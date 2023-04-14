@@ -6,7 +6,7 @@ Impromptu is a prototype implementation of a model-driven engineering tool for p
 
 ## Requirements
 
-Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. In order to execute you need Node.js and Visual Studio Code in your system.
+Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. In order to run Impromptu you need [Node.js](https://nodejs.org/) and [Visual Studio Code](https://code.visualstudio.com/) in your system.
 
 ## Installing
 
