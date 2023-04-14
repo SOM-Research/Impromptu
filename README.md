@@ -6,12 +6,22 @@ Impromptu is a prototype implementation of a model-driven engineering tool for p
 
 ## Requirements
 
-Impromptu is implemented in TypeScript using the Langium open-source language engineering toolkit.
+Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. In order to execute you need Node.js and Visual Studio Code in your system.
 
 ## Installing
 
-Impromptu is offered as a Visual Studio Code extension.
+Impromptu is offered as a Visual Studio Code extension. You can install the extension by downloading the `.vsix` file and running:
+
+    code --install-extension impromptu-1.0.0.vsix
 
 ## Features 
 
-At this stage, the features offered by Impromptu are limited. The extension offers an editor for impromptu prompts, with syntax highlighting, syntax validation and autocomplete suggestions. Moreover, there is a command-line interface to generate prompts for specific AI systems (right now, Midjourney and Stable Diffusion).
+At this stage, the features offered by Impromptu are limited. The extension offers an editor for impromptu prompts, with *syntax highlighting*, *syntax validation* and *autocomplete suggestions*. Moreover, there is a command-line interface to generate prompts for specific AI systems (right now, [Midjourney](https://www.midjourney.com/) and [Stable Diffusion web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)).
+ 
+To use the editor, first install the Impromptu VS Code extension and then create a file in VS Code with extension `.prm``
+
+The invoke the command-line interface, simply run the following command: 
+
+    ./bin/cli gentprompt examples/ex1.prm -d <output-dir> -t <target-ai-system>
+
+
