@@ -18,9 +18,9 @@ Impromptu is offered as a Visual Studio Code extension. You can install the exte
 
 At this stage, the features offered by Impromptu are limited. The extension offers an editor for impromptu prompts, with *syntax highlighting*, *syntax validation* and *autocomplete suggestions*. Moreover, there is a command-line interface to generate prompts for specific AI systems (right now, [Midjourney](https://www.midjourney.com/) and [Stable Diffusion web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui)).
  
-To use the editor, first install the Impromptu VS Code extension and then create a file in VS Code with extension `.prm``
+To use the editor, first install the Impromptu VS Code extension and then create a file in VS Code with extension `.prm`. The editor will not be available until you create a file with the proper extension.
 
-The invoke the command-line interface, simply run the following command: 
+To invoke the command-line interface, simply run the following command: 
 
     ./bin/cli gentprompt examples/ex1.prm -d <output-dir> -t <target-ai-system>
 
