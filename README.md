@@ -13,6 +13,9 @@ Impromptu is implemented in TypeScript using the [Langium](https://langium.org) 
 Impromptu is offered as a Visual Studio Code extension. You can install the extension by downloading the `.vsix` file and running:
 
     code --install-extension impromptu-1.0.0.vsix
+    
+Alternatively, if you open Visual Studio Code and search the extension file, you can right-click on it 
+and select `"Install VSIX Extension"` at the bottom of the list of options.
 
 ## Features 
 
