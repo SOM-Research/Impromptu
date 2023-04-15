@@ -1,6 +1,0 @@
-prompt Mixture(@animal1, @animal2): image
-core = 
-  medium( drawing ),
-  between("eagle", "lion"),
-  audience("children" ) weight high,
-  no("violent" ), no("scary")
