@@ -25,6 +25,6 @@ To use the editor, first install the Impromptu VS Code extension and then create
 
 To invoke the command-line interface, simply run the following command: 
 
-    ./bin/cli gentprompt examples/ex1.prm -d <output-dir> -t <target-ai-system>
+    ./bin/cli gentprompt examples/example.prm -d <output-dir> -t <target-ai-system>
 
 You can specify the output directory and the target AI system that will execute the prompt (currently `midjourney`or `stable-diffusion`).
