@@ -1,0 +1,57 @@
+{
+  "name": "impromptu",
+  "scopeName": "source.impromptu",
+  "fileTypes": [
+    ".prm"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "name": "keyword.control.impromptu",
+      "match": "\\b(3D art|3dobject|accent|advertisement|aerial view|alternative|ambient|atmospheric|audience|audio|author|back|bench-level|between|blur|camera-angle|camera-settings|chain|character|close-up|comic book art|composer|core|count|dark shadows|definition|depth|dialect|different from|diffuse|digital art|distortion|drawing|duration|effects|essay|exactly|extreme close-up|extreme long shot|facetious|fast shutter|first person|formal|frame|headline|height|high|hour|hyper|image|in-house|includes|interview|ironic|joke|language-register|length|less or equal than|less than|letter|lighting|like|line|literary-style|long shot|low|low angle|max|medium|medium shot|min|minute|more or equal than|more than|neon|neutral|no|over-the-shoulder shot|overhead view|page|painting|paragraph|photography|pixel|play|poem|point|point-of-view|portrait|prefix|promixity|prompt|proof|reflection|report|second|second person|sentence|size|slang|song|source code|suffix|taboo|tale|technical|text|third person|tilted frame|video|volumetric|vulgar|weight|width|word)\\b"
+    },
+    {
+      "name": "string.quoted.double.impromptu",
+      "begin": "\"",
+      "end": "\""
+    },
+    {
+      "name": "string.quoted.single.impromptu",
+      "begin": "'",
+      "end": "'"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.impromptu",
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.impromptu"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.impromptu"
+            }
+          }
+        },
+        {
+          "begin": "//",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.impromptu"
+            }
+          },
+          "end": "(?=$)",
+          "name": "comment.line.impromptu"
+        }
+      ]
+    }
+  }
+}

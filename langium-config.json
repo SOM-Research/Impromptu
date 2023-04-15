@@ -1,0 +1,12 @@
+{
+    "projectName": "Impromptu",
+    "languages": [{
+        "id": "impromptu",
+        "grammar": "src/language-server/impromptu.langium",
+        "fileExtensions": [".prm"],
+        "textMate": {
+            "out": "syntaxes/impromptu.tmLanguage.json"
+        }
+    }],
+    "out": "src/language-server/generated"
+}
