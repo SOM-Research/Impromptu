@@ -11,6 +11,10 @@ For example, you can write a generic prompt to generate an image as follows:
         
 Impromptu can generate platform-specific prompts for different platforms that take advantage of its advanced settings, e.g. defining the weight of specific concepts within the prompt. Different systems offer different settings and use a different syntax. With Impromptu, you only need to write them once. You can also import one prompt into another (write modular prompts!) as well as defining prompt chains or keeping track of different prompt versions.
 
+This repository is the companion to the research paper providing a description of the Impromptu DSL:
+
+> Robert Clarisó, Jordi Cabot (2023). "Model-driven prompt engineering". ACM/IEEE 26th International Conference on Model-Driven Engineering Languages and Systems (MODELS), IEEE, to appear.
+
 ## Requirements
 
 Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. In order to run Impromptu you need [Node.js](https://nodejs.org/) and [Visual Studio Code](https://code.visualstudio.com/) in your system.
