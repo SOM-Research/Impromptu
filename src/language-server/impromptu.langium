@@ -1,12 +1,29 @@
 grammar Impromptu
 
+// Identifiers
+QualifiedName returns string: ID ('.' ID)*;
+ParamId returns string:'@'+ID;
+FileId returns string:'$'+ID;
+
+// Terminals
+hidden terminal WS: /\s+/;
+terminal ID returns string: /[_a-zA-Z][\w_]*/;
+terminal INT returns number: /[0-9]+/;
+terminal STRING: /"[^"]*"|'[^']*'/;
+
+// Comments
+hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
+hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
+
 entry Model:
-    (assets+=Asset)*;
+    (languages+=Language)+
+    (assets+=Asset)+
+    (equivalencies=Equivalency)*;
 
 Asset:
-    ExecutableAsset  | Composer;
+    ExecutableAsset | Composer;
 
-ExecutableAsset: 
+ExecutableAsset:
     Prompt | Chain;
 
 Prompt:
@@ -15,6 +32,9 @@ Prompt:
     core=Core
     (suffix=Suffix)?
     (hyper=HyperParameters)?
+    AssetLanguage
+    AssetRelationships
+    (ByExpressionValidators)?
     ;
 
 HyperParameters:
@@ -26,17 +46,23 @@ HyperParam:
     ;
 
 Chain:
-    'chain' name=QualifiedName;
+    'chain' name=QualifiedName
+    AssetRelationships
+    (ByExpressionValidators)?
+    ;
 
 Composer:
     'composer' name=QualifiedName  pars=Parameters contents=Contents
+    AssetLanguage
+    AssetRelationships
     ;
 
 Prefix:
     name='prefix' '=' snippets+=Snippet (',' snippets+=Snippet)*;
 
 Trait:
-    TextTrait | ImageTrait | MediumIndependentTrait;
+    (TextTrait | ImageTrait | MediumIndependentTrait)
+    (TraitValidator)?;
 
 TextTrait:
     LiteraryStyleTrait | LanguageRegisterTrait | PointOfViewTrait;
@@ -172,17 +198,47 @@ Lighting returns string: 'accent' | 'ambient' | 'atmospheric' | 'back' | 'volume
 Proximity returns string: 'extreme close-up' | 'close-up' | 'medium shot' | 'long shot' | 'extreme long shot';
 Effects returns string: 'blur' | 'reflection' | 'distortion' ;
 
-// Identifiers
-QualifiedName returns string: ID ('.' ID)*;
-ParamId returns string:'@'+ID;
-FileId returns string:'$'+ID;
+// ----------------------------------------------------------------------------------------
+// 2024-01-17 SEMO: Extension - Language support, refinements and equivalencies
+// ----------------------------------------------------------------------------------------
 
-// Terminals
-hidden terminal WS: /\s+/;
-terminal ID returns string: /[_a-zA-Z][\w_]*/;
-terminal INT returns number: /[0-9]+/;
-terminal STRING: /"[^"]*"|'[^']*'/;
+Language:
+    'language'
+    name=ID
+    'code=' code=STRING
+    'region=' region=STRING
+    ;
 
-// Comments
-hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
-hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
+fragment AssetLanguage:
+    'language=' language=[Language:ID]
+    ;
+
+fragment AssetRelationships:
+    ('priorVersion=' priorVersion=[Asset:ID])?
+    ('refines=' priorVersion=[Asset:ID])?
+    ;
+
+Equivalency:
+    'equivalency'
+    'assets=' ('(' (assets+=[Asset:ID])
+        ((','assets+=[Asset:ID])*')'))?;
+
+// ----------------------------------------------------------------------------------------
+// 2024-01-17 SEMO: Extension - Output validators
+// ----------------------------------------------------------------------------------------
+
+//OutputValidator:
+//    ByExpression | ByReinforcedTrait;
+
+ByExpressionValidators:
+    //'validator=['validator=STRING']';
+    'validators=' '[' (validator=STRING) ']'
+        ((',['validator=STRING)*']')?;
+
+//ByReinforcedTrait:
+    //'traitValidator'
+    //validator=[ExecutableAsset:ID]
+    //;
+
+TraitValidator:
+    '['validator=[ExecutableAsset:ID]']';

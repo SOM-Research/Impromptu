@@ -1,0 +1,42 @@
+language
+    espanol
+    code='es'
+    region='es'
+
+prompt
+    Version1
+    'un ejemplo de prompt'
+    () : text
+    core='este es un ejemplo de core de prompt','tiene otro core'
+    language=espanol
+
+prompt
+    Version2
+    'un ejemplo de prompt pero otra versión'
+    () : text
+    core='este es un ejemplo de core de prompt',language-register(ironic)[Version1],'tiene 3 cores'
+    language=espanol
+    priorVersion=Version1
+
+prompt
+    VersionEquivalente
+    'un ejemplo de prompt pero otra versión'
+    () : text
+    core='este es un ejemplo de core de prompt','tiene otro core','tiene 3 cores'
+    language=espanol
+
+prompt
+    VersionRefinada
+    'un ejemplo de prompt refinando a otro'
+    () : text
+    core='este es un ejemplo de core de prompt','tiene otro core',literary-style(joke)
+    suffix=literary-style(song)[Version2]
+    language=espanol
+    refines=Version2
+    validators=['y aquí viene una expresion'],['otra']
+
+equivalency
+    assets=(Version1,VersionEquivalente)
+
+equivalency
+    assets=(Version1,VersionRefinada)

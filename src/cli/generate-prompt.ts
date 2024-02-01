@@ -11,14 +11,7 @@ import * as Ast from '../language-server/generated/ast';
          */
 import { extractDestinationAndName } from './cli-util';
 
-export function generatePrompt(model: Ast.Model, filePath: string, destination: string | undefined, aiSystem: string | undefined): string {
-    const data = extractDestinationAndName(filePath, destination);
-    const generatedFilePath = `${path.join(data.destination, data.name)}.txt`;
-
-    if (!fs.existsSync(data.destination)) {
-        fs.mkdirSync(data.destination, { recursive: true });
-    }
-
+export function generatePromptCode(model: Ast.Model, aiSystem: string | undefined): string[] | undefined {
     var result;
     switch(aiSystem) {
         case 'midjourney': {
@@ -29,6 +22,10 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
             result = generatePrompt_SD(model);
             break;
         }
+        case 'chatgpt': {
+            result = generatePrompt_ChatGPT(model);
+            break;
+        }
         case undefined: {
             console.log(chalk.yellow(`No target provided. Using 'midjourney' by default`));
             result = generatePrompt_MJ(model); 
@@ -37,7 +34,37 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
         default: {
             console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
         }
-    } 
+    }
+    return result;
+}
+
+export function generatePrompt(model: Ast.Model, filePath: string, destination: string | undefined, aiSystem: string | undefined): string {
+    const data = extractDestinationAndName(filePath, destination);
+    const generatedFilePath = `${path.join(data.destination, data.name)}.txt`;
+
+    if (!fs.existsSync(data.destination)) {
+        fs.mkdirSync(data.destination, { recursive: true });
+    }
+
+    var result = generatePromptCode(model, aiSystem);
+    // switch(aiSystem) {
+    //     case 'midjourney': {
+    //         result = generatePrompt_MJ(model);
+    //         break;
+    //     }
+    //     case 'stable-diffusion': {   
+    //         result = generatePrompt_SD(model);
+    //         break;
+    //     }
+    //     case undefined: {
+    //         console.log(chalk.yellow(`No target provided. Using 'midjourney' by default`));
+    //         result = generatePrompt_MJ(model); 
+    //         break;
+    //     }
+    //     default: {
+    //         console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+    //     }
+    // } 
 
     if (result != null) {
         fs.writeFileSync(generatedFilePath, result.toString());
@@ -130,7 +157,9 @@ function genNegativeTrait_MJ(snippet: Ast.NegativeTrait): string {
 function genCombinationTrait_MJ(snippet: Ast.CombinationTrait): string {
     const contents  = snippet.contents;
     const texts     = contents.flatMap(subSnippet => genSnippet_SD(subSnippet)).filter(e => e !== undefined) as string[];
-    return "[" + combineStrings(texts, " : ", " : ") + " :0.5]";
+    const cleanText = texts.filter(function(e){return e}); // remove empty elements from array
+    return "[" + cleanText.join(" : ") + " :0.5]";
+    //combineStrings(texts, " : ", " : ") + " :0.5]";
 }
 
 function genAudienceTrait_MJ(snippet: Ast.AudienceTrait): string {
@@ -233,7 +262,9 @@ function genBaseSnippet_SD(snippet: Ast.BaseSnippet): string {
 function genCombinationTrait_SD(snippet: Ast.CombinationTrait): string  {
     const contents  = snippet.contents;
     const texts     = contents.flatMap(subSnippet => genSnippet_SD(subSnippet)).filter(e => e !== undefined) as string[];
-    return "a combination of " + combineStrings(texts, ", ", " and ");
+    const cleanTexts  = texts.filter(function(e){return e}); // remove empty elements from array
+    return "a combination of " + cleanTexts.slice(0, -1).join(',')+' and '+cleanTexts.slice(-1);
+    //combineStrings(texts, ", ", " and ");
 }
 
 function genAudienceTrait_SD(snippet: Ast.AudienceTrait): string  {
@@ -247,19 +278,71 @@ function genMediumTrait_SD(snippet: Ast.MediumTrait): string {
     return text;
 }
 
-function combineStrings(contents: string[], separator: string, lastSeparator: string ): string {
-    var result = "";
-    for(var i = 0; i < contents.length; i++) {
-        if (contents[i]!="") {
-            result = result + contents[i];
-            if (i+1 < contents.length-1) {
-                result += separator;
-            } else if (i+1 == contents.length-1) {
-                result += lastSeparator;
-            }
-        }
-    }
-    return result;
+// Note: shouldn't be necessary; already replaced with array operators
+// function combineStrings(contents: string[], separator: string, lastSeparator: string ): string {
+//     var result = "";
+//     for(var i = 0; i < contents.length; i++) {
+//         if (contents[i]!="") {
+//             result = result + contents[i];
+//             if (i+1 < contents.length-1) {
+//                 result += separator;
+//             } else if (i+1 == contents.length-1) {
+//                 result += lastSeparator;
+//             }
+//         }
+//     }
+//     return result;
+// }
+
+function generatePrompt_ChatGPT(model: Ast.Model): string[] {
+    // Generate a prompt for each asset
+   const prompt = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined) as string[];
+   return [prompt.filter(function(e){return e}).join('. ')];
 }
 
+function genAsset_ChatGPT(asset: Ast.Asset): string[] {
+    if (Ast.isPrompt(asset)) {
+        const prefix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[]: []);
+        const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[]: []);
+        
+        const core  = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[];
+        
+        //const negativeModifiers = extractNegativeModifiers(asset.core.snippets);
+        //const negativeText = negativeModifiers.flatMap(snippet => genSnippet_ChatGPT(((snippet.content as unknown) as Ast.NegativeTrait).content)).filter(e => e !== undefined) as string[];
 
+        // Build the final prompt
+        const prompt = prefix.concat(core, suffix);
+        //const positive = ["Positive prompt:"].concat(prefix, core, suffix);
+        //const negative = ["Negative prompt:"].concat(negativeText);
+        //return positive.concat(['\n'], negative);
+        return prompt;
+    } else if (Ast.isComposer(asset)) {
+        return asset.contents.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[];;
+    } else if (Ast.isChain(asset)) {
+        return [];
+    }
+    return [];
+ }
+
+ function genSnippet_ChatGPT(snippet: Ast.Snippet): string {
+    return genBaseSnippet_ChatGPT(snippet.content);
+}
+
+ function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet): string {
+    if (Ast.isTextLiteral(snippet)) {
+        return ((snippet as unknown) as Ast.TextLiteral).content;
+    } else if (Ast.isParameterRef(snippet)) {
+        return ((snippet as unknown) as Ast.ParameterRef).param.$refText ;
+    } else if (Ast.isAssetReuse(snippet)) {
+        return "";
+    } else if (Ast.isNegativeTrait(snippet)) {
+        return "";
+    } else if (Ast.isCombinationTrait(snippet)) {
+        return genCombinationTrait_SD(snippet);
+    } else if (Ast.isAudienceTrait(snippet)) {
+        return genAudienceTrait_SD(snippet);
+    } else if (Ast.isMediumTrait(snippet)) {
+        return genMediumTrait_SD(snippet);
+    } 
+   return "";
+}
