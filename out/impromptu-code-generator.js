@@ -31,28 +31,37 @@ const node_1 = require("langium/node");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const generate_prompt_1 = require("./cli/generate-prompt");
+let Templates = new Map();
 /**
-* ChatGPT Python code generator service main class
+* Python code generator service main class
 */
 class CodeGenerator {
     constructor(context) {
-        this.template = "NONE generated";
         const services = (0, impromptu_module_js_1.createImpromptuServices)(node_1.NodeFileSystem);
         this.parser = services.Impromptu.parser.LangiumParser;
-        let fullFilePath = context.asAbsolutePath(path.join('resources', 'openai-chatgpt-template.py'));
-        this.template = fs.readFileSync(fullFilePath, "utf8");
+        var fullFilePath = context.asAbsolutePath(path.join('resources', 'openai-chatgpt-template.py'));
+        var template = fs.readFileSync(fullFilePath, "utf8");
+        Templates.set(generate_prompt_1.AISystem.ChatGPT, template);
+        fullFilePath = context.asAbsolutePath(path.join('resources', 'stable-diffusion-template.py'));
+        template = fs.readFileSync(fullFilePath, "utf8");
+        Templates.set(generate_prompt_1.AISystem.StableDiffusion, template);
     }
-    generateChatGPT(model) {
+    getPromptsList(model) {
+        const astNode = this.parser.parse(model).value;
+        return ((0, ast_js_1.isModel)(astNode) ? (0, generate_prompt_1.getPromptsList)(astNode) : undefined);
+    }
+    generateCode(model, aiSystem, prompt) {
         //const astNode = (typeof(Model) == 'string' ? this.parser.parse(Model).value : Model);
         //return (isModel(astNode) ? this.model2Html(astNode) : undefined);
         const astNode = this.parser.parse(model).value;
-        return ((0, ast_js_1.isModel)(astNode) ? this.model2Code(astNode) : undefined);
+        var template = Templates.get(aiSystem);
+        return ((0, ast_js_1.isModel)(astNode) ? this.model2Code(astNode, aiSystem, template, prompt) : undefined);
     }
     // Generation of the output code string
-    model2Code(model) {
-        const promptCode = (0, generate_prompt_1.generatePromptCode)(model, 'chatgpt');
+    model2Code(model, aiSystem, template, prompt) {
+        const promptCode = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt);
         if (promptCode != null) {
-            return this.template.replace('{PROMPTS_ARRAY}', JSON.stringify(promptCode)); // promptCode.toString());
+            return template.replace('{PROMPT}', promptCode.filter(e => e !== '\n').filter(function (e) { return e; }).toString());
         }
         else
             return 'ERROR: Cannot generate prompt code.';

@@ -4,6 +4,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, TransportKind
 } from 'vscode-languageclient/node';
 import { CodeGenerator } from './impromptu-code-generator';
+import { AISystem } from './cli/generate-prompt';
 import fs from 'fs';
 
 let client: LanguageClient;
@@ -14,7 +15,10 @@ let previewPanel : vscode.WebviewPanel;
 export function activate(context: vscode.ExtensionContext): void {
     client = startLanguageClient(context);
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', async () => {
-        await generateChatGPTService(context);
+        await generateCodeService(context, AISystem.ChatGPT);
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateStableDiffusion', async () => {
+        await generateCodeService(context, AISystem.StableDiffusion);
     }));
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.saveCodeDocument', async () => {
         await saveCodeDocument(context);
@@ -68,34 +72,57 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
     return client;
 }
 
-async function generateChatGPTService(context: vscode.ExtensionContext) {
-    let title : string = 'Code Test Scenario';
-    previewPanel = vscode.window.createWebviewPanel(
-        // Webview id
-        'liveCodePreviewer',
-        // Webview title
-        title,
-        // This will open the second column for preview inside editor
-        2,
-        {
-            // Enable scripts in the webview
-            enableScripts: false,
-            retainContextWhenHidden: false,
-            // And restrict the webview to only loading content from our extension's 'assets' directory.
-            localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
-        }
-    )
-    setPreviewActiveContext(true);
+async function generateCodeService(context: vscode.ExtensionContext, aiSystem: string) {
+
     const generator =  new CodeGenerator(context);
-    const prompt = vscode.window.activeTextEditor?.document.getText();
-    if (prompt) {
-        const returner = generator.generateChatGPT(prompt);
-        updateCodePreview(returner);
-        console.log(returner);
+    const model = vscode.window.activeTextEditor?.document.getText();
+    if (model) {
+        var prompt = await requestPromptAndValidation(generator, model);
+        if (prompt) {
+            const returner = generator.generateCode(model, aiSystem, prompt);
+            let title : string = 'Code Test Scenario';
+            previewPanel = vscode.window.createWebviewPanel(
+                // Webview id
+                'liveCodePreviewer',
+                // Webview title
+                title,
+                // This will open the second column for preview inside editor
+                2,
+                {
+                    // Enable scripts in the webview
+                    enableScripts: false,
+                    retainContextWhenHidden: false,
+                    // And restrict the webview to only loading content from our extension's 'assets' directory.
+                    localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
+                }
+            )
+            setPreviewActiveContext('liveCodePreviewer', true);
+            updateCodePreview(returner);
+            previewPanel.onDidDispose(() => {
+                setPreviewActiveContext('liveCodePreviewer', false);
+            })
+        }
     }
-    previewPanel.onDidDispose(() => {
-        setPreviewActiveContext(false);
-    })
+}
+
+async function requestPromptAndValidation(generator: CodeGenerator, model: string) {
+    const prompts = generator.getPromptsList(model);
+    if (prompts) {
+        var quickPickItems = new Array();
+        prompts.forEach(prompt => {
+            if (prompt) quickPickItems.push({label: prompt.name, description: prompt.description})
+        });
+        if (quickPickItems) {
+            const pick = await vscode.window.showQuickPick(
+                quickPickItems,
+                {
+                    placeHolder: 'Select which prompt do you want to query the model with.',
+                    canPickMany: false
+                });
+            return pick?.label;
+        }
+    }
+    return undefined;
 }
 
 function updateCodePreview(code : string | void) {
@@ -104,8 +131,8 @@ function updateCodePreview(code : string | void) {
     }
 }
 
-function setPreviewActiveContext(value: boolean) {
-    vscode.commands.executeCommand('setContext', 'liveCodePreviewer', value);
+function setPreviewActiveContext(panelName: string, value: boolean) {
+    vscode.commands.executeCommand('setContext', panelName, value);
 }
 
 function saveCodeDocument(context: vscode.ExtensionContext) {

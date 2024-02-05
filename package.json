@@ -35,11 +35,21 @@
             {
                 "command": "impromptu.generateChatGPT",
                 "title": "Generate ChatGPT Python code",
-                "shortTitle": "Generate ChatGPT Python code",
+                "shortTitle": "Generate ChatGPT code",
                 "category": "Impromptu",
                 "icon": {
-                    "light": "icons/python-logo.png",
-                    "dark": "icons/python-logo.png"
+                    "light": "icons/chatgpt-logo.png",
+                    "dark": "icons/chatgpt-logo.png"
+                }
+            },
+            {
+                "command": "impromptu.generateStableDiffusion",
+                "title": "Generate Stable Diffusion Python code",
+                "shortTitle": "Generate SD code",
+                "category": "Impromptu",
+                "icon": {
+                    "light": "icons/sd-logo.png",
+                    "dark": "icons/sd-logo.png"
                 }
             },
             {
@@ -58,6 +68,11 @@
                 {
                     "when": "resourceLangId == impromptu",
                     "command": "impromptu.generateChatGPT",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == impromptu",
+                    "command": "impromptu.generateStableDiffusion",
                     "group": "navigation"
                 },
                 {

@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generatePrompt = exports.generatePromptCode = void 0;
+exports.getPromptsList = exports.generatePrompt = exports.generatePromptCode = exports.AISystem = void 0;
 const fs_1 = __importDefault(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
 //import AbstractFormatter from 'langium';
@@ -39,24 +39,29 @@ const Ast = __importStar(require("../language-server/generated/ast"));
          isCombinationTrait, isAudienceTrait, isMediumTrait } from '../language-server/generated/ast';
          */
 const cli_util_1 = require("./cli-util");
-function generatePromptCode(model, aiSystem) {
+exports.AISystem = {
+    ChatGPT: "chatgpt",
+    StableDiffusion: "stable-diffusion",
+    Midjourney: "midjourney"
+};
+function generatePromptCode(model, aiSystem, prompt = '') {
     var result;
     switch (aiSystem) {
-        case 'midjourney': {
-            result = generatePrompt_MJ(model);
+        case exports.AISystem.Midjourney: {
+            result = generatePrompt_MJ(model, prompt);
             break;
         }
-        case 'stable-diffusion': {
-            result = generatePrompt_SD(model);
+        case exports.AISystem.StableDiffusion: {
+            result = generatePrompt_SD(model, prompt);
             break;
         }
-        case 'chatgpt': {
-            result = generatePrompt_ChatGPT(model);
+        case exports.AISystem.ChatGPT: {
+            result = generatePrompt_ChatGPT(model, prompt);
             break;
         }
         case undefined: {
-            console.log(chalk_1.default.yellow(`No target provided. Using 'midjourney' by default`));
-            result = generatePrompt_MJ(model);
+            console.log(chalk_1.default.yellow(`No target provided. Using 'chatgpt' by default`));
+            result = generatePrompt_ChatGPT(model, prompt);
             break;
         }
         default: {
@@ -72,34 +77,35 @@ function generatePrompt(model, filePath, destination, aiSystem) {
     if (!fs_1.default.existsSync(data.destination)) {
         fs_1.default.mkdirSync(data.destination, { recursive: true });
     }
-    var result = generatePromptCode(model, aiSystem);
-    // switch(aiSystem) {
-    //     case 'midjourney': {
-    //         result = generatePrompt_MJ(model);
-    //         break;
-    //     }
-    //     case 'stable-diffusion': {   
-    //         result = generatePrompt_SD(model);
-    //         break;
-    //     }
-    //     case undefined: {
-    //         console.log(chalk.yellow(`No target provided. Using 'midjourney' by default`));
-    //         result = generatePrompt_MJ(model); 
-    //         break;
-    //     }
-    //     default: {
-    //         console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
-    //     }
-    // } 
+    // TODO: third parameter should be replaced by an actual prompt
+    // or indicator to collect all prompts
+    var result = generatePromptCode(model, aiSystem, '');
     if (result != null) {
         fs_1.default.writeFileSync(generatedFilePath, result.toString());
     }
     return generatedFilePath;
 }
 exports.generatePrompt = generatePrompt;
-function generatePrompt_MJ(model) {
+function getPromptsList(model) {
+    return model.assets.map(asset => getAssetDescription(asset)).filter(e => e !== undefined);
+}
+exports.getPromptsList = getPromptsList;
+function getAssetDescription(asset) {
+    if (Ast.isPrompt(asset))
+        return { name: asset.name, description: asset.description };
+    else
+        return undefined;
+}
+function generatePrompt_MJ(model, promptName) {
     // Generate a prompt for each asset
-    return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined);
+    // return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined) as string[];
+    // Generate the single requested prompt
+    if (promptName)
+        return model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName).flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined);
+    // Generate a prompt for each asset
+    else {
+        return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined);
+    }
 }
 function genAsset_MJ(asset) {
     if (Ast.isPrompt(asset)) {
@@ -208,9 +214,14 @@ function genMediumTrait_MJ(snippet) {
     const text = snippet.value;
     return text;
 }
-function generatePrompt_SD(model) {
+function generatePrompt_SD(model, promptName) {
+    // Generate the single requested prompt
+    if (promptName)
+        return model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName).flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined);
     // Generate a prompt for each asset
-    return model.assets.flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined);
+    else {
+        return model.assets.flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined);
+    }
 }
 function genAsset_SD(asset) {
     if (Ast.isPrompt(asset)) {
@@ -336,23 +347,23 @@ function genMediumTrait_SD(snippet) {
 //     }
 //     return result;
 // }
-function generatePrompt_ChatGPT(model) {
+function generatePrompt_ChatGPT(model, promptName) {
+    // Generate the single requested prompt
+    if (promptName)
+        return model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName).flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
     // Generate a prompt for each asset
-    return model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
-    //return [prompt.filter(function(e){return e}).join('. ')];
+    else {
+        const prompts = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
+        return [prompts.filter(function (e) { return e; }).join('. ')];
+    }
 }
 function genAsset_ChatGPT(asset) {
     if (Ast.isPrompt(asset)) {
         const prefix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) : []);
         const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) : []);
         const core = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined);
-        //const negativeModifiers = extractNegativeModifiers(asset.core.snippets);
-        //const negativeText = negativeModifiers.flatMap(snippet => genSnippet_ChatGPT(((snippet.content as unknown) as Ast.NegativeTrait).content)).filter(e => e !== undefined) as string[];
         // Build the final prompt
         const prompt = prefix.concat(core, suffix);
-        //const positive = ["Positive prompt:"].concat(prefix, core, suffix);
-        //const negative = ["Negative prompt:"].concat(negativeText);
-        //return positive.concat(['\n'], negative);
         return [prompt.filter(function (e) { return e; }).join('. ')];
     }
     else if (Ast.isComposer(asset)) {
