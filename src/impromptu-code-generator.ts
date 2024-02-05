@@ -43,7 +43,7 @@ export class CodeGenerator implements Generator {
     model2Code(model : Model) : string | undefined {
         const promptCode = generatePromptCode(model, 'chatgpt');
         if (promptCode != null) {
-            return this.template.replace('{PROMPT}', promptCode.toString());
+            return this.template.replace('{PROMPTS_ARRAY}', JSON.stringify(promptCode));// promptCode.toString());
         }
         else
             return 'ERROR: Cannot generate prompt code.';

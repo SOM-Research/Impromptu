@@ -338,8 +338,8 @@ function genMediumTrait_SD(snippet) {
 // }
 function generatePrompt_ChatGPT(model) {
     // Generate a prompt for each asset
-    const prompt = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
-    return [prompt.filter(function (e) { return e; }).join('. ')];
+    return model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
+    //return [prompt.filter(function(e){return e}).join('. ')];
 }
 function genAsset_ChatGPT(asset) {
     if (Ast.isPrompt(asset)) {
@@ -353,7 +353,7 @@ function genAsset_ChatGPT(asset) {
         //const positive = ["Positive prompt:"].concat(prefix, core, suffix);
         //const negative = ["Negative prompt:"].concat(negativeText);
         //return positive.concat(['\n'], negative);
-        return prompt;
+        return [prompt.filter(function (e) { return e; }).join('. ')];
     }
     else if (Ast.isComposer(asset)) {
         return asset.contents.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined);

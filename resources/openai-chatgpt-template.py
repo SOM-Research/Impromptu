@@ -18,10 +18,13 @@ class OpenAIService():
 
 class OpenAIChatGPTService(OpenAIService):
 
-    prompt = ```{PROMPT}```
+    prompts = {PROMPTS_ARRAY}
     
-    def execute_prompt(self):
-        completion = openai.ChatCompletion.create(
-            model = self.model,
-            messages = [{"role": "user", "content": self.prompt}])
-        return completion.choices[0].message.content
+    def execute_prompts(self) -> list[str]:
+        responses = []
+        for prompt in self.prompts:
+            completion = openai.ChatCompletion.create(
+                model = self.model,
+                messages = [{"role": "user", "content": prompt}])
+            responses.append(completion.choices[0].message.content)
+        return responses

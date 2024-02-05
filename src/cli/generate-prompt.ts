@@ -296,8 +296,8 @@ function genMediumTrait_SD(snippet: Ast.MediumTrait): string {
 
 function generatePrompt_ChatGPT(model: Ast.Model): string[] {
     // Generate a prompt for each asset
-   const prompt = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined) as string[];
-   return [prompt.filter(function(e){return e}).join('. ')];
+   return model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined) as string[];
+   //return [prompt.filter(function(e){return e}).join('. ')];
 }
 
 function genAsset_ChatGPT(asset: Ast.Asset): string[] {
@@ -315,7 +315,7 @@ function genAsset_ChatGPT(asset: Ast.Asset): string[] {
         //const positive = ["Positive prompt:"].concat(prefix, core, suffix);
         //const negative = ["Negative prompt:"].concat(negativeText);
         //return positive.concat(['\n'], negative);
-        return prompt;
+        return [prompt.filter(function(e){return e}).join('. ')];
     } else if (Ast.isComposer(asset)) {
         return asset.contents.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[];;
     } else if (Ast.isChain(asset)) {
