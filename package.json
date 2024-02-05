@@ -38,8 +38,8 @@
                 "shortTitle": "Generate ChatGPT Python code",
                 "category": "Impromptu",
                 "icon": {
-                    "light": "icons/json.png",
-                    "dark": "icons/json.png"
+                    "light": "icons/python-logo.png",
+                    "dark": "icons/python-logo.png"
                 }
             },
             {

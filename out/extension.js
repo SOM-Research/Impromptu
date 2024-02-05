@@ -93,7 +93,7 @@ function startLanguageClient(context) {
 function generateChatGPTService(context) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        let title = 'Code Test Scenario';
+        let title = 'code-test-scenario.py';
         previewPanel = vscode.window.createWebviewPanel(
         // Webview id
         'liveCodePreviewer', 
