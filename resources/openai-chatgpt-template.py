@@ -21,25 +21,33 @@ class OpenAIChatGPTService(OpenAIService):
     __validators = [{VALIDATORS}]
 
     @property
+    def prompt(self):
+        return self.__prompt
+    
+    @property
     def response(self):
-        return self.__response
+        if (self.__response): return self.__response
+        return ''
     
     @property
     def validation(self):
-        return self.__validation
+        if (self.__validation): return self.__validation
+        return []
     
     def execute_prompt(self):
-        self.__response = self.__query_model(self.__prompt)
-        self.__validation = self.__validate_response(self.__response)
+        self.__response = self.__query_model(self.prompt)
+        self.__validation = self.__validate_response
     
-    def __validate_response(self, response: str) -> list[(str, bool)]:
+    def __validate_response(self) -> list[(str, bool)]:
         result = []
         for validator in self.__validators:
-            validation_prompt = f'Does the TEXT comply with the following CONDITION? \
+            validation_prompt = f'Given the PROMPT below and the RESPONSE given by an AI assistant. \
+                Does the RESPONSE comply with the following CONDITION? \
                 Reply only with "True" if the CONDITION is fulfilled; \
                 or "False" otherwise. \
+                PROMPT: ```{self.prompt}``` \
                 \
-                TEXT: ```{response}``` \
+                RESPONSE: ```{self.response}``` \
                 \
                 CONDITION: {validator}'
             validation = self.__query_model(validation_prompt)

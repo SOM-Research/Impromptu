@@ -1,42 +1,19 @@
 language
-    espanol
-    code='es'
-    region='es'
+    English
+    code='en'
+    region='EN'
 
 prompt
-    Version1
-    'un ejemplo de prompt'
+    Validator
+    'This prompt is intended for validation of literary style traits'
     () : text
-    core='este es un ejemplo de core de prompt','tiene otro core'
-    language=espanol
+    core='Does the text use the expected literary style?'
+    language=English
 
 prompt
-    Version2
-    'un ejemplo de prompt pero otra versión'
+    PromptToValidate
+    'This prompt is an example to be validated'
     () : text
-    core='este es un ejemplo de core de prompt',language-register(ironic)[Version1],'tiene 3 cores'
-    language=espanol
-    priorVersion=Version1
-
-prompt
-    VersionEquivalente
-    'un ejemplo de prompt pero otra versión'
-    () : text
-    core='este es un ejemplo de core de prompt','tiene otro core','tiene 3 cores'
-    language=espanol
-
-prompt
-    VersionRefinada
-    'un ejemplo de prompt refinando a otro'
-    () : text
-    core='este es un ejemplo de core de prompt','tiene otro core',literary-style(joke)
-    suffix=literary-style(song)[Version2]
-    language=espanol
-    refines=Version2
-    validators=['y aquí viene una expresion'],['otra']
-
-equivalency
-    assets=(Version1,VersionEquivalente)
-
-equivalency
-    assets=(Version1,VersionRefinada)
+    core='Provide a text that describes a new year beginning tomorrow','It is expected to be full of hope and happiness',language-register(ironic)
+    suffix=literary-style(song)[Validator]
+    language=English
