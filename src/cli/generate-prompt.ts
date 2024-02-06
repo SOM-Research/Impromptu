@@ -17,15 +17,15 @@ export const AISystem = {
     Midjourney: "midjourney"
 }
 
-export function generatePromptCode(model: Ast.Model, aiSystem: string | undefined, prompt: string = ''): string[] | undefined {
+export function generatePromptCode(model: Ast.Model, aiSystem: string | undefined, prompt: string = '') {
     var result;
     switch(aiSystem) {
         case AISystem.Midjourney: {
-            result = generatePrompt_MJ(model, prompt);
+            result = { prompt: generatePrompt_MJ(model, prompt).filter(e => e !== '\n').filter(function(e){return e}).toString(), traits: ['']};
             break;
         }
         case AISystem.StableDiffusion: {   
-            result = generatePrompt_SD(model, prompt);
+            result = { prompt: generatePrompt_SD(model, prompt).filter(e => e !== '\n').filter(function(e){return e}).toString(), traits: ['']};
             break;
         }
         case AISystem.ChatGPT: {
@@ -305,60 +305,84 @@ function genMediumTrait_SD(snippet: Ast.MediumTrait): string {
 //     return result;
 // }
 
-function generatePrompt_ChatGPT(model: Ast.Model, promptName: string): string[] {
+function generatePrompt_ChatGPT(model: Ast.Model, promptName: string) {
     // Generate the single requested prompt
-    if (promptName)
-        return model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName).flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined) as string[];
+    if (promptName) {
+        const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName)[0];
+        return genAsset_ChatGPT(asset);
     // Generate a prompt for each asset
-    else {
-        const prompts = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined) as string[];
-        return [prompts.filter(function(e){return e}).join('. ')];
+    } else {
+        const prompts = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
+        return {prompt: prompts.flatMap(p => p.prompt).join('.'), traits: prompts.flatMap(p => p.traits)};
+        //return [prompts.filter(function(e){return e}).join('. ')];
     }
 }
 
-function genAsset_ChatGPT(asset: Ast.Asset): string[] {
+function genAsset_ChatGPT(asset: Ast.Asset) {
+    let result = {
+        prompt: '',
+        traits: ['']
+    };
+
     if (Ast.isPrompt(asset)) {
-        const prefix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[]: []);
-        const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[]: []);
-        
-        const core  = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[];
+        const preffixElements = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) : [{ promptSnippet: '', trait: ''}]);
+        const suffixElements = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) : [{ promptSnippet: '', trait: ''}]);
+        const coreElements  = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet));
+
+        const preffix = preffixElements?.map(e => e.promptSnippet);
+        const suffix = suffixElements?.map(e => e.promptSnippet);
+        const core = coreElements.map(e => e.promptSnippet);
+
+        const traits = (coreElements.concat(preffixElements).concat(suffixElements).map(e => e.trait) as string[]).filter(function(e){return e});
         
         // Build the final prompt
-        const prompt = prefix.concat(core, suffix);
-        return [prompt.filter(function(e){return e}).join('. ')];
+        const prompt = preffix.concat(core, suffix);
+
+        result.prompt = prompt.filter(function(e){return e}).join('. ');
+        result.traits = traits;
+
+        return result;
     } else if (Ast.isComposer(asset)) {
-        return asset.contents.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)).filter(e => e !== undefined) as string[];;
+        return result;
     } else if (Ast.isChain(asset)) {
-        return [];
+        return result;
     }
-    return [];
+    return result;
  }
 
- function genSnippet_ChatGPT(snippet: Ast.Snippet): string {
+ function genSnippet_ChatGPT(snippet: Ast.Snippet) {
     return genBaseSnippet_ChatGPT(snippet.content);
 }
 
- function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet): string {
+ function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet) {
+    let result = {
+        promptSnippet: '',
+        trait: ''};
+
     if (Ast.isTextLiteral(snippet)) {
-        return ((snippet as unknown) as Ast.TextLiteral).content;
+        result.promptSnippet = ((snippet as unknown) as Ast.TextLiteral).content;
     } else if (Ast.isLanguageRegisterTrait(snippet)) {
-        return "Use a " + snippet.value + " register";
+        result.promptSnippet = "Use a " + snippet.value + " register";
+        result.trait = snippet.value;
     } else if (Ast.isLiteraryStyleTrait(snippet)) {
-        return "Write your answer as a " + snippet.value;
+        result.promptSnippet = "Write your answer as a " + snippet.value;
+        result.trait = snippet.value;
     } else if (Ast.isPointOfViewTrait(snippet)) {
-        return "Write your answer in " + snippet.value;
-    } else if (Ast.isParameterRef(snippet)) {
-        return "" ;
-    } else if (Ast.isAssetReuse(snippet)) {
-        return "";
-    } else if (Ast.isNegativeTrait(snippet)) {
-        return "";
-    } else if (Ast.isCombinationTrait(snippet)) {
-        return "";
-    } else if (Ast.isAudienceTrait(snippet)) {
-        return "";
-    } else if (Ast.isMediumTrait(snippet)) {
-        return "";
-    } 
-   return "";
+        result.promptSnippet = "Write your answer in " + snippet.value;
+        result.trait = snippet.value;
+    }
+    // } else if (Ast.isParameterRef(snippet)) {
+    //     return "" ;
+    // } else if (Ast.isAssetReuse(snippet)) {
+    //     return "";
+    // } else if (Ast.isNegativeTrait(snippet)) {
+    //     return "";
+    // } else if (Ast.isCombinationTrait(snippet)) {
+    //     return "";
+    // } else if (Ast.isAudienceTrait(snippet)) {
+    //     return "";
+    // } else if (Ast.isMediumTrait(snippet)) {
+    //     return "";
+    // } 
+   return result;
 }

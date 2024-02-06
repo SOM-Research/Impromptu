@@ -60,7 +60,7 @@ class CodeGenerator {
         // TODO: should return a complex structure for: negative prompts, hyper parameters, and validation
         const promptCode = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt);
         if (promptCode != null) {
-            return template.replace('{PROMPT}', promptCode.filter(e => e !== '\n').filter(function (e) { return e; }).toString());
+            return template.replace('{PROMPT}', promptCode.prompt);
         }
         else
             return 'ERROR: Cannot generate prompt code.';
