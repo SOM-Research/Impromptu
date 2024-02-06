@@ -77,8 +77,8 @@ function generatePrompt(model, filePath, destination, aiSystem) {
     if (!fs_1.default.existsSync(data.destination)) {
         fs_1.default.mkdirSync(data.destination, { recursive: true });
     }
-    // TODO: third parameter should be replaced by an actual prompt
-    // or indicator to collect all prompts
+    // TODO: should the third parameter be replaced by an actual prompt name
+    // or indicator to collect all prompts?
     var result = generatePromptCode(model, aiSystem, '');
     if (result != null) {
         fs_1.default.writeFileSync(generatedFilePath, result.toString());

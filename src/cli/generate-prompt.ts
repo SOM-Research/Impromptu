@@ -52,8 +52,8 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
         fs.mkdirSync(data.destination, { recursive: true });
     }
 
-    // TODO: third parameter should be replaced by an actual prompt
-    // or indicator to collect all prompts
+    // TODO: should the third parameter be replaced by an actual prompt name
+    // or indicator to collect all prompts?
     var result = generatePromptCode(model, aiSystem, '');
 
     if (result != null) {

@@ -51,8 +51,6 @@ class CodeGenerator {
         return ((0, ast_js_1.isModel)(astNode) ? (0, generate_prompt_1.getPromptsList)(astNode) : undefined);
     }
     generateCode(model, aiSystem, prompt) {
-        //const astNode = (typeof(Model) == 'string' ? this.parser.parse(Model).value : Model);
-        //return (isModel(astNode) ? this.model2Html(astNode) : undefined);
         const astNode = this.parser.parse(model).value;
         var template = Templates.get(aiSystem);
         return ((0, ast_js_1.isModel)(astNode) ? this.model2Code(astNode, aiSystem, template, prompt) : undefined);
@@ -60,6 +58,7 @@ class CodeGenerator {
     // Generation of the output code string
     model2Code(model, aiSystem, template, prompt) {
         const promptCode = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt);
+        // TODO: should return a complex structure for: negative prompts, hyper parameters, and validation
         if (promptCode != null) {
             return template.replace('{PROMPT}', promptCode.filter(e => e !== '\n').filter(function (e) { return e; }).toString());
         }

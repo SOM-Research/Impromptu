@@ -135,13 +135,15 @@ function requestPromptAndValidation(generator, model) {
                 if (prompt)
                     quickPickItems.push({ label: prompt.name, description: prompt.description });
             });
-            if (quickPickItems) {
+            if (quickPickItems && quickPickItems.length > 1) {
                 const pick = yield vscode.window.showQuickPick(quickPickItems, {
                     placeHolder: 'Select which prompt do you want to query the model with.',
                     canPickMany: false
                 });
                 return pick === null || pick === void 0 ? void 0 : pick.label;
             }
+            if (quickPickItems && quickPickItems.length == 1)
+                return quickPickItems[0].label;
         }
         return undefined;
     });

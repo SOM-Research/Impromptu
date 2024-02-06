@@ -42,9 +42,7 @@ export class CodeGenerator implements Generator {
         return (isModel(astNode) ? getPromptsList(astNode) : undefined);
     }
 
-    generateCode(model : string, aiSystem: string, prompt: string) : string | undefined { // | AstNode) : string | undefined {
-        //const astNode = (typeof(Model) == 'string' ? this.parser.parse(Model).value : Model);
-        //return (isModel(astNode) ? this.model2Html(astNode) : undefined);
+    generateCode(model : string, aiSystem: string, prompt: string) : string | undefined {
         const astNode = this.parser.parse(model).value;
         var template = Templates.get(aiSystem);
         return (isModel(astNode) ? this.model2Code(astNode, aiSystem, template, prompt) : undefined);
@@ -53,6 +51,7 @@ export class CodeGenerator implements Generator {
     // Generation of the output code string
     model2Code(model : Model, aiSystem: string, template: string, prompt: string) : string | undefined {
         const promptCode = generatePromptCode(model, aiSystem, prompt);
+        // TODO: should return a complex structure for: negative prompts, hyper parameters, and validation
         if (promptCode != null) {
             return template.replace('{PROMPT}', promptCode.filter(e => e !== '\n').filter(function(e){return e}).toString());
         }

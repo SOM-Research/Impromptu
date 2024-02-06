@@ -112,7 +112,7 @@ async function requestPromptAndValidation(generator: CodeGenerator, model: strin
         prompts.forEach(prompt => {
             if (prompt) quickPickItems.push({label: prompt.name, description: prompt.description})
         });
-        if (quickPickItems) {
+        if (quickPickItems && quickPickItems.length > 1) {
             const pick = await vscode.window.showQuickPick(
                 quickPickItems,
                 {
@@ -121,6 +121,8 @@ async function requestPromptAndValidation(generator: CodeGenerator, model: strin
                 });
             return pick?.label;
         }
+        if (quickPickItems && quickPickItems.length == 1)
+            return quickPickItems[0].label;
     }
     return undefined;
 }
