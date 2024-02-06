@@ -57,8 +57,8 @@ class CodeGenerator {
     }
     // Generation of the output code string
     model2Code(model, aiSystem, template, prompt) {
-        const promptCode = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt);
         // TODO: should return a complex structure for: negative prompts, hyper parameters, and validation
+        const promptCode = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt);
         if (promptCode != null) {
             return template.replace('{PROMPT}', promptCode.filter(e => e !== '\n').filter(function (e) { return e; }).toString());
         }

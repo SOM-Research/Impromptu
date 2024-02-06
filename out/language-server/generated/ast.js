@@ -5,8 +5,8 @@
  ******************************************************************************/
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isHyperParameters = exports.HyperParameters = exports.isHyperParam = exports.HyperParam = exports.isEquivalency = exports.Equivalency = exports.isEffectsTrait = exports.EffectsTrait = exports.isCore = exports.Core = exports.isContents = exports.Contents = exports.isComposer = exports.Composer = exports.isCombinationTrait = exports.CombinationTrait = exports.isChain = exports.Chain = exports.isCameraSettingsTrait = exports.CameraSettingsTrait = exports.isCameraAngleTrait = exports.CameraAngleTrait = exports.isByAuthorTrait = exports.ByAuthorTrait = exports.isAudienceTrait = exports.AudienceTrait = exports.isAssetReuse = exports.AssetReuse = exports.isAlternativeTrait = exports.AlternativeTrait = exports.isTrait = exports.Trait = exports.isTextTrait = exports.TextTrait = exports.isRelativeTrait = exports.RelativeTrait = exports.isMediumIndependentTrait = exports.MediumIndependentTrait = exports.isInputRef = exports.InputRef = exports.isInput = exports.Input = exports.isImageTrait = exports.ImageTrait = exports.isExecutableAsset = exports.ExecutableAsset = exports.isBaseSnippet = exports.BaseSnippet = exports.isAsset = exports.Asset = void 0;
-exports.isWeight = exports.Weight = exports.isTraitValidator = exports.TraitValidator = exports.isTextLiteral = exports.TextLiteral = exports.isTargetSizeTrait = exports.TargetSizeTrait = exports.isSuffix = exports.Suffix = exports.isSnippet = exports.Snippet = exports.isSimilarToTrait = exports.SimilarToTrait = exports.isProximityTrait = exports.ProximityTrait = exports.isPrompt = exports.Prompt = exports.isPrefix = exports.Prefix = exports.isPointOfViewTrait = exports.PointOfViewTrait = exports.isParamInvokation = exports.ParamInvokation = exports.isParameters = exports.Parameters = exports.isParameterRef = exports.ParameterRef = exports.isParameter = exports.Parameter = exports.isNegativeTrait = exports.NegativeTrait = exports.isMultimodalRef = exports.MultimodalRef = exports.isMultimodal = exports.Multimodal = exports.isModel = exports.Model = exports.isMediumTrait = exports.MediumTrait = exports.isLiteraryStyleTrait = exports.LiteraryStyleTrait = exports.isLightingTrait = exports.LightingTrait = exports.isLanguageRegisterTrait = exports.LanguageRegisterTrait = exports.isLanguage = exports.Language = exports.isIncludesTrait = exports.IncludesTrait = void 0;
-exports.reflection = exports.ImpromptuAstReflection = exports.isByExpressionValidators = exports.ByExpressionValidators = void 0;
+exports.isByExpressionValidators = exports.ByExpressionValidators = exports.isWeight = exports.Weight = exports.isTextLiteral = exports.TextLiteral = exports.isTargetSizeTrait = exports.TargetSizeTrait = exports.isSuffix = exports.Suffix = exports.isSnippet = exports.Snippet = exports.isSimilarToTrait = exports.SimilarToTrait = exports.isProximityTrait = exports.ProximityTrait = exports.isPrompt = exports.Prompt = exports.isPrefix = exports.Prefix = exports.isPointOfViewTrait = exports.PointOfViewTrait = exports.isParamInvokation = exports.ParamInvokation = exports.isParameters = exports.Parameters = exports.isParameterRef = exports.ParameterRef = exports.isParameter = exports.Parameter = exports.isNegativeTrait = exports.NegativeTrait = exports.isMultimodalRef = exports.MultimodalRef = exports.isMultimodal = exports.Multimodal = exports.isModel = exports.Model = exports.isMediumTrait = exports.MediumTrait = exports.isLiteraryStyleTrait = exports.LiteraryStyleTrait = exports.isLightingTrait = exports.LightingTrait = exports.isLanguageRegisterTrait = exports.LanguageRegisterTrait = exports.isLanguage = exports.Language = exports.isIncludesTrait = exports.IncludesTrait = void 0;
+exports.reflection = exports.ImpromptuAstReflection = void 0;
 /* eslint-disable */
 const langium_1 = require("langium");
 exports.Asset = 'Asset';
@@ -249,11 +249,6 @@ function isTextLiteral(item) {
     return exports.reflection.isInstance(item, exports.TextLiteral);
 }
 exports.isTextLiteral = isTextLiteral;
-exports.TraitValidator = 'TraitValidator';
-function isTraitValidator(item) {
-    return exports.reflection.isInstance(item, exports.TraitValidator);
-}
-exports.isTraitValidator = isTraitValidator;
 exports.Weight = 'Weight';
 function isWeight(item) {
     return exports.reflection.isInstance(item, exports.Weight);
@@ -266,7 +261,7 @@ function isByExpressionValidators(item) {
 exports.isByExpressionValidators = isByExpressionValidators;
 class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
     getAllTypes() {
-        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionValidators', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'TraitValidator', 'Weight'];
+        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionValidators', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
     computeIsSubtype(subtype, supertype) {
         switch (subtype) {
@@ -318,14 +313,13 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
             case exports.ParameterRef: {
                 return this.isSubtype(exports.InputRef, supertype);
             }
-            case exports.TraitValidator:
+            case exports.ByExpressionValidators: {
+                return this.isSubtype(exports.Prompt, supertype) || this.isSubtype(exports.Chain, supertype);
+            }
             case exports.ImageTrait:
             case exports.MediumIndependentTrait:
             case exports.TextTrait: {
                 return this.isSubtype(exports.Trait, supertype);
-            }
-            case exports.ByExpressionValidators: {
-                return this.isSubtype(exports.Prompt, supertype) || this.isSubtype(exports.Chain, supertype);
             }
             default: {
                 return false;
@@ -335,6 +329,25 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
     getReferenceType(refInfo) {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
+            case 'AlternativeTrait:validator':
+            case 'AudienceTrait:validator':
+            case 'ByAuthorTrait:validator':
+            case 'CameraAngleTrait:validator':
+            case 'CameraSettingsTrait:validator':
+            case 'CombinationTrait:validator':
+            case 'EffectsTrait:validator':
+            case 'IncludesTrait:validator':
+            case 'LanguageRegisterTrait:validator':
+            case 'LightingTrait:validator':
+            case 'LiteraryStyleTrait:validator':
+            case 'MediumTrait:validator':
+            case 'NegativeTrait:validator':
+            case 'PointOfViewTrait:validator':
+            case 'ProximityTrait:validator':
+            case 'SimilarToTrait:validator':
+            case 'TargetSizeTrait:validator': {
+                return exports.ExecutableAsset;
+            }
             case 'AssetReuse:asset':
             case 'ByExpressionValidators:priorVersion':
             case 'ByExpressionValidators:priorVersion':
@@ -354,9 +367,6 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
             }
             case 'ParameterRef:param': {
                 return exports.Parameter;
-            }
-            case 'TraitValidator:validator': {
-                return exports.ExecutableAsset;
             }
             default: {
                 throw new Error(`${referenceId} is not a valid reference id.`);

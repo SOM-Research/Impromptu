@@ -61,41 +61,49 @@ Prefix:
     name='prefix' '=' snippets+=Snippet (',' snippets+=Snippet)*;
 
 Trait:
-    (TextTrait | ImageTrait | MediumIndependentTrait)
-    (TraitValidator)?;
+    TextTrait | ImageTrait | MediumIndependentTrait;
 
 TextTrait:
     LiteraryStyleTrait | LanguageRegisterTrait | PointOfViewTrait;
 
 LiteraryStyleTrait:
-    'literary-style' '(' value=LiteraryStyle ')';
+    'literary-style' '(' value=LiteraryStyle ')'
+    TraitValidator;
 
 LanguageRegisterTrait:
-    'language-register' '(' value=LanguageRegister')';
+    'language-register' '(' value=LanguageRegister')'
+    TraitValidator;
 
 PointOfViewTrait: 
-    'point-of-view' '(' value=PointOfView')';
+    'point-of-view' '(' value=PointOfView')'
+    TraitValidator;
 
 ImageTrait:
     MediumTrait | CameraAngleTrait | CameraSettingsTrait | LightingTrait | ProximityTrait | EffectsTrait;
 
 MediumTrait: 
-    'medium'       '(' value=Medium ')';
+    'medium'       '(' value=Medium ')'
+    TraitValidator;
 
 CameraAngleTrait:
-    'camera-angle' '(' value=CameraAngle ')';
+    'camera-angle' '(' value=CameraAngle ')'
+    TraitValidator;
 
 CameraSettingsTrait:
-    'camera-settings' '(' value=CameraSettings ')';
+    'camera-settings' '(' value=CameraSettings ')'
+    TraitValidator;
 
 LightingTrait:
-    'lighting'     '(' value=Lighting ')';
+    'lighting'     '(' value=Lighting ')'
+    TraitValidator;
 
 ProximityTrait:
-    'promixity'    '(' value=Proximity ')';
+    'promixity'    '(' value=Proximity ')'
+    TraitValidator;
 
 EffectsTrait:
-    'effects'      '(' value=Effects ')';
+    'effects'      '(' value=Effects ')'
+    TraitValidator;
 
 MediumIndependentTrait:
     RelativeTrait | AudienceTrait | IncludesTrait | SimilarToTrait | ByAuthorTrait | TargetSizeTrait ;
@@ -104,28 +112,36 @@ RelativeTrait:
     NegativeTrait | AlternativeTrait | CombinationTrait;
 
 NegativeTrait:
-    'no' '(' content=Snippet ')';
+    'no' '(' content=Snippet ')'
+    TraitValidator;
 
 AlternativeTrait:
-    'alternative' '(' contents+=Snippet (',' content+=Snippet)+ ')' ;
+    'alternative' '(' contents+=Snippet (',' content+=Snippet)+ ')'
+    TraitValidator;
 
 CombinationTrait:
-    'between' '(' contents+=Snippet (',' contents+=Snippet)+ ')' ;
+    'between' '(' contents+=Snippet (',' contents+=Snippet)+ ')'
+    TraitValidator;
 
 AudienceTrait:
-    'audience' '(' content=Snippet ')';
+    'audience' '(' content=Snippet ')'
+    TraitValidator;
 
 IncludesTrait:
-    'includes' '(' (times=INT ':')? contents+=Snippet (',' contents+=Snippet)* ')';
+    'includes' '(' (times=INT ':')? contents+=Snippet (',' contents+=Snippet)* ')'
+    TraitValidator;
 
 SimilarToTrait:
-    'like' '(' contents+=Snippet (',' contents+=Snippet)* ')';
+    'like' '(' contents+=Snippet (',' contents+=Snippet)* ')'
+    TraitValidator;
 
 ByAuthorTrait:
-    'author' '(' value=Snippet ')';
+    'author' '(' value=Snippet ')'
+    TraitValidator;
 
 TargetSizeTrait:
-    'size' '(' dimension=Dimension ',' type=SizeConstraint ',' amount=INT ',' unit=Unit ')';
+    'size' '(' dimension=Dimension ',' type=SizeConstraint ',' amount=INT ',' unit=Unit ')'
+    TraitValidator;
 
 Contents:
     snippets+=Snippet (',' snippets+=Snippet)*;
@@ -240,5 +256,8 @@ ByExpressionValidators:
     //validator=[ExecutableAsset:ID]
     //;
 
-TraitValidator:
-    '['validator=[ExecutableAsset:ID]']';
+fragment TraitValidator:
+    ('['validator=[ExecutableAsset:ID]']')?;
+
+//TraitValidator:
+//    '['validator=[ExecutableAsset:ID]']';

@@ -731,41 +731,28 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
       "$type": "ParserRule",
       "name": "Trait",
       "definition": {
-        "$type": "Group",
+        "$type": "Alternatives",
         "elements": [
           {
-            "$type": "Alternatives",
-            "elements": [
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@19"
-                },
-                "arguments": []
-              },
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@23"
-                },
-                "arguments": []
-              },
-              {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@30"
-                },
-                "arguments": []
-              }
-            ]
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@19"
+            },
+            "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@75"
+              "$ref": "#/rules@23"
             },
-            "arguments": [],
-            "cardinality": "?"
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@30"
+            },
+            "arguments": []
           }
         ]
       },
@@ -841,6 +828,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -880,6 +874,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -919,6 +920,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1015,6 +1023,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1054,6 +1069,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1093,6 +1115,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1132,6 +1161,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1171,6 +1207,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1210,6 +1253,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1342,6 +1392,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1403,6 +1460,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1464,6 +1528,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1503,6 +1574,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1586,6 +1664,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1647,6 +1732,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1686,6 +1778,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1773,6 +1872,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Keyword",
             "value": ")"
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
           }
         ]
       },
@@ -3436,6 +3542,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
     {
       "$type": "ParserRule",
       "name": "TraitValidator",
+      "fragment": true,
       "definition": {
         "$type": "Group",
         "elements": [
@@ -3466,11 +3573,11 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "$type": "Keyword",
             "value": "]"
           }
-        ]
+        ],
+        "cardinality": "?"
       },
       "definesHiddenTokens": false,
       "entry": false,
-      "fragment": false,
       "hiddenTokens": [],
       "parameters": [],
       "wildcard": false

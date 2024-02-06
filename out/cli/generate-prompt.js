@@ -382,8 +382,17 @@ function genBaseSnippet_ChatGPT(snippet) {
     if (Ast.isTextLiteral(snippet)) {
         return snippet.content;
     }
+    else if (Ast.isLanguageRegisterTrait(snippet)) {
+        return "Use a " + snippet.value + " register";
+    }
+    else if (Ast.isLiteraryStyleTrait(snippet)) {
+        return "Write your answer as a " + snippet.value;
+    }
+    else if (Ast.isPointOfViewTrait(snippet)) {
+        return "Write your answer in " + snippet.value;
+    }
     else if (Ast.isParameterRef(snippet)) {
-        return snippet.param.$refText;
+        return "";
     }
     else if (Ast.isAssetReuse(snippet)) {
         return "";
@@ -392,13 +401,13 @@ function genBaseSnippet_ChatGPT(snippet) {
         return "";
     }
     else if (Ast.isCombinationTrait(snippet)) {
-        return genCombinationTrait_SD(snippet);
+        return "";
     }
     else if (Ast.isAudienceTrait(snippet)) {
-        return genAudienceTrait_SD(snippet);
+        return "";
     }
     else if (Ast.isMediumTrait(snippet)) {
-        return genMediumTrait_SD(snippet);
+        return "";
     }
     return "";
 }

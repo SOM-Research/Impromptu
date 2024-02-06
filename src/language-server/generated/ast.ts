@@ -110,7 +110,7 @@ export function isTextTrait(item: unknown): item is TextTrait {
     return reflection.isInstance(item, TextTrait);
 }
 
-export type Trait = ImageTrait | MediumIndependentTrait | TextTrait | TraitValidator;
+export type Trait = ImageTrait | MediumIndependentTrait | TextTrait;
 
 export const Trait = 'Trait';
 
@@ -125,6 +125,7 @@ export interface AlternativeTrait extends AstNode {
     readonly $type: 'AlternativeTrait';
     content: Array<Snippet>
     contents: Array<Snippet>
+    validator?: Reference<ExecutableAsset>
 }
 
 export const AlternativeTrait = 'AlternativeTrait';
@@ -150,6 +151,7 @@ export interface AudienceTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'AudienceTrait';
     content: Snippet
+    validator?: Reference<ExecutableAsset>
 }
 
 export const AudienceTrait = 'AudienceTrait';
@@ -161,6 +163,7 @@ export function isAudienceTrait(item: unknown): item is AudienceTrait {
 export interface ByAuthorTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'ByAuthorTrait';
+    validator?: Reference<ExecutableAsset>
     value: Snippet
 }
 
@@ -173,6 +176,7 @@ export function isByAuthorTrait(item: unknown): item is ByAuthorTrait {
 export interface CameraAngleTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'CameraAngleTrait';
+    validator?: Reference<ExecutableAsset>
     value: CameraAngle
 }
 
@@ -185,6 +189,7 @@ export function isCameraAngleTrait(item: unknown): item is CameraAngleTrait {
 export interface CameraSettingsTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'CameraSettingsTrait';
+    validator?: Reference<ExecutableAsset>
     value: CameraSettings
 }
 
@@ -211,6 +216,7 @@ export interface CombinationTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'CombinationTrait';
     contents: Array<Snippet>
+    validator?: Reference<ExecutableAsset>
 }
 
 export const CombinationTrait = 'CombinationTrait';
@@ -263,6 +269,7 @@ export function isCore(item: unknown): item is Core {
 export interface EffectsTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'EffectsTrait';
+    validator?: Reference<ExecutableAsset>
     value: Effects
 }
 
@@ -314,6 +321,7 @@ export interface IncludesTrait extends AstNode {
     readonly $type: 'IncludesTrait';
     contents: Array<Snippet>
     times?: number
+    validator?: Reference<ExecutableAsset>
 }
 
 export const IncludesTrait = 'IncludesTrait';
@@ -339,6 +347,7 @@ export function isLanguage(item: unknown): item is Language {
 export interface LanguageRegisterTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'LanguageRegisterTrait';
+    validator?: Reference<ExecutableAsset>
     value: LanguageRegister
 }
 
@@ -351,6 +360,7 @@ export function isLanguageRegisterTrait(item: unknown): item is LanguageRegister
 export interface LightingTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'LightingTrait';
+    validator?: Reference<ExecutableAsset>
     value: Lighting
 }
 
@@ -363,6 +373,7 @@ export function isLightingTrait(item: unknown): item is LightingTrait {
 export interface LiteraryStyleTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'LiteraryStyleTrait';
+    validator?: Reference<ExecutableAsset>
     value: LiteraryStyle
 }
 
@@ -375,6 +386,7 @@ export function isLiteraryStyleTrait(item: unknown): item is LiteraryStyleTrait 
 export interface MediumTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'MediumTrait';
+    validator?: Reference<ExecutableAsset>
     value: Medium
 }
 
@@ -428,6 +440,7 @@ export interface NegativeTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'NegativeTrait';
     content: Snippet
+    validator?: Reference<ExecutableAsset>
 }
 
 export const NegativeTrait = 'NegativeTrait';
@@ -488,6 +501,7 @@ export function isParamInvokation(item: unknown): item is ParamInvokation {
 export interface PointOfViewTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'PointOfViewTrait';
+    validator?: Reference<ExecutableAsset>
     value: PointOfView
 }
 
@@ -535,6 +549,7 @@ export function isPrompt(item: unknown): item is Prompt {
 export interface ProximityTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'ProximityTrait';
+    validator?: Reference<ExecutableAsset>
     value: Proximity
 }
 
@@ -548,6 +563,7 @@ export interface SimilarToTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'SimilarToTrait';
     contents: Array<Snippet>
+    validator?: Reference<ExecutableAsset>
 }
 
 export const SimilarToTrait = 'SimilarToTrait';
@@ -589,6 +605,7 @@ export interface TargetSizeTrait extends AstNode {
     dimension: Dimension
     type: SizeConstraint
     unit: Unit
+    validator?: Reference<ExecutableAsset>
 }
 
 export const TargetSizeTrait = 'TargetSizeTrait';
@@ -607,18 +624,6 @@ export const TextLiteral = 'TextLiteral';
 
 export function isTextLiteral(item: unknown): item is TextLiteral {
     return reflection.isInstance(item, TextLiteral);
-}
-
-export interface TraitValidator extends AstNode {
-    readonly $container: Snippet;
-    readonly $type: 'TraitValidator';
-    validator: Reference<ExecutableAsset>
-}
-
-export const TraitValidator = 'TraitValidator';
-
-export function isTraitValidator(item: unknown): item is TraitValidator {
-    return reflection.isInstance(item, TraitValidator);
 }
 
 export interface Weight extends AstNode {
@@ -695,14 +700,13 @@ export interface ImpromptuAstType {
     TextLiteral: TextLiteral
     TextTrait: TextTrait
     Trait: Trait
-    TraitValidator: TraitValidator
     Weight: Weight
 }
 
 export class ImpromptuAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionValidators', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'TraitValidator', 'Weight'];
+        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionValidators', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -755,14 +759,13 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             case ParameterRef: {
                 return this.isSubtype(InputRef, supertype);
             }
-            case TraitValidator:
+            case ByExpressionValidators: {
+                return this.isSubtype(Prompt, supertype) || this.isSubtype(Chain, supertype);
+            }
             case ImageTrait:
             case MediumIndependentTrait:
             case TextTrait: {
                 return this.isSubtype(Trait, supertype);
-            }
-            case ByExpressionValidators: {
-                return this.isSubtype(Prompt, supertype) || this.isSubtype(Chain, supertype);
             }
             default: {
                 return false;
@@ -773,6 +776,25 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
     getReferenceType(refInfo: ReferenceInfo): string {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
+            case 'AlternativeTrait:validator':
+            case 'AudienceTrait:validator':
+            case 'ByAuthorTrait:validator':
+            case 'CameraAngleTrait:validator':
+            case 'CameraSettingsTrait:validator':
+            case 'CombinationTrait:validator':
+            case 'EffectsTrait:validator':
+            case 'IncludesTrait:validator':
+            case 'LanguageRegisterTrait:validator':
+            case 'LightingTrait:validator':
+            case 'LiteraryStyleTrait:validator':
+            case 'MediumTrait:validator':
+            case 'NegativeTrait:validator':
+            case 'PointOfViewTrait:validator':
+            case 'ProximityTrait:validator':
+            case 'SimilarToTrait:validator':
+            case 'TargetSizeTrait:validator': {
+                return ExecutableAsset;
+            }
             case 'AssetReuse:asset':
             case 'ByExpressionValidators:priorVersion':
             case 'ByExpressionValidators:priorVersion':
@@ -792,9 +814,6 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             }
             case 'ParameterRef:param': {
                 return Parameter;
-            }
-            case 'TraitValidator:validator': {
-                return ExecutableAsset;
             }
             default: {
                 throw new Error(`${referenceId} is not a valid reference id.`);
