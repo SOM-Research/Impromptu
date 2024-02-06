@@ -7,7 +7,7 @@ import { NodeFileSystem } from 'langium/node';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionContext } from 'vscode';
-import { generatePromptCode, AISystem, getPromptsList } from './cli/generate-prompt';
+import { generatePromptCode, AISystem, getPromptsList, generatePromptValidators } from './cli/generate-prompt';
 
 let Templates = new Map();
 
@@ -51,9 +51,10 @@ export class CodeGenerator implements Generator {
     // Generation of the output code string
     model2Code(model : Model, aiSystem: string, template: string, prompt: string) : string | undefined {
         // TODO: should return a complex structure for: negative prompts, hyper parameters, and validation
-        const promptCode = generatePromptCode(model, aiSystem, prompt);
-        if (promptCode != null) {
-            return template.replace('{PROMPT}', promptCode.prompt);
+        const promptCode = generatePromptCode(model, aiSystem, prompt)?.toString();
+        if (promptCode) {
+            const validators = generatePromptValidators(model, prompt);
+            return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', validators.map(t => `'${t}'`).toString());
         }
         else
             return 'ERROR: Cannot generate prompt code.';

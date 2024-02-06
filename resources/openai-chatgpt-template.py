@@ -16,10 +16,38 @@ class OpenAIService():
 
 class OpenAIChatGPTService(OpenAIService):
 
-    prompt = '''{PROMPT}'''
+    __prompt = '''{PROMPT}'''
+
+    __validators = [{VALIDATORS}]
+
+    @property
+    def response(self):
+        return self.__response
     
-    def execute_prompt(self) -> str:
+    @property
+    def validation(self):
+        return self.__validation
+    
+    def execute_prompt(self):
+        self.__response = self.__query_model(self.__prompt)
+        self.__validation = self.__validate_response(self.__response)
+    
+    def __validate_response(self, response: str) -> list[(str, bool)]:
+        result = []
+        for validator in self.__validators:
+            validation_prompt = f'Does the TEXT comply with the following CONDITION? \
+                Reply only with "True" if the CONDITION is fulfilled; \
+                or "False" otherwise. \
+                \
+                TEXT: ```{response}``` \
+                \
+                CONDITION: {validator}'
+            validation = self.__query_model(validation_prompt)
+            result.append(validator, validation)
+        return result
+    
+    def __query_model(self, prompt: str) -> str:
         completion = openai.ChatCompletion.create(
             model = self.model,
-            messages = [{"role": "user", "content": self.prompt}])
+            messages = [{"role": "user", "content": prompt}])
         return completion.choices[0].message.content

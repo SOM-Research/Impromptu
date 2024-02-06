@@ -17,15 +17,15 @@ export const AISystem = {
     Midjourney: "midjourney"
 }
 
-export function generatePromptCode(model: Ast.Model, aiSystem: string | undefined, prompt: string = '') {
+export function generatePromptCode(model: Ast.Model, aiSystem: string | undefined, prompt: string = ''): string[] | undefined {
     var result;
     switch(aiSystem) {
         case AISystem.Midjourney: {
-            result = { prompt: generatePrompt_MJ(model, prompt).filter(e => e !== '\n').filter(function(e){return e}).toString(), traits: ['']};
+            result = generatePrompt_MJ(model, prompt).filter(e => e !== '\n').filter(function(e){return e});
             break;
         }
         case AISystem.StableDiffusion: {   
-            result = { prompt: generatePrompt_SD(model, prompt).filter(e => e !== '\n').filter(function(e){return e}).toString(), traits: ['']};
+            result = generatePrompt_SD(model, prompt).filter(e => e !== '\n').filter(function(e){return e});
             break;
         }
         case AISystem.ChatGPT: {
@@ -42,6 +42,23 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
         }
     }
     return result;
+}
+
+export function generatePromptValidators(model: Ast.Model, prompt: string): string[] {
+    const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0] as Ast.Prompt;
+    const core = (asset.core.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[];
+    const preffix = ((asset.prefix) ? (asset.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
+    const suffix = ((asset.suffix) ? (asset.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
+    const snippets = core.concat(preffix).concat(suffix);
+    return snippets.flatMap(s => genValidatorPrompt(model, s.validator?.$refText)).filter(function(e){return e});
+}
+
+function genValidatorPrompt(model: Ast.Model, prompt: string | undefined): string {
+    if (prompt) {
+        const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0] as Ast.Prompt;
+        return genAsset_ChatGPT(asset).join('.');
+    }
+    return '';
 }
 
 export function generatePrompt(model: Ast.Model, filePath: string, destination: string | undefined, aiSystem: string | undefined): string {
@@ -305,71 +322,50 @@ function genMediumTrait_SD(snippet: Ast.MediumTrait): string {
 //     return result;
 // }
 
-function generatePrompt_ChatGPT(model: Ast.Model, promptName: string) {
+function generatePrompt_ChatGPT(model: Ast.Model, promptName: string): string[] {
     // Generate the single requested prompt
     if (promptName) {
         const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName)[0];
         return genAsset_ChatGPT(asset);
     // Generate a prompt for each asset
-    } else {
+    } else {
         const prompts = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
-        return {prompt: prompts.flatMap(p => p.prompt).join('.'), traits: prompts.flatMap(p => p.traits)};
-        //return [prompts.filter(function(e){return e}).join('. ')];
+        return [prompts.filter(function(e){return e}).join('. ')];
     }
 }
 
-function genAsset_ChatGPT(asset: Ast.Asset) {
-    let result = {
-        prompt: '',
-        traits: ['']
-    };
-
+function genAsset_ChatGPT(asset: Ast.Asset): string[] {
     if (Ast.isPrompt(asset)) {
-        const preffixElements = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) : [{ promptSnippet: '', trait: ''}]);
-        const suffixElements = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) : [{ promptSnippet: '', trait: ''}]);
-        const coreElements  = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet));
-
-        const preffix = preffixElements?.map(e => e.promptSnippet);
-        const suffix = suffixElements?.map(e => e.promptSnippet);
-        const core = coreElements.map(e => e.promptSnippet);
-
-        const traits = (coreElements.concat(preffixElements).concat(suffixElements).map(e => e.trait) as string[]).filter(function(e){return e});
+        const preffix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) as string[] : []);
+        const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) as string[] : []);
+        const core  = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet));
         
         // Build the final prompt
         const prompt = preffix.concat(core, suffix);
 
-        result.prompt = prompt.filter(function(e){return e}).join('. ');
-        result.traits = traits;
+        return [prompt.filter(function(e){return e}).join('. ')];
 
-        return result;
     } else if (Ast.isComposer(asset)) {
-        return result;
+        return [];
     } else if (Ast.isChain(asset)) {
-        return result;
+        return [];
     }
-    return result;
+    return [];
  }
 
- function genSnippet_ChatGPT(snippet: Ast.Snippet) {
+ function genSnippet_ChatGPT(snippet: Ast.Snippet): string {
     return genBaseSnippet_ChatGPT(snippet.content);
 }
 
- function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet) {
-    let result = {
-        promptSnippet: '',
-        trait: ''};
-
+ function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet): string {
     if (Ast.isTextLiteral(snippet)) {
-        result.promptSnippet = ((snippet as unknown) as Ast.TextLiteral).content;
+        return ((snippet as unknown) as Ast.TextLiteral).content;
     } else if (Ast.isLanguageRegisterTrait(snippet)) {
-        result.promptSnippet = "Use a " + snippet.value + " register";
-        result.trait = snippet.value;
+        return "Use a " + snippet.value + " register";
     } else if (Ast.isLiteraryStyleTrait(snippet)) {
-        result.promptSnippet = "Write your answer as a " + snippet.value;
-        result.trait = snippet.value;
+        return "Write your answer as a " + snippet.value;
     } else if (Ast.isPointOfViewTrait(snippet)) {
-        result.promptSnippet = "Write your answer in " + snippet.value;
-        result.trait = snippet.value;
+        return "Write your answer in " + snippet.value;
     }
     // } else if (Ast.isParameterRef(snippet)) {
     //     return "" ;
@@ -383,6 +379,6 @@ function genAsset_ChatGPT(asset: Ast.Asset) {
     //     return "";
     // } else if (Ast.isMediumTrait(snippet)) {
     //     return "";
-    // } 
-   return result;
+    // }
+    return "";
 }
