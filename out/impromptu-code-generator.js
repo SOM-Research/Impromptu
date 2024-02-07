@@ -62,7 +62,7 @@ class CodeGenerator {
         const promptCode = (_a = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
         if (promptCode) {
             const validators = (0, generate_prompt_1.generatePromptValidators)(model, prompt);
-            return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', validators.map(t => `'${t}'`).toString());
+            return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators)); // validators.map(t => `'${t}'`).toString());
         }
         else
             return 'ERROR: Cannot generate prompt code.';

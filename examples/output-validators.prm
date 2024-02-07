@@ -4,16 +4,23 @@ language
     region='EN'
 
 prompt
-    Validator
+    ValidatorSong
     'This prompt is intended for validation of literary style traits'
     () : text
     core='Does the text use the expected literary style?'
     language=English
 
 prompt
+    ValidatorIronic
+    'This prompt is intended for validation of literary register traits'
+    () : text
+    core='Is the text written in the expected register?'
+    language=English
+
+prompt
     PromptToValidate
     'This prompt is an example to be validated'
     () : text
-    core='Provide a text that describes a new year beginning tomorrow','It is expected to be full of hope and happiness',language-register(ironic)
-    suffix=literary-style(song)[Validator]
+    core='Provide a text that describes a new year beginning tomorrow','It is expected to be full of hope and happiness',language-register(ironic)[ValidatorIronic]
+    suffix=literary-style(song)[ValidatorSong]
     language=English

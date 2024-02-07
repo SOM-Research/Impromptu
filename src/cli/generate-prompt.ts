@@ -44,13 +44,21 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
     return result;
 }
 
-export function generatePromptValidators(model: Ast.Model, prompt: string): string[] {
+export function generatePromptValidators(model: Ast.Model, prompt: string) {
     const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0] as Ast.Prompt;
     const core = (asset.core.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[];
     const preffix = ((asset.prefix) ? (asset.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
     const suffix = ((asset.suffix) ? (asset.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
     const snippets = core.concat(preffix).concat(suffix);
-    return snippets.flatMap(s => genValidatorPrompt(model, s.validator?.$refText)).filter(function(e){return e});
+    let result = [{trait: '', condition: ''}];
+    snippets.forEach(s => {
+        // traits with value
+        if (Ast.isTextTrait(s)) { // || Ast.isImageTrait(s)) {
+            if (s.validator)
+                result.push({ trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)});
+        }
+    })
+    return result.filter(t => t.condition); //snippets.flatMap(s => ({trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)})).filter(function(e){return e});
 }
 
 function genValidatorPrompt(model: Ast.Model, prompt: string | undefined): string {

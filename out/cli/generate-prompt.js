@@ -77,7 +77,16 @@ function generatePromptValidators(model, prompt) {
     const preffix = ((asset.prefix) ? asset.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
     const suffix = ((asset.suffix) ? asset.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
     const snippets = core.concat(preffix).concat(suffix);
-    return snippets.flatMap(s => { var _a; return genValidatorPrompt(model, (_a = s.validator) === null || _a === void 0 ? void 0 : _a.$refText); }).filter(function (e) { return e; });
+    let result = [{ trait: '', condition: '' }];
+    snippets.forEach(s => {
+        var _a;
+        // traits with value
+        if (Ast.isTextTrait(s)) { // || Ast.isImageTrait(s)) {
+            if (s.validator)
+                result.push({ trait: s.value, condition: genValidatorPrompt(model, (_a = s.validator) === null || _a === void 0 ? void 0 : _a.$refText) });
+        }
+    });
+    return result.filter(t => t.condition); //snippets.flatMap(s => ({trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)})).filter(function(e){return e});
 }
 exports.generatePromptValidators = generatePromptValidators;
 function genValidatorPrompt(model, prompt) {

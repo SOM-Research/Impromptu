@@ -2,6 +2,8 @@ import openai
 
 class OpenAIService():
     
+    VALIDATOR_MODEL = 'gpt-4'
+
     # Invoke with...
     # 1) Your own OpenAI's API key
     # 2) A valid OpenAI's chat model, e.g.:
@@ -18,7 +20,7 @@ class OpenAIChatGPTService(OpenAIService):
 
     __prompt = '''{PROMPT}'''
 
-    __validators = [{VALIDATORS}]
+    __validators = {VALIDATORS}
 
     @property
     def prompt(self):
@@ -35,27 +37,27 @@ class OpenAIChatGPTService(OpenAIService):
         return []
     
     def execute_prompt(self):
-        self.__response = self.__query_model(self.prompt)
+        self.__response = self.__query_model(self.prompt, self.model)
         self.__validation = self.__validate_response
     
     def __validate_response(self) -> list[(str, bool)]:
-        result = []
-        for validator in self.__validators:
-            validation_prompt = f'Given the PROMPT below and the RESPONSE given by an AI assistant. \
-                Does the RESPONSE comply with the following CONDITION? \
-                Reply only with "True" if the CONDITION is fulfilled; \
-                or "False" otherwise. \
-                PROMPT: ```{self.prompt}``` \
-                \
-                RESPONSE: ```{self.response}``` \
-                \
-                CONDITION: {validator}'
-            validation = self.__query_model(validation_prompt)
-            result.append(validator, validation)
-        return result
+        validation_prompt = f'Given the PROMPT below and the RESPONSE given by an AI assistant. \
+            Does the RESPONSE comply with the following LIST OF CONDITIONS (in JSON format, with keys "trait" and "condition")? \
+            \
+            Reply in JSON format. Your answer must include, for each item in the LIST OF CONDITIONS: \
+            1. A key "trait" with the trait of the corresponding CONDITION item. \
+            2. A key "valid" only with "True" if the corresponding condition of the CONDITION item is fulfilled by the RESPONSE; or "False" otherwise. \
+            \
+            PROMPT: ```{self.prompt}``` \
+            \
+            RESPONSE: ```{self.response}``` \
+            \
+            LIST OF CONDITIONS: {self.__validators}'
+        validation = self.__query_model(validation_prompt, self.VALIDATOR_MODEL)
+        return validation
     
-    def __query_model(self, prompt: str) -> str:
+    def __query_model(self, prompt: str, model: str) -> str:
         completion = openai.ChatCompletion.create(
-            model = self.model,
+            model = model,
             messages = [{"role": "user", "content": prompt}])
         return completion.choices[0].message.content
