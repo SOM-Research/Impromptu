@@ -50,7 +50,6 @@ export class CodeGenerator implements Generator {
 
     // Generation of the output code string
     model2Code(model : Model, aiSystem: string, template: string, prompt: string) : string | undefined {
-        // TODO: should return a complex structure for: negative prompts, hyper parameters, and validation
         const promptCode = generatePromptCode(model, aiSystem, prompt)?.toString();
         if (promptCode) {
             const validators = generatePromptValidators(model, prompt);

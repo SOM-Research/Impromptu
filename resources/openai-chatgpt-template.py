@@ -1,4 +1,5 @@
 import openai
+import json
 
 class OpenAIService():
     
@@ -40,7 +41,7 @@ class OpenAIChatGPTService(OpenAIService):
         self.__response = self.__query_model(self.prompt, self.model)
         self.__validation = self.__validate_response
     
-    def __validate_response(self) -> list[(str, bool)]:
+    def __validate_response(self):
         validation_prompt = f'Given the PROMPT below and the RESPONSE given by an AI assistant. \
             Does the RESPONSE comply with the following LIST OF CONDITIONS (in JSON format, with keys "trait" and "condition")? \
             \
@@ -56,7 +57,7 @@ class OpenAIChatGPTService(OpenAIService):
         validation = self.__query_model(validation_prompt, self.VALIDATOR_MODEL)
         return validation
     
-    def __query_model(self, prompt: str, model: str) -> str:
+    def __query_model(self, prompt: str, model: str):
         completion = openai.ChatCompletion.create(
             model = model,
             response_format = { "type": "json_object" },
@@ -64,4 +65,4 @@ class OpenAIChatGPTService(OpenAIService):
                 "role": "user",
                 "content": prompt
                 }])
-        return completion.choices[0].message.content
+        return json.dumps(completion.choices[0].message.content)

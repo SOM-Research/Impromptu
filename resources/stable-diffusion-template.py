@@ -45,7 +45,7 @@ class StableDiffusionText2ImageService(StableDiffusionService):
         result = requests.request("POST", self.API_URL, headers=self.API_HEADERS, data=payload)
         return result.text
         
-    def __validate_response(self) -> list[(str, bool)]:
+    def __validate_response(self):
         validation_prompt = f'Given the PROMPT below and the RESPONSE given by an AI assistant. \
             Does the RESPONSE comply with the following LIST OF CONDITIONS (in JSON format, with keys "trait" and "condition")? \
             \
@@ -61,7 +61,7 @@ class StableDiffusionText2ImageService(StableDiffusionService):
         validation = self.__query_validation(validation_prompt)
         return validation
     
-    def __query_validation(self, validation_prompt) -> bool:
+    def __query_validation(self, validation_prompt):
         completion = openai.ChatCompletion.create(
             model = self.VALIDATOR_MODEL,
             response_format = { "type": "json_object" },
@@ -69,4 +69,4 @@ class StableDiffusionText2ImageService(StableDiffusionService):
                 "role": "user",
                 "content": validation_prompt
                 }])
-        return completion.choices[0].message.content
+        return json.dumps(completion.choices[0].message.content)
