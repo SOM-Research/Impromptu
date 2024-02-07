@@ -59,5 +59,9 @@ class OpenAIChatGPTService(OpenAIService):
     def __query_model(self, prompt: str, model: str) -> str:
         completion = openai.ChatCompletion.create(
             model = model,
-            messages = [{"role": "user", "content": prompt}])
+            response_format = { "type": "json_object" },
+            messages = [{
+                "role": "user",
+                "content": prompt
+                }])
         return completion.choices[0].message.content

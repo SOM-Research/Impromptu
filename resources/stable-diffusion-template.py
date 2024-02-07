@@ -64,5 +64,9 @@ class StableDiffusionText2ImageService(StableDiffusionService):
     def __query_validation(self, validation_prompt) -> bool:
         completion = openai.ChatCompletion.create(
             model = self.VALIDATOR_MODEL,
-            messages = [{"role": "user", "content": validation_prompt}])
+            response_format = { "type": "json_object" },
+            messages = [{
+                "role": "user",
+                "content": validation_prompt
+                }])
         return completion.choices[0].message.content
