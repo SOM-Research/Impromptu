@@ -6,14 +6,12 @@ class StableDiffusionService(PromptService):
     API_HEADERS = {'Content-Type': 'application/json'}
     
     # Invoke with your own Stable Diffusion's API key
-    def __init__(self, sd_api_key: string):
-        self.sd_api_key = sd_api_key
-
-class StableDiffusionText2ImageService(StableDiffusionService):
+    def __init__(self, sd_api_key: str):
+        self.__sd_api_key = sd_api_key
 
     def query_model(self) -> str:
         payload = json.dumps({
-            "key": self.sd_api_key,
+            "key": self.__sd_api_key,
             "prompt": self.prompt,
             "negative_prompt": None,
         })

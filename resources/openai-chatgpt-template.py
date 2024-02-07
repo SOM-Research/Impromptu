@@ -1,5 +1,5 @@
 class OpenAIService(PromptService):
-    
+
     # Invoke with...
     # 1) Your own OpenAI's API key
     # 2) A valid OpenAI's chat model, e.g.:
@@ -8,17 +8,17 @@ class OpenAIService(PromptService):
     #       gpt-3.5-turbo-16k
     #       gpt-4-0613          # snapshot June 13th, 2023
     #       gpt-4
-    def __init__(self, openai_api_key: string, model: string):
-        openai.api_key = openai_api_key
-        self.model = model
-
-class OpenAIChatGPTService(OpenAIService):
+    def __init__(self, openai_api_key: str, model: str):
+        self.__client = OpenAI(api_key=openai_api_key)
+        self.__model = model
+        super().__init__(openai_api_key)
 
     def query_model(self):
-        completion = openai.ChatCompletion.create(
-            model = self.model,
-            messages = [{
+        completion = self.__client.chat.completions.create(
+            model = self.__model,
+            max_tokens=10,
+            messages =[{
                 "role": "user",
-                "content": self.prompt
+                "content": self.prompt,
                 }])
         return json.dumps(completion.choices[0].message.content)
