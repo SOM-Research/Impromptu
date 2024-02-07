@@ -31,20 +31,24 @@ const node_1 = require("langium/node");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const generate_prompt_1 = require("./cli/generate-prompt");
-let Templates = new Map();
 /**
 * Python code generator service main class
 */
 class CodeGenerator {
     constructor(context) {
+        this.templates = new Map();
+        this.GENERIC_PROMPT_SERVICE = 'GENERIC_PROMPT_SERVICE';
         const services = (0, impromptu_module_js_1.createImpromptuServices)(node_1.NodeFileSystem);
         this.parser = services.Impromptu.parser.LangiumParser;
         var fullFilePath = context.asAbsolutePath(path.join('resources', 'openai-chatgpt-template.py'));
         var template = fs.readFileSync(fullFilePath, "utf8");
-        Templates.set(generate_prompt_1.AISystem.ChatGPT, template);
+        this.templates.set(generate_prompt_1.AISystem.ChatGPT, template);
         fullFilePath = context.asAbsolutePath(path.join('resources', 'stable-diffusion-template.py'));
         template = fs.readFileSync(fullFilePath, "utf8");
-        Templates.set(generate_prompt_1.AISystem.StableDiffusion, template);
+        this.templates.set(generate_prompt_1.AISystem.StableDiffusion, template);
+        fullFilePath = context.asAbsolutePath(path.join('resources', 'prompt-service-template.py'));
+        template = fs.readFileSync(fullFilePath, "utf8");
+        this.templates.set(this.GENERIC_PROMPT_SERVICE, template);
     }
     getPromptsList(model) {
         const astNode = this.parser.parse(model).value;
@@ -52,17 +56,16 @@ class CodeGenerator {
     }
     generateCode(model, aiSystem, prompt) {
         const astNode = this.parser.parse(model).value;
-        var template = Templates.get(aiSystem);
+        const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
         return ((0, ast_js_1.isModel)(astNode) ? this.model2Code(astNode, aiSystem, template, prompt) : undefined);
     }
     // Generation of the output code string
     model2Code(model, aiSystem, template, prompt) {
         var _a;
-        // TODO: should return a complex structure for: negative prompts, hyper parameters, and validation
         const promptCode = (_a = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
         if (promptCode) {
             const validators = (0, generate_prompt_1.generatePromptValidators)(model, prompt);
-            return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators)); // validators.map(t => `'${t}'`).toString());
+            return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators));
         }
         else
             return 'ERROR: Cannot generate prompt code.';
