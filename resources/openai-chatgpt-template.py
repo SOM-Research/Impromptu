@@ -21,4 +21,4 @@ class OpenAIService(PromptService):
                 "role": "user",
                 "content": self.prompt,
                 }])
-        return json.dumps(completion.choices[0].message.content)
+        return completion.choices[0].message.content
