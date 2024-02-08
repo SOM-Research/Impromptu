@@ -1,6 +1,6 @@
 import { AstNode, LangiumParser} from 'langium';
 import { createImpromptuServices } from './language-server/impromptu-module.js';
-import { Model, isModel } from './language-server/generated/ast.js';
+import { Model, isModel, Prompt, isPrompt } from './language-server/generated/ast.js';
 import { NodeFileSystem } from 'langium/node';
 
 // To retrieve the template files
@@ -46,21 +46,27 @@ export class CodeGenerator implements Generator {
         return (isModel(astNode) ? getPromptsList(astNode) : undefined);
     }
 
-    generateCode(model : string, aiSystem: string, prompt: string) : string | undefined {
+    generateCode(model : string, aiSystem: string, promptName: string) : string | undefined {
         const astNode = this.parser.parse(model).value;
         const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
-        return (isModel(astNode) ? this.model2Code(astNode, aiSystem, template, prompt) : undefined);
+        return (isModel(astNode) ? this.model2Code(astNode, aiSystem, template, promptName) : undefined);
     }
 
     // Generation of the output code string
-    model2Code(model : Model, aiSystem: string, template: string, prompt: string) : string | undefined {
-        const promptCode = generatePromptCode(model, aiSystem, prompt)?.toString();
-        if (promptCode) {
-            const validators = generatePromptValidators(model, prompt);
-            return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators));
+    model2Code(model : Model, aiSystem: string, template: string, promptName: string) : string | undefined {
+        const prompt = this.getPrompt(model, promptName);
+        if (prompt) {
+            const promptCode = generatePromptCode(model, aiSystem, prompt)?.toString();
+            if (promptCode) {
+                const validators = generatePromptValidators(model, prompt);
+                return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators));
+            }
         }
-        else
-            return 'ERROR: Cannot generate prompt code.';
+        return 'ERROR: Cannot generate prompt code.';
+    }
+
+    getPrompt(model: Model, promptName: string): Prompt | undefined {
+        return model.assets.filter(a => isPrompt(a)).filter(a => a.name == promptName)[0] as Prompt;
     }
 }
  

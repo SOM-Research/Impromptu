@@ -44,7 +44,7 @@ exports.AISystem = {
     StableDiffusion: "stable-diffusion",
     Midjourney: "midjourney"
 };
-function generatePromptCode(model, aiSystem, prompt = '') {
+function generatePromptCode(model, aiSystem, prompt) {
     var result;
     switch (aiSystem) {
         case exports.AISystem.Midjourney: {
@@ -72,10 +72,9 @@ function generatePromptCode(model, aiSystem, prompt = '') {
 }
 exports.generatePromptCode = generatePromptCode;
 function generatePromptValidators(model, prompt) {
-    const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0];
-    const core = asset.core.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c));
-    const preffix = ((asset.prefix) ? asset.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
-    const suffix = ((asset.suffix) ? asset.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
+    const core = prompt.core.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c));
+    const preffix = ((prompt.prefix) ? prompt.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
+    const suffix = ((prompt.suffix) ? prompt.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
     const snippets = core.concat(preffix).concat(suffix);
     let result = [{ trait: '', condition: '' }];
     snippets.forEach(s => {
@@ -104,7 +103,7 @@ function generatePrompt(model, filePath, destination, aiSystem) {
     }
     // TODO: should the third parameter be replaced by an actual prompt name
     // or indicator to collect all prompts?
-    var result = generatePromptCode(model, aiSystem, '');
+    var result = generatePromptCode(model, aiSystem, undefined);
     if (result != null) {
         fs_1.default.writeFileSync(generatedFilePath, result.toString());
     }
@@ -121,12 +120,12 @@ function getAssetDescription(asset) {
     else
         return undefined;
 }
-function generatePrompt_MJ(model, promptName) {
+function generatePrompt_MJ(model, prompt) {
     // Generate a prompt for each asset
     // return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined) as string[];
     // Generate the single requested prompt
-    if (promptName)
-        return model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName).flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined);
+    if (prompt)
+        return genAsset_MJ(prompt).filter(e => e !== undefined);
     // Generate a prompt for each asset
     else {
         return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined);
@@ -239,10 +238,10 @@ function genMediumTrait_MJ(snippet) {
     const text = snippet.value;
     return text;
 }
-function generatePrompt_SD(model, promptName) {
+function generatePrompt_SD(model, prompt) {
     // Generate the single requested prompt
-    if (promptName)
-        return model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName).flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined);
+    if (prompt)
+        return genAsset_SD(prompt).filter(e => e !== undefined);
     // Generate a prompt for each asset
     else {
         return model.assets.flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined);
@@ -372,11 +371,10 @@ function genMediumTrait_SD(snippet) {
 //     }
 //     return result;
 // }
-function generatePrompt_ChatGPT(model, promptName) {
+function generatePrompt_ChatGPT(model, prompt) {
     // Generate the single requested prompt
-    if (promptName) {
-        const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == promptName)[0];
-        return genAsset_ChatGPT(asset);
+    if (prompt) {
+        return genAsset_ChatGPT(prompt);
         // Generate a prompt for each asset
     }
     else {

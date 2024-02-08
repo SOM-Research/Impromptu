@@ -54,21 +54,26 @@ class CodeGenerator {
         const astNode = this.parser.parse(model).value;
         return ((0, ast_js_1.isModel)(astNode) ? (0, generate_prompt_1.getPromptsList)(astNode) : undefined);
     }
-    generateCode(model, aiSystem, prompt) {
+    generateCode(model, aiSystem, promptName) {
         const astNode = this.parser.parse(model).value;
         const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
-        return ((0, ast_js_1.isModel)(astNode) ? this.model2Code(astNode, aiSystem, template, prompt) : undefined);
+        return ((0, ast_js_1.isModel)(astNode) ? this.model2Code(astNode, aiSystem, template, promptName) : undefined);
     }
     // Generation of the output code string
-    model2Code(model, aiSystem, template, prompt) {
+    model2Code(model, aiSystem, template, promptName) {
         var _a;
-        const promptCode = (_a = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
-        if (promptCode) {
-            const validators = (0, generate_prompt_1.generatePromptValidators)(model, prompt);
-            return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators));
+        const prompt = this.getPrompt(model, promptName);
+        if (prompt) {
+            const promptCode = (_a = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
+            if (promptCode) {
+                const validators = (0, generate_prompt_1.generatePromptValidators)(model, prompt);
+                return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators));
+            }
         }
-        else
-            return 'ERROR: Cannot generate prompt code.';
+        return 'ERROR: Cannot generate prompt code.';
+    }
+    getPrompt(model, promptName) {
+        return model.assets.filter(a => (0, ast_js_1.isPrompt)(a)).filter(a => a.name == promptName)[0];
     }
 }
 exports.CodeGenerator = CodeGenerator;
