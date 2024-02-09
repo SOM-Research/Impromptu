@@ -44,6 +44,8 @@ exports.AISystem = {
     StableDiffusion: "stable-diffusion",
     Midjourney: "midjourney"
 };
+// If prompt is not informed, the generator will consider all the prompts included in the model;
+// will generate the code for a single prompt, otherwise.
 function generatePromptCode(model, aiSystem, prompt) {
     var result;
     switch (aiSystem) {
@@ -101,8 +103,6 @@ function generatePrompt(model, filePath, destination, aiSystem) {
     if (!fs_1.default.existsSync(data.destination)) {
         fs_1.default.mkdirSync(data.destination, { recursive: true });
     }
-    // TODO: should the third parameter be replaced by an actual prompt name
-    // or indicator to collect all prompts?
     var result = generatePromptCode(model, aiSystem, undefined);
     if (result != null) {
         fs_1.default.writeFileSync(generatedFilePath, result.toString());

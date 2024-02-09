@@ -56,13 +56,17 @@ export class CodeGenerator implements Generator {
     }
 
     // Generation of the output code string
-    model2Code(model : Model, aiSystem: string, template: string, promptName: string) : string | undefined {
+    model2Code(model: Model, aiSystem: string, template: string, promptName: string) : string | undefined {
         const prompt = this.getPrompt(model, promptName);
         if (prompt) {
+            const media = this.getPromptOutputMedia(prompt)
             const promptCode = generatePromptCode(model, aiSystem, prompt)?.toString();
             if (promptCode) {
                 const validators = generatePromptValidators(model, prompt);
-                return template.replace('{PROMPT}', promptCode).replace('{VALIDATORS}', JSON.stringify(validators));
+                return template
+                    .replace('{PROMPT}', promptCode)
+                    .replace('{VALIDATORS}', JSON.stringify(validators))
+                    .replace('{MEDIA}', media);
             }
         }
         return 'ERROR: Cannot generate prompt code.';
@@ -70,6 +74,10 @@ export class CodeGenerator implements Generator {
 
     getPrompt(model: Model, promptName: string): Prompt | undefined {
         return model.assets.filter(a => isPrompt(a)).filter(a => a.name == promptName)[0] as Prompt;
+    }
+
+    getPromptOutputMedia(prompt: Prompt): string {
+        return (prompt.output) ? prompt.output : 'text';
     }
 }
  
