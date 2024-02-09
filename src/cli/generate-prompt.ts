@@ -17,6 +17,8 @@ export const AISystem = {
     Midjourney: "midjourney"
 }
 
+// If prompt is not informed, the generator will consider all the prompts included in the model;
+// will generate the code for a single prompt, otherwise.
 export function generatePromptCode(model: Ast.Model, aiSystem: string | undefined, prompt: Ast.Prompt | undefined): string[] | undefined {
     var result;
     switch(aiSystem) {
@@ -76,8 +78,6 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
         fs.mkdirSync(data.destination, { recursive: true });
     }
 
-    // TODO: should the third parameter be replaced by an actual prompt name
-    // or indicator to collect all prompts?
     var result = generatePromptCode(model, aiSystem, undefined);
 
     if (result != null) {

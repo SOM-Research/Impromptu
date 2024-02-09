@@ -30,6 +30,7 @@ export class CodeGenerator implements Generator {
         const services = createImpromptuServices(NodeFileSystem);
         this.parser = services.Impromptu.parser.LangiumParser;
 
+        // preload Python templates for invoking OpenAI and Stable Diffusion into a dictionary
         var fullFilePath = context.asAbsolutePath(path.join('resources', 'openai-chatgpt-template.py'));
         var template = fs.readFileSync(fullFilePath, "utf8");
         this.templates.set(AISystem.ChatGPT, template);
@@ -41,15 +42,17 @@ export class CodeGenerator implements Generator {
         this.templates.set(this.GENERIC_PROMPT_SERVICE, template);
     }
 
+    // For selecting a single prompt to generate the code from,
+    // from the set of prompts included in the *.prm file
     getPromptsList(model: string) {
         const astNode = this.parser.parse(model).value;
         return (isModel(astNode) ? getPromptsList(astNode) : undefined);
     }
 
-    generateCode(model : string, aiSystem: string, promptName: string) : string | undefined {
-        const astNode = this.parser.parse(model).value;
+    generateCode(modelName: string, aiSystem: string, promptName: string) : string | undefined {
+        const model = this.parser.parse(modelName).value;
         const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
-        return (isModel(astNode) ? this.model2Code(astNode, aiSystem, template, promptName) : undefined);
+        return (isModel(model) ? this.model2Code(model, aiSystem, template, promptName) : undefined);
     }
 
     // Generation of the output code string
