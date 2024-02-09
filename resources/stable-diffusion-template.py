@@ -16,4 +16,4 @@ class StableDiffusionService(PromptService):
             "negative_prompt": None,
         })
         result = requests.request("POST", self.API_URL, headers=self.API_HEADERS, data=payload)
-        return result.text
+        return result.text.output
