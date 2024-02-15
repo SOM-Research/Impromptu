@@ -11,7 +11,7 @@ function registerValidationChecks(services) {
     const checks = {
         Model: (validator.checkUniqueAssets, validator.checkByExpressionValidatorsOutputMedia),
         Parameters: validator.checkUniqueParams,
-        Multimodal: validator.checkMultimodalInputNotText,
+        Multimodal: validator.checkMultimodalInputNotText
     };
     registry.register(checks, validator);
 }
@@ -59,9 +59,10 @@ class ImpromptuValidator {
         model.assets.forEach(a => {
             if ((0, ast_1.isByExpressionOutputTesting)(a)) {
                 const validator = model.assets.filter(p => (0, ast_1.isPrompt)(p) && p.name == a.validator.$refText)[0];
-                //accept('error', `Validator name == ${validator.name}; output == '${validator.output}' `, {node: validator, property: 'name'});
                 if (validator && validator.output != 'text')
-                    accept('error', `The output media of validator '${validator.name}' must be of type text.`, { node: validator, property: 'output' });
+                    accept('error', `The output media of validator must be of type text.`, { node: validator, property: 'output' });
+                if (validator && (0, ast_1.isByExpressionOutputTesting)(validator))
+                    accept('error', `A validator cannot have an output validation itself.`, { node: validator, property: 'validator' });
             }
         });
     }

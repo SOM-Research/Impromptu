@@ -9,9 +9,9 @@ export function registerValidationChecks(services: ImpromptuServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.ImpromptuValidator;
     const checks: ValidationChecks<ImpromptuAstType> = {
-        Model: (validator.checkUniqueAssets, validator.checkByExpressionValidatorsOutputMedia),
+        Model: (validator.checkUniqueAssets, validator.checkByExpressionValidators),
         Parameters: validator.checkUniqueParams,
-        Multimodal: validator.checkMultimodalInputNotText,
+        Multimodal: validator.checkMultimodalInputNotText
     };
     registry.register(checks, validator);
 }
@@ -60,13 +60,16 @@ export class ImpromptuValidator {
         });
     }
 
-    checkByExpressionValidatorsOutputMedia(model: Model, accept: ValidationAcceptor): void {
+    checkByExpressionValidators(model: Model, accept: ValidationAcceptor): void {
         model.assets.forEach(a => {
             if (isByExpressionOutputTesting(a)) {
                 const validator = (model.assets.filter(p => isPrompt(p) && p.name == a.validator.$refText)[0] as unknown) as Prompt;
-                //accept('error', `Validator name == ${validator.name}; output == '${validator.output}' `, {node: validator, property: 'name'});
+                // verify that the output media is text
                 if (validator && validator.output != 'text')
-                    accept('error', `The output media of validator '${validator.name}' must be of type text.`,  {node: validator, property: 'output'});
+                    accept('error', `The output media of validator must be of type text.`,  {node: validator, property: 'output'});
+                // verify that a validator does not have a validator
+                if (validator && isByExpressionOutputTesting(validator))
+                    accept('error', `A validator cannot have an output validation itself.`,  {node: validator, property: 'validator'});
             }
         });
     }
