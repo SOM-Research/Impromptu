@@ -46,7 +46,7 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
     return result;
 }
 
-export function generatePromptValidators(model: Ast.Model, prompt: Ast.Prompt) {
+export function generatePromptTraitValidators(model: Ast.Model, prompt: Ast.Prompt) {
     const core = (prompt.core.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[];
     const preffix = ((prompt.prefix) ? (prompt.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
     const suffix = ((prompt.suffix) ? (prompt.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
@@ -56,19 +56,19 @@ export function generatePromptValidators(model: Ast.Model, prompt: Ast.Prompt) {
         // traits with value
         if (Ast.isTextTrait(s)) { // || Ast.isImageTrait(s)) {
             if (s.validator)
-                result.push({ trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)});
+                result.push({ trait: s.value, condition: genBaseSnippet_ChatGPT(s)});// s.validator}); //genTraitValidatorPrompt(model, s.validator?.$refText)});
         }
     })
     return result.filter(t => t.condition); //snippets.flatMap(s => ({trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)})).filter(function(e){return e});
 }
 
-function genValidatorPrompt(model: Ast.Model, prompt: string | undefined): string {
-    if (prompt) {
-        const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0] as Ast.Prompt;
-        return genAsset_ChatGPT(asset).join('.');
-    }
-    return '';
-}
+// function genValidatorPrompt(model: Ast.Model, prompt: string | undefined): string {
+//     if (prompt) {
+//         const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0] as Ast.Prompt;
+//         return genAsset_ChatGPT(asset).join('.');
+//     }
+//     return '';
+// }
 
 export function generatePrompt(model: Ast.Model, filePath: string, destination: string | undefined, aiSystem: string | undefined): string {
     const data = extractDestinationAndName(filePath, destination);
@@ -367,11 +367,11 @@ function genAsset_ChatGPT(asset: Ast.Asset): string[] {
     if (Ast.isTextLiteral(snippet)) {
         return ((snippet as unknown) as Ast.TextLiteral).content;
     } else if (Ast.isLanguageRegisterTrait(snippet)) {
-        return "Use a " + snippet.value + " register";
+        return "The answer is written using a " + snippet.value + " register";
     } else if (Ast.isLiteraryStyleTrait(snippet)) {
-        return "Write your answer as a " + snippet.value;
+        return "The answer is written as a " + snippet.value;
     } else if (Ast.isPointOfViewTrait(snippet)) {
-        return "Write your answer in " + snippet.value;
+        return "The answer is written in " + snippet.value;
     }
     // } else if (Ast.isParameterRef(snippet)) {
     //     return "" ;

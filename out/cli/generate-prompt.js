@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPromptsList = exports.generatePrompt = exports.generatePromptValidators = exports.generatePromptCode = exports.AISystem = void 0;
+exports.getPromptsList = exports.generatePrompt = exports.generatePromptTraitValidators = exports.generatePromptCode = exports.AISystem = void 0;
 const fs_1 = __importDefault(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
 //import AbstractFormatter from 'langium';
@@ -73,30 +73,29 @@ function generatePromptCode(model, aiSystem, prompt) {
     return result;
 }
 exports.generatePromptCode = generatePromptCode;
-function generatePromptValidators(model, prompt) {
+function generatePromptTraitValidators(model, prompt) {
     const core = prompt.core.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c));
     const preffix = ((prompt.prefix) ? prompt.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
     const suffix = ((prompt.suffix) ? prompt.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) : []);
     const snippets = core.concat(preffix).concat(suffix);
     let result = [{ trait: '', condition: '' }];
     snippets.forEach(s => {
-        var _a;
         // traits with value
         if (Ast.isTextTrait(s)) { // || Ast.isImageTrait(s)) {
             if (s.validator)
-                result.push({ trait: s.value, condition: genValidatorPrompt(model, (_a = s.validator) === null || _a === void 0 ? void 0 : _a.$refText) });
+                result.push({ trait: s.value, condition: genBaseSnippet_ChatGPT(s) }); // s.validator}); //genTraitValidatorPrompt(model, s.validator?.$refText)});
         }
     });
     return result.filter(t => t.condition); //snippets.flatMap(s => ({trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)})).filter(function(e){return e});
 }
-exports.generatePromptValidators = generatePromptValidators;
-function genValidatorPrompt(model, prompt) {
-    if (prompt) {
-        const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0];
-        return genAsset_ChatGPT(asset).join('.');
-    }
-    return '';
-}
+exports.generatePromptTraitValidators = generatePromptTraitValidators;
+// function genValidatorPrompt(model: Ast.Model, prompt: string | undefined): string {
+//     if (prompt) {
+//         const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0] as Ast.Prompt;
+//         return genAsset_ChatGPT(asset).join('.');
+//     }
+//     return '';
+// }
 function generatePrompt(model, filePath, destination, aiSystem) {
     const data = (0, cli_util_1.extractDestinationAndName)(filePath, destination);
     const generatedFilePath = `${path_1.default.join(data.destination, data.name)}.txt`;
@@ -407,13 +406,13 @@ function genBaseSnippet_ChatGPT(snippet) {
         return snippet.content;
     }
     else if (Ast.isLanguageRegisterTrait(snippet)) {
-        return "Use a " + snippet.value + " register";
+        return "The answer is written using a " + snippet.value + " register";
     }
     else if (Ast.isLiteraryStyleTrait(snippet)) {
-        return "Write your answer as a " + snippet.value;
+        return "The answer is written as a " + snippet.value;
     }
     else if (Ast.isPointOfViewTrait(snippet)) {
-        return "Write your answer in " + snippet.value;
+        return "The answer is written in " + snippet.value;
     }
     // } else if (Ast.isParameterRef(snippet)) {
     //     return "" ;

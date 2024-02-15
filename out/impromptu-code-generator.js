@@ -70,7 +70,7 @@ class CodeGenerator {
             const media = this.getPromptOutputMedia(prompt);
             const promptCode = (_a = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
             if (promptCode) {
-                const validators = (0, generate_prompt_1.generatePromptValidators)(model, prompt);
+                const validators = (0, generate_prompt_1.generatePromptTraitValidators)(model, prompt);
                 return template
                     .replace('{PROMPT}', promptCode)
                     .replace('{VALIDATORS}', JSON.stringify(validators))

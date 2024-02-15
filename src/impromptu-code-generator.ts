@@ -7,7 +7,7 @@ import { NodeFileSystem } from 'langium/node';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionContext } from 'vscode';
-import { generatePromptCode, AISystem, getPromptsList, generatePromptValidators } from './cli/generate-prompt';
+import { generatePromptCode, AISystem, getPromptsList, generatePromptTraitValidators } from './cli/generate-prompt';
 
 export interface Generator {
     // Load the Abstract Syntax Tree of the .prm active file
@@ -62,7 +62,7 @@ export class CodeGenerator implements Generator {
             const media = this.getPromptOutputMedia(prompt)
             const promptCode = generatePromptCode(model, aiSystem, prompt)?.toString();
             if (promptCode) {
-                const validators = generatePromptValidators(model, prompt);
+                const validators = generatePromptTraitValidators(model, prompt);
                 return template
                     .replace('{PROMPT}', promptCode)
                     .replace('{VALIDATORS}', JSON.stringify(validators))

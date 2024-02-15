@@ -435,7 +435,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
               "$ref": "#/rules@74"
             },
             "arguments": [],
-            "cardinality": "?"
+            "cardinality": "*"
           }
         ]
       },
@@ -585,7 +585,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
               "$ref": "#/rules@74"
             },
             "arguments": [],
-            "cardinality": "?"
+            "cardinality": "*"
           }
         ]
       },
@@ -3470,85 +3470,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
     },
     {
       "$type": "ParserRule",
-      "name": "ByExpressionValidators",
+      "name": "ByExpressionValidator",
       "definition": {
         "$type": "Group",
         "elements": [
           {
             "$type": "Keyword",
-            "value": "validators="
-          },
-          {
-            "$type": "Keyword",
-            "value": "["
-          },
-          {
-            "$type": "Assignment",
-            "feature": "validator",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@6"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "]"
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Group",
-                "elements": [
-                  {
-                    "$type": "Keyword",
-                    "value": ",["
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "validator",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@6"
-                      },
-                      "arguments": []
-                    }
-                  }
-                ],
-                "cardinality": "*"
-              },
-              {
-                "$type": "Keyword",
-                "value": "]"
-              }
-            ],
-            "cardinality": "?"
-          }
-        ]
-      },
-      "definesHiddenTokens": false,
-      "entry": false,
-      "fragment": false,
-      "hiddenTokens": [],
-      "parameters": [],
-      "wildcard": false
-    },
-    {
-      "$type": "ParserRule",
-      "name": "TraitValidator",
-      "fragment": true,
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Keyword",
-            "value": "["
+            "value": "validator=["
           },
           {
             "$type": "Assignment",
@@ -3573,7 +3501,27 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "$type": "Keyword",
             "value": "]"
           }
-        ],
+        ]
+      },
+      "definesHiddenTokens": false,
+      "entry": false,
+      "fragment": false,
+      "hiddenTokens": [],
+      "parameters": [],
+      "wildcard": false
+    },
+    {
+      "$type": "ParserRule",
+      "name": "TraitValidator",
+      "fragment": true,
+      "definition": {
+        "$type": "Assignment",
+        "feature": "validator",
+        "operator": "=",
+        "terminal": {
+          "$type": "Keyword",
+          "value": "[reinforced]"
+        },
         "cardinality": "?"
       },
       "definesHiddenTokens": false,

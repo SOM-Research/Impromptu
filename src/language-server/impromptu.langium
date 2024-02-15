@@ -34,7 +34,7 @@ Prompt:
     (hyper=HyperParameters)?
     AssetLanguage
     AssetRelationships
-    (ByExpressionValidators)?
+    (ByExpressionValidator)*
     ;
 
 HyperParameters:
@@ -48,7 +48,7 @@ HyperParam:
 Chain:
     'chain' name=QualifiedName
     AssetRelationships
-    (ByExpressionValidators)?
+    (ByExpressionValidator)*
     ;
 
 Composer:
@@ -246,10 +246,10 @@ Equivalency:
 //OutputValidator:
 //    ByExpression | ByReinforcedTrait;
 
-ByExpressionValidators:
-    //'validator=['validator=STRING']';
-    'validators=' '[' (validator=STRING) ']'
-        ((',['validator=STRING)*']')?;
+ByExpressionValidator:
+    'validator=['validator=[ExecutableAsset:ID]']';
+    //'validators=' '[' (validator=STRING) ']'
+    //    ((',['validator=STRING)*']')?;
 
 //ByReinforcedTrait:
     //'traitValidator'
@@ -257,7 +257,7 @@ ByExpressionValidators:
     //;
 
 fragment TraitValidator:
-    ('['validator=[ExecutableAsset:ID]']')?;
+    (validator='[reinforced]')?;
 
 //TraitValidator:
 //    '['validator=[ExecutableAsset:ID]']';
