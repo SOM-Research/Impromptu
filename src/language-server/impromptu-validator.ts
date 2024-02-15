@@ -71,8 +71,7 @@ export class ImpromptuValidator {
         model.assets.forEach(a => {
             if (a.priorVersion != undefined) {
                 let node = model.assets.filter(p => p.name == a.priorVersion?.$refText)[0];
-                let b = false;
-                while (node != undefined && !b) {
+                while (node != undefined) {
                     if (node.name == a.name) {
                         accept('error', `Cannot be cycles in prior version relationship.`,  {node: a, property: 'priorVersion'});
                         break;
@@ -80,7 +79,7 @@ export class ImpromptuValidator {
                     if (node.priorVersion != undefined)
                         node = model.assets.filter(a => a.name == node.priorVersion?.$refText)[0];
                     else
-                        b = true;
+                        break;
                 }
             }
         });
@@ -90,8 +89,7 @@ export class ImpromptuValidator {
         model.assets.forEach(a => {
             if (a.refines != undefined) {
                 let node = model.assets.filter(p => p.name == a.refines?.$refText)[0];
-                let b = false;
-                while (node != undefined && !b) {
+                while (node != undefined) {
                     if (node.name == a.name) {
                         accept('error', `Cannot be cycles in refinement relationship.`,  {node: a, property: 'refines'});
                         break;
@@ -99,7 +97,7 @@ export class ImpromptuValidator {
                     if (node.refines != undefined)
                         node = model.assets.filter(a => a.name == node.refines?.$refText)[0];
                     else
-                        b = true;
+                        break;
                 }
             }
         });

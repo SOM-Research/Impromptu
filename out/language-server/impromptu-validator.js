@@ -65,8 +65,7 @@ class ImpromptuValidator {
         model.assets.forEach(a => {
             if (a.priorVersion != undefined) {
                 let node = model.assets.filter(p => { var _a; return p.name == ((_a = a.priorVersion) === null || _a === void 0 ? void 0 : _a.$refText); })[0];
-                let b = false;
-                while (node != undefined && !b) {
+                while (node != undefined) {
                     if (node.name == a.name) {
                         accept('error', `Cannot be cycles in prior version relationship.`, { node: a, property: 'priorVersion' });
                         break;
@@ -74,7 +73,7 @@ class ImpromptuValidator {
                     if (node.priorVersion != undefined)
                         node = model.assets.filter(a => { var _a; return a.name == ((_a = node.priorVersion) === null || _a === void 0 ? void 0 : _a.$refText); })[0];
                     else
-                        b = true;
+                        break;
                 }
             }
         });
@@ -83,8 +82,7 @@ class ImpromptuValidator {
         model.assets.forEach(a => {
             if (a.refines != undefined) {
                 let node = model.assets.filter(p => { var _a; return p.name == ((_a = a.refines) === null || _a === void 0 ? void 0 : _a.$refText); })[0];
-                let b = false;
-                while (node != undefined && !b) {
+                while (node != undefined) {
                     if (node.name == a.name) {
                         accept('error', `Cannot be cycles in refinement relationship.`, { node: a, property: 'refines' });
                         break;
@@ -92,7 +90,7 @@ class ImpromptuValidator {
                     if (node.refines != undefined)
                         node = model.assets.filter(a => { var _a; return a.name == ((_a = node.refines) === null || _a === void 0 ? void 0 : _a.$refText); })[0];
                     else
-                        b = true;
+                        break;
                 }
             }
         });
