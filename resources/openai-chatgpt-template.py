@@ -22,11 +22,12 @@ class OpenAIService(PromptService):
     def __query_text(self):
         completion = self.__client.chat.completions.create(
             model = self.__model,
-            max_tokens=10,
-            messages =[{
+            n = 1,
+            # max_tokens = 10,
+            messages = [{
                 "role": "user",
                 "content": self.prompt,
-                }])
+            }])
         return completion.choices[0].message.content
     
     def __query_image(self):
@@ -35,6 +36,6 @@ class OpenAIService(PromptService):
             prompt = self.prompt,
             #size="1024x1024",
             #quality="standard",
-            #n=1,
+            n = 1,
         )
         return response.data[0].url

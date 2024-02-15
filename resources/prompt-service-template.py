@@ -45,12 +45,14 @@ class PromptService:
 
     def __validate_response(self):
         if (self.media == self.MediaKind.text.name):
-            validation_prompt = f'Given the PROMPT below and the RESPONSE given by an AI assistant. \
-                Does the RESPONSE comply with the following LIST OF CONDITIONS (in JSON format, with keys "trait" and "condition")? \
+            validation_prompt = f'Given the PROMPT below and the RESPONSE given by an AI assistant as a response to the PROMPT. \
+                Does the RESPONSE comply with the following LIST OF CONDITIONS (which are provided in JSON format, with keys "trait" and "condition")? \
                 \
-                Reply in JSON format. Your answer must include, for each item in the LIST OF CONDITIONS: \
-                1. A key "trait" with the trait of the corresponding CONDITION item. \
-                2. A key "valid" only with "True" if the corresponding condition of the CONDITION item is fulfilled by the RESPONSE; or "False" otherwise. \
+                Reply with a text in valid JSON format, that is: the content is embedded within an open and a closing bracket. \
+                Do not include in your answer the term "json". Do not include in your answer any carry return, nor any special character other than brackets and curly brackets. \
+                Your answer must include, for each item in the LIST OF CONDITIONS: \
+                1. A key "trait" with the trait of the corresponding LIST OF CONDITIONS item. \
+                2. A key "valid" only with "True" if the corresponding condition of the LIST OF CONDITIONS item is fulfilled by the RESPONSE; or "False" otherwise. \
                 \
                 PROMPT: ```{self.prompt}``` \
                 \
@@ -63,12 +65,14 @@ class PromptService:
             }]
         # yet, we only consider text and image media outputs
         else:
-            validation_prompt = f'Given the PROMPT below and the image given by an AI assistant. \
-                Does the image comply with the following LIST OF CONDITIONS (in JSON format, with keys "trait" and "condition")? \
+            validation_prompt = f'Given the PROMPT below and the image provided by an AI assistant as a response to the PROMPT. \
+                Does the image comply with the following LIST OF CONDITIONS (which are provided in JSON format, with keys "trait" and "condition")? \
                 \
-                Reply in JSON format. Your answer must include, for each item in the LIST OF CONDITIONS: \
-                1. A key "trait" with the trait of the corresponding CONDITION item. \
-                2. A key "valid" only with "True" if the corresponding condition of the CONDITION item is fulfilled by the image; or "False" otherwise. \
+                Reply with a text in valid JSON format, that is: the content is embedded within an open and a closing bracket. \
+                Do not include in your answer the term "json". Do not include in your answer any carry return, nor any special character other than brackets and curly brackets. \
+                Your answer must include, for each item in the LIST OF CONDITIONS: \
+                1. A key "trait" with the trait of the corresponding LIST OF CONDITIONS item. \
+                2. A key "valid" only with "True" if the corresponding condition of the LIST OF CONDITIONS item is fulfilled by the image; or "False" otherwise. \
                 \
                 PROMPT: ```{self.prompt}``` \
                 \
@@ -86,6 +90,11 @@ class PromptService:
     def __query_validation(self, message_payload):
         completion = self.__validator.chat.completions.create(
             model = self.VALIDATOR_MODEL,
+            # if no max_tokens provided, default seems to be 16
+            # 16 is insufficient for generating a valid json response
+            # TODO: decide!
+            max_tokens = 30,
+            n = 1,
             messages = message_payload)
         return json.dumps(completion.choices[0].message.content)
 
