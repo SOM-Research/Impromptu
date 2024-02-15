@@ -231,7 +231,7 @@ fragment AssetLanguage:
 
 fragment AssetRelationships:
     ('priorVersion=' priorVersion=[Asset:ID])?
-    ('refines=' priorVersion=[Asset:ID])?
+    ('refines=' refines=[Asset:ID])?
     ;
 
 Equivalency:

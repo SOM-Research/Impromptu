@@ -3325,7 +3325,7 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@10"
+                    "$ref": "#/rules@11"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -3349,12 +3349,12 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
               },
               {
                 "$type": "Assignment",
-                "feature": "priorVersion",
+                "feature": "refines",
                 "operator": "=",
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@10"
+                    "$ref": "#/rules@11"
                   },
                   "terminal": {
                     "$type": "RuleCall",

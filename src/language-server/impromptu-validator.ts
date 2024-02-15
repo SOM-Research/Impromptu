@@ -9,7 +9,7 @@ export function registerValidationChecks(services: ImpromptuServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.ImpromptuValidator;
     const checks: ValidationChecks<ImpromptuAstType> = {
-        Model: (validator.checkUniqueAssets, validator.checkByExpressionValidators),
+        Model: validator.checkModelWellFormedRules,
         Parameters: validator.checkUniqueParams,
         Multimodal: validator.checkMultimodalInputNotText
     };
@@ -36,6 +36,13 @@ export class ImpromptuValidator {
         } 
     }
 
+    checkModelWellFormedRules(model: Model, accept: ValidationAcceptor): void {
+        this.checkUniqueAssets(model, accept);
+        this.checkByExpressionValidators(model, accept);
+        this.checkNoCyclesInVersions(model, accept);
+        this.checkNoCyclesInRefines(model, accept);
+    }
+
     checkUniqueAssets(model: Model, accept: ValidationAcceptor): void {
         // create a set of visited assets
         // and report an error when we see one we've already seen
@@ -60,6 +67,44 @@ export class ImpromptuValidator {
         });
     }
 
+    checkNoCyclesInVersions(model: Model, accept: ValidationAcceptor): void {
+        model.assets.forEach(a => {
+            if (a.priorVersion != undefined) {
+                let node = model.assets.filter(p => p.name == a.priorVersion?.$refText)[0];
+                let b = false;
+                while (node != undefined && !b) {
+                    if (node.name == a.name) {
+                        accept('error', `Cannot be cycles in prior version relationship.`,  {node: a, property: 'priorVersion'});
+                        break;
+                    }
+                    if (node.priorVersion != undefined)
+                        node = model.assets.filter(a => a.name == node.priorVersion?.$refText)[0];
+                    else
+                        b = true;
+                }
+            }
+        });
+    }
+
+    checkNoCyclesInRefines(model: Model, accept: ValidationAcceptor): void {
+        model.assets.forEach(a => {
+            if (a.refines != undefined) {
+                let node = model.assets.filter(p => p.name == a.refines?.$refText)[0];
+                let b = false;
+                while (node != undefined && !b) {
+                    if (node.name == a.name) {
+                        accept('error', `Cannot be cycles in refinement relationship.`,  {node: a, property: 'refines'});
+                        break;
+                    }
+                    if (node.refines != undefined)
+                        node = model.assets.filter(a => a.name == node.refines?.$refText)[0];
+                    else
+                        b = true;
+                }
+            }
+        });
+    }
+
     checkByExpressionValidators(model: Model, accept: ValidationAcceptor): void {
         model.assets.forEach(a => {
             if (isByExpressionOutputTesting(a)) {
@@ -73,5 +118,17 @@ export class ImpromptuValidator {
             }
         });
     }
+
+//     isDescendant(model: Model, asset: Asset, accept: ValidationAcceptor) {
+//         var node = model.assets.filter(a => a.name == asset.priorVersion.$refText)[0];
+//         accept('error', `Asset name == '${asset.name}'; prior version name == '${node.name}'.`,  {node: asset, property: 'priorVersion'});
+//         while (node != null) {
+//             if (node.name == asset.name) {
+//                 return true;
+//             }
+//             node = model.assets.filter(a => a.name == node.priorVersion.$refText)[0];
+//         }
+//         return false;
+//    }
 
 }

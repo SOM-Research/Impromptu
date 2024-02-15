@@ -330,15 +330,20 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
             case 'AssetReuse:asset':
-            case 'ByExpressionOutputTesting:priorVersion':
-            case 'ByExpressionOutputTesting:priorVersion':
-            case 'Chain:priorVersion':
-            case 'Composer:priorVersion':
-            case 'Equivalency:assets':
-            case 'Prompt:priorVersion': {
+            case 'Equivalency:assets': {
                 return exports.Asset;
             }
-            case 'ByExpressionOutputTesting:validator': {
+            case 'ByExpressionOutputTesting:validator':
+            case 'ByExpressionOutputTesting:priorVersion':
+            case 'ByExpressionOutputTesting:refines':
+            case 'ByExpressionOutputTesting:priorVersion':
+            case 'ByExpressionOutputTesting:refines':
+            case 'Chain:priorVersion':
+            case 'Chain:refines':
+            case 'Composer:priorVersion':
+            case 'Composer:refines':
+            case 'Prompt:priorVersion':
+            case 'Prompt:refines': {
                 return exports.ExecutableAsset;
             }
             case 'ByExpressionOutputTesting:language':

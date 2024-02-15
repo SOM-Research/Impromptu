@@ -3326,7 +3326,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@10"
+                    "$ref": "#/rules@11"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -3350,12 +3350,12 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
               },
               {
                 "$type": "Assignment",
-                "feature": "priorVersion",
+                "feature": "refines",
                 "operator": "=",
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@10"
+                    "$ref": "#/rules@11"
                   },
                   "terminal": {
                     "$type": "RuleCall",
