@@ -3469,7 +3469,7 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
     },
     {
       "$type": "ParserRule",
-      "name": "ByExpressionValidator",
+      "name": "ByExpressionOutputTesting",
       "definition": {
         "$type": "Group",
         "elements": [
@@ -3511,7 +3511,7 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
     },
     {
       "$type": "ParserRule",
-      "name": "TraitValidator",
+      "name": "ByReinforcedTraitOutputTesting",
       "fragment": true,
       "definition": {
         "$type": "Assignment",

@@ -3470,7 +3470,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
     },
     {
       "$type": "ParserRule",
-      "name": "ByExpressionValidator",
+      "name": "ByExpressionOutputTesting",
       "definition": {
         "$type": "Group",
         "elements": [
@@ -3512,7 +3512,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
     },
     {
       "$type": "ParserRule",
-      "name": "TraitValidator",
+      "name": "ByReinforcedTraitOutputTesting",
       "fragment": true,
       "definition": {
         "$type": "Assignment",

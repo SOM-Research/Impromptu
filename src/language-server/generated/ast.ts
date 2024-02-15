@@ -201,7 +201,7 @@ export function isCameraSettingsTrait(item: unknown): item is CameraSettingsTrai
 
 export interface Chain extends AstNode {
     readonly $container: Model;
-    readonly $type: 'ByExpressionValidator' | 'Chain';
+    readonly $type: 'ByExpressionOutputTesting' | 'Chain';
     name: QualifiedName
     priorVersion: Reference<Asset>
 }
@@ -526,7 +526,7 @@ export function isPrefix(item: unknown): item is Prefix {
 
 export interface Prompt extends AstNode {
     readonly $container: Model;
-    readonly $type: 'ByExpressionValidator' | 'Prompt';
+    readonly $type: 'ByExpressionOutputTesting' | 'Prompt';
     core: Core
     description?: string
     hyper?: HyperParameters
@@ -638,16 +638,16 @@ export function isWeight(item: unknown): item is Weight {
     return reflection.isInstance(item, Weight);
 }
 
-export interface ByExpressionValidator extends Chain, Prompt {
+export interface ByExpressionOutputTesting extends Chain, Prompt {
     readonly $container: Model;
-    readonly $type: 'ByExpressionValidator';
+    readonly $type: 'ByExpressionOutputTesting';
     validator: Reference<ExecutableAsset>
 }
 
-export const ByExpressionValidator = 'ByExpressionValidator';
+export const ByExpressionOutputTesting = 'ByExpressionOutputTesting';
 
-export function isByExpressionValidator(item: unknown): item is ByExpressionValidator {
-    return reflection.isInstance(item, ByExpressionValidator);
+export function isByExpressionOutputTesting(item: unknown): item is ByExpressionOutputTesting {
+    return reflection.isInstance(item, ByExpressionOutputTesting);
 }
 
 export interface ImpromptuAstType {
@@ -657,7 +657,7 @@ export interface ImpromptuAstType {
     AudienceTrait: AudienceTrait
     BaseSnippet: BaseSnippet
     ByAuthorTrait: ByAuthorTrait
-    ByExpressionValidator: ByExpressionValidator
+    ByExpressionOutputTesting: ByExpressionOutputTesting
     CameraAngleTrait: CameraAngleTrait
     CameraSettingsTrait: CameraSettingsTrait
     Chain: Chain
@@ -706,7 +706,7 @@ export interface ImpromptuAstType {
 export class ImpromptuAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionValidator', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
+        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -759,7 +759,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             case ParameterRef: {
                 return this.isSubtype(InputRef, supertype);
             }
-            case ByExpressionValidator: {
+            case ByExpressionOutputTesting: {
                 return this.isSubtype(Prompt, supertype) || this.isSubtype(Chain, supertype);
             }
             case ImageTrait:
@@ -777,18 +777,18 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
             case 'AssetReuse:asset':
-            case 'ByExpressionValidator:priorVersion':
-            case 'ByExpressionValidator:priorVersion':
+            case 'ByExpressionOutputTesting:priorVersion':
+            case 'ByExpressionOutputTesting:priorVersion':
             case 'Chain:priorVersion':
             case 'Composer:priorVersion':
             case 'Equivalency:assets':
             case 'Prompt:priorVersion': {
                 return Asset;
             }
-            case 'ByExpressionValidator:validator': {
+            case 'ByExpressionOutputTesting:validator': {
                 return ExecutableAsset;
             }
-            case 'ByExpressionValidator:language':
+            case 'ByExpressionOutputTesting:language':
             case 'Composer:language':
             case 'Prompt:language': {
                 return Language;

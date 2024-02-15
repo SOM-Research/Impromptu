@@ -34,7 +34,7 @@ Prompt:
     (hyper=HyperParameters)?
     AssetLanguage
     AssetRelationships
-    (ByExpressionValidator)*
+    (ByExpressionOutputTesting)*
     ;
 
 HyperParameters:
@@ -48,7 +48,7 @@ HyperParam:
 Chain:
     'chain' name=QualifiedName
     AssetRelationships
-    (ByExpressionValidator)*
+    (ByExpressionOutputTesting)*
     ;
 
 Composer:
@@ -68,42 +68,42 @@ TextTrait:
 
 LiteraryStyleTrait:
     'literary-style' '(' value=LiteraryStyle ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 LanguageRegisterTrait:
     'language-register' '(' value=LanguageRegister')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 PointOfViewTrait: 
     'point-of-view' '(' value=PointOfView')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 ImageTrait:
     MediumTrait | CameraAngleTrait | CameraSettingsTrait | LightingTrait | ProximityTrait | EffectsTrait;
 
 MediumTrait: 
     'medium'       '(' value=Medium ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 CameraAngleTrait:
     'camera-angle' '(' value=CameraAngle ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 CameraSettingsTrait:
     'camera-settings' '(' value=CameraSettings ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 LightingTrait:
     'lighting'     '(' value=Lighting ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 ProximityTrait:
     'promixity'    '(' value=Proximity ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 EffectsTrait:
     'effects'      '(' value=Effects ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 MediumIndependentTrait:
     RelativeTrait | AudienceTrait | IncludesTrait | SimilarToTrait | ByAuthorTrait | TargetSizeTrait ;
@@ -113,35 +113,35 @@ RelativeTrait:
 
 NegativeTrait:
     'no' '(' content=Snippet ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 AlternativeTrait:
     'alternative' '(' contents+=Snippet (',' content+=Snippet)+ ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 CombinationTrait:
     'between' '(' contents+=Snippet (',' contents+=Snippet)+ ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 AudienceTrait:
     'audience' '(' content=Snippet ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 IncludesTrait:
     'includes' '(' (times=INT ':')? contents+=Snippet (',' contents+=Snippet)* ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 SimilarToTrait:
     'like' '(' contents+=Snippet (',' contents+=Snippet)* ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 ByAuthorTrait:
     'author' '(' value=Snippet ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 TargetSizeTrait:
     'size' '(' dimension=Dimension ',' type=SizeConstraint ',' amount=INT ',' unit=Unit ')'
-    TraitValidator;
+    ByReinforcedTraitOutputTesting;
 
 Contents:
     snippets+=Snippet (',' snippets+=Snippet)*;
@@ -246,7 +246,7 @@ Equivalency:
 //OutputValidator:
 //    ByExpression | ByReinforcedTrait;
 
-ByExpressionValidator:
+ByExpressionOutputTesting:
     'validator=['validator=[ExecutableAsset:ID]']';
     //'validators=' '[' (validator=STRING) ']'
     //    ((',['validator=STRING)*']')?;
@@ -256,7 +256,7 @@ ByExpressionValidator:
     //validator=[ExecutableAsset:ID]
     //;
 
-fragment TraitValidator:
+fragment ByReinforcedTraitOutputTesting:
     (validator='[reinforced]')?;
 
 //TraitValidator:
