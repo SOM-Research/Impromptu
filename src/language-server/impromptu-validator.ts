@@ -1,5 +1,5 @@
 import { ValidationAcceptor, ValidationChecks } from 'langium';
-import { ImpromptuAstType, Multimodal, Model, Parameters } from './generated/ast';
+import { ImpromptuAstType, Multimodal, Model, Parameters, Prompt, isPrompt, isByExpressionOutputTesting } from './generated/ast';
 import type { ImpromptuServices } from './impromptu-module';
 
 /**
@@ -9,9 +9,9 @@ export function registerValidationChecks(services: ImpromptuServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.ImpromptuValidator;
     const checks: ValidationChecks<ImpromptuAstType> = {
-        Model: validator.checkUniqueAssets,
+        Model: (validator.checkUniqueAssets, validator.checkByExpressionValidatorsOutputMedia),
         Parameters: validator.checkUniqueParams,
-        Multimodal: validator.checkMultimodalInputNotText
+        Multimodal: validator.checkMultimodalInputNotText,
     };
     registry.register(checks, validator);
 }
@@ -57,6 +57,17 @@ export class ImpromptuValidator {
                 accept('error', `Input has non-unique name '${p.name}'.`,  {node: p, property: 'name'});
             }
             reported.add(p.name);
+        });
+    }
+
+    checkByExpressionValidatorsOutputMedia(model: Model, accept: ValidationAcceptor): void {
+        model.assets.forEach(a => {
+            if (isByExpressionOutputTesting(a)) {
+                const validator = (model.assets.filter(p => isPrompt(p) && p.name == a.validator.$refText)[0] as unknown) as Prompt;
+                //accept('error', `Validator name == ${validator.name}; output == '${validator.output}' `, {node: validator, property: 'name'});
+                if (validator && validator.output != 'text')
+                    accept('error', `The output media of validator '${validator.name}' must be of type text.`,  {node: validator, property: 'output'});
+            }
         });
     }
 

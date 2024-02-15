@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImpromptuValidator = exports.registerValidationChecks = void 0;
+const ast_1 = require("./generated/ast");
 /**
  * Register custom validation checks.
  */
@@ -8,9 +9,9 @@ function registerValidationChecks(services) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.ImpromptuValidator;
     const checks = {
-        Model: validator.checkUniqueAssets,
+        Model: (validator.checkUniqueAssets, validator.checkByExpressionValidatorsOutputMedia),
         Parameters: validator.checkUniqueParams,
-        Multimodal: validator.checkMultimodalInputNotText
+        Multimodal: validator.checkMultimodalInputNotText,
     };
     registry.register(checks, validator);
 }
@@ -52,6 +53,16 @@ class ImpromptuValidator {
                 accept('error', `Input has non-unique name '${p.name}'.`, { node: p, property: 'name' });
             }
             reported.add(p.name);
+        });
+    }
+    checkByExpressionValidatorsOutputMedia(model, accept) {
+        model.assets.forEach(a => {
+            if ((0, ast_1.isByExpressionOutputTesting)(a)) {
+                const validator = model.assets.filter(p => (0, ast_1.isPrompt)(p) && p.name == a.validator.$refText)[0];
+                //accept('error', `Validator name == ${validator.name}; output == '${validator.output}' `, {node: validator, property: 'name'});
+                if (validator && validator.output != 'text')
+                    accept('error', `The output media of validator '${validator.name}' must be of type text.`, { node: validator, property: 'output' });
+            }
         });
     }
 }
