@@ -3,12 +3,26 @@ import * as path from 'path';
 import {
     LanguageClient, LanguageClientOptions, ServerOptions, TransportKind
 } from 'vscode-languageclient/node';
+import { CodeGenerator } from './impromptu-code-generator';
+import { AISystem } from './cli/generate-prompt';
+import fs from 'fs';
 
 let client: LanguageClient;
+
+let previewPanel : vscode.WebviewPanel;
 
 // This function is called when the extension is activated.
 export function activate(context: vscode.ExtensionContext): void {
     client = startLanguageClient(context);
+    context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', async () => {
+        await generateCodeService(context, AISystem.ChatGPT);
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateStableDiffusion', async () => {
+        await generateCodeService(context, AISystem.StableDiffusion);
+    }));
+    context.subscriptions.push(vscode.commands.registerCommand('impromptu.saveCodeDocument', async () => {
+        await saveCodeDocument(context);
+     }));
 }
 
 // This function is called when the extension is deactivated.
@@ -56,4 +70,83 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
     // Start the client. This will also launch the server
     client.start();
     return client;
+}
+
+async function generateCodeService(context: vscode.ExtensionContext, aiSystem: string) {
+
+    const generator =  new CodeGenerator(context);
+    const model = vscode.window.activeTextEditor?.document.getText();
+    if (model) {
+        var prompt = await requestPromptAndValidation(generator, model);
+        if (prompt) {
+            const returner = generator.generateCode(model, aiSystem, prompt);
+            let title : string = 'Code Test Scenario';
+            previewPanel = vscode.window.createWebviewPanel(
+                // Webview id
+                'liveCodePreviewer',
+                // Webview title
+                title,
+                // This will open the second column for preview inside editor
+                2,
+                {
+                    // Enable scripts in the webview
+                    enableScripts: false,
+                    retainContextWhenHidden: false,
+                    // And restrict the webview to only loading content from our extension's 'assets' directory.
+                    localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
+                }
+            )
+            setPreviewActiveContext('liveCodePreviewer', true);
+            updateCodePreview(returner);
+            previewPanel.onDidDispose(() => {
+                setPreviewActiveContext('liveCodePreviewer', false);
+            })
+        }
+    }
+}
+
+async function requestPromptAndValidation(generator: CodeGenerator, model: string) {
+    const prompts = generator.getPromptsList(model);
+    if (prompts) {
+        var quickPickItems = new Array();
+        prompts.forEach(prompt => {
+            if (prompt) quickPickItems.push({label: prompt.name, description: prompt.description})
+        });
+        if (quickPickItems && quickPickItems.length > 1) {
+            const pick = await vscode.window.showQuickPick(
+                quickPickItems,
+                {
+                    placeHolder: 'Select which prompt do you want to query the model with.',
+                    canPickMany: false
+                });
+            return pick?.label;
+        }
+        if (quickPickItems && quickPickItems.length == 1)
+            return quickPickItems[0].label;
+    }
+    return undefined;
+}
+
+function updateCodePreview(code : string | void) {
+    if (previewPanel && code) {
+        previewPanel.webview.html = code;
+    }
+}
+
+function setPreviewActiveContext(panelName: string, value: boolean) {
+    vscode.commands.executeCommand('setContext', panelName, value);
+}
+
+function saveCodeDocument(context: vscode.ExtensionContext) {
+    const code = previewPanel.webview.html;
+    const searchRegExp = /\s/g;
+    const replaceWith = '-';
+    const title = previewPanel.title.toLowerCase().replace(searchRegExp, replaceWith);
+    if (code) {
+        vscode.workspace.workspaceFolders?.forEach(workspace => {
+            const filePath = workspace.uri.fsPath + "/" + title + ".py";
+            fs.writeFileSync(filePath, code, 'utf8');
+		    vscode.window.showInformationMessage('Congrats! Your file, ' + title + '.py, has been saved in your workspace root folder.');
+        });
+    }
 }

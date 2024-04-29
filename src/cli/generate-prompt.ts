@@ -11,6 +11,65 @@ import * as Ast from '../language-server/generated/ast';
          */
 import { extractDestinationAndName } from './cli-util';
 
+export const AISystem = {
+	ChatGPT: "chatgpt",
+	StableDiffusion: "stable-diffusion",
+    Midjourney: "midjourney"
+}
+
+// If prompt is not informed, the generator will consider all the prompts included in the model;
+// will generate the code for a single prompt, otherwise.
+export function generatePromptCode(model: Ast.Model, aiSystem: string | undefined, prompt: Ast.Prompt | undefined): string[] | undefined {
+    var result;
+    switch(aiSystem) {
+        case AISystem.Midjourney: {
+            result = generatePrompt_MJ(model, prompt).filter(e => e !== '\n').filter(function(e){return e});
+            break;
+        }
+        case AISystem.StableDiffusion: {   
+            result = generatePrompt_SD(model, prompt).filter(e => e !== '\n').filter(function(e){return e});
+            break;
+        }
+        case AISystem.ChatGPT: {
+            result = generatePrompt_ChatGPT(model, prompt);
+            break;
+        }
+        case undefined: {
+            console.log(chalk.yellow(`No target provided. Using 'chatgpt' by default`));
+            result = generatePrompt_ChatGPT(model, prompt); 
+            break;
+        }
+        default: {
+            console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+        }
+    }
+    return result;
+}
+
+export function generatePromptTraitValidators(model: Ast.Model, prompt: Ast.Prompt) {
+    const core = (prompt.core.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[];
+    const preffix = ((prompt.prefix) ? (prompt.prefix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
+    const suffix = ((prompt.suffix) ? (prompt.suffix.snippets.flatMap(s => s.content).filter(c => Ast.isTrait(c)) as unknown) as Ast.Trait[] : []);
+    const snippets = core.concat(preffix).concat(suffix);
+    let result = [{trait: '', condition: ''}];
+    snippets.forEach(s => {
+        // traits with value
+        if (Ast.isTextTrait(s)) { // || Ast.isImageTrait(s)) {
+            if (s.validator)
+                result.push({ trait: s.value, condition: genBaseSnippet_ChatGPT(s)});// s.validator}); //genTraitValidatorPrompt(model, s.validator?.$refText)});
+        }
+    })
+    return result.filter(t => t.condition); //snippets.flatMap(s => ({trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)})).filter(function(e){return e});
+}
+
+// function genValidatorPrompt(model: Ast.Model, prompt: string | undefined): string {
+//     if (prompt) {
+//         const asset = model.assets.filter(a => Ast.isPrompt(a)).filter(a => a.name == prompt)[0] as Ast.Prompt;
+//         return genAsset_ChatGPT(asset).join('.');
+//     }
+//     return '';
+// }
+
 export function generatePrompt(model: Ast.Model, filePath: string, destination: string | undefined, aiSystem: string | undefined): string {
     const data = extractDestinationAndName(filePath, destination);
     const generatedFilePath = `${path.join(data.destination, data.name)}.txt`;
@@ -19,25 +78,7 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
         fs.mkdirSync(data.destination, { recursive: true });
     }
 
-    var result;
-    switch(aiSystem) {
-        case 'midjourney': {
-            result = generatePrompt_MJ(model);
-            break;
-        }
-        case 'stable-diffusion': {   
-            result = generatePrompt_SD(model);
-            break;
-        }
-        case undefined: {
-            console.log(chalk.yellow(`No target provided. Using 'midjourney' by default`));
-            result = generatePrompt_MJ(model); 
-            break;
-        }
-        default: {
-            console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
-        }
-    } 
+    var result = generatePromptCode(model, aiSystem, undefined);
 
     if (result != null) {
         fs.writeFileSync(generatedFilePath, result.toString());
@@ -46,9 +87,25 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
     return generatedFilePath;
 }
 
-function generatePrompt_MJ(model: Ast.Model): string[] {
+export function getPromptsList(model: Ast.Model) {
+    return model.assets.map(asset => getAssetDescription(asset)).filter(e => e !== undefined);
+}
+
+function getAssetDescription(asset: Ast.Asset) {
+    if (Ast.isPrompt(asset)) return { name: asset.name, description: asset.description};
+    else return undefined;
+}
+
+function generatePrompt_MJ(model: Ast.Model, prompt: Ast.Prompt | undefined): string[] {
     // Generate a prompt for each asset
-   return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined) as string[];
+    // return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined) as string[];
+    // Generate the single requested prompt
+    if (prompt)
+       return genAsset_MJ(prompt).filter(e => e !== undefined) as string[];
+    // Generate a prompt for each asset
+    else {
+       return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined) as string[];
+    }
 }
 
 function genAsset_MJ(asset: Ast.Asset): string[] {
@@ -130,7 +187,9 @@ function genNegativeTrait_MJ(snippet: Ast.NegativeTrait): string {
 function genCombinationTrait_MJ(snippet: Ast.CombinationTrait): string {
     const contents  = snippet.contents;
     const texts     = contents.flatMap(subSnippet => genSnippet_SD(subSnippet)).filter(e => e !== undefined) as string[];
-    return "[" + combineStrings(texts, " : ", " : ") + " :0.5]";
+    const cleanText = texts.filter(function(e){return e}); // remove empty elements from array
+    return "[" + cleanText.join(" : ") + " :0.5]";
+    //combineStrings(texts, " : ", " : ") + " :0.5]";
 }
 
 function genAudienceTrait_MJ(snippet: Ast.AudienceTrait): string {
@@ -144,9 +203,14 @@ function genMediumTrait_MJ(snippet: Ast.MediumTrait): string {
     return text;
 }
 
-function generatePrompt_SD(model: Ast.Model): string[] {
+function generatePrompt_SD(model: Ast.Model, prompt: Ast.Prompt | undefined): string[] {
+    // Generate the single requested prompt
+    if (prompt)
+       return genAsset_SD(prompt).filter(e => e !== undefined) as string[];
     // Generate a prompt for each asset
-   return model.assets.flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined) as string[];
+    else {
+       return model.assets.flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined) as string[];
+    }
 }
 
 function genAsset_SD(asset: Ast.Asset): string[] {
@@ -233,7 +297,9 @@ function genBaseSnippet_SD(snippet: Ast.BaseSnippet): string {
 function genCombinationTrait_SD(snippet: Ast.CombinationTrait): string  {
     const contents  = snippet.contents;
     const texts     = contents.flatMap(subSnippet => genSnippet_SD(subSnippet)).filter(e => e !== undefined) as string[];
-    return "a combination of " + combineStrings(texts, ", ", " and ");
+    const cleanTexts  = texts.filter(function(e){return e}); // remove empty elements from array
+    return "a combination of " + cleanTexts.slice(0, -1).join(',')+' and '+cleanTexts.slice(-1);
+    //combineStrings(texts, ", ", " and ");
 }
 
 function genAudienceTrait_SD(snippet: Ast.AudienceTrait): string  {
@@ -247,19 +313,78 @@ function genMediumTrait_SD(snippet: Ast.MediumTrait): string {
     return text;
 }
 
-function combineStrings(contents: string[], separator: string, lastSeparator: string ): string {
-    var result = "";
-    for(var i = 0; i < contents.length; i++) {
-        if (contents[i]!="") {
-            result = result + contents[i];
-            if (i+1 < contents.length-1) {
-                result += separator;
-            } else if (i+1 == contents.length-1) {
-                result += lastSeparator;
-            }
-        }
+// Note: shouldn't be necessary; already replaced with array operators
+// function combineStrings(contents: string[], separator: string, lastSeparator: string ): string {
+//     var result = "";
+//     for(var i = 0; i < contents.length; i++) {
+//         if (contents[i]!="") {
+//             result = result + contents[i];
+//             if (i+1 < contents.length-1) {
+//                 result += separator;
+//             } else if (i+1 == contents.length-1) {
+//                 result += lastSeparator;
+//             }
+//         }
+//     }
+//     return result;
+// }
+
+function generatePrompt_ChatGPT(model: Ast.Model, prompt: Ast.Prompt | undefined): string[] {
+    // Generate the single requested prompt
+    if (prompt) {
+        return genAsset_ChatGPT(prompt);
+    // Generate a prompt for each asset
+    } else {
+        const prompts = model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined);
+        return [prompts.filter(function(e){return e}).join('. ')];
     }
-    return result;
 }
 
+function genAsset_ChatGPT(asset: Ast.Asset): string[] {
+    if (Ast.isPrompt(asset)) {
+        const preffix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) as string[] : []);
+        const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet)) as string[] : []);
+        const core  = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet));
+        
+        // Build the final prompt
+        const prompt = preffix.concat(core, suffix);
 
+        return [prompt.filter(function(e){return e}).join('. ')];
+
+    } else if (Ast.isComposer(asset)) {
+        return [];
+    } else if (Ast.isChain(asset)) {
+        return [];
+    }
+    return [];
+ }
+
+ function genSnippet_ChatGPT(snippet: Ast.Snippet): string {
+    return genBaseSnippet_ChatGPT(snippet.content);
+}
+
+ function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet): string {
+    if (Ast.isTextLiteral(snippet)) {
+        return ((snippet as unknown) as Ast.TextLiteral).content;
+    } else if (Ast.isLanguageRegisterTrait(snippet)) {
+        return "The answer is written using a " + snippet.value + " register";
+    } else if (Ast.isLiteraryStyleTrait(snippet)) {
+        return "The answer is written as a " + snippet.value;
+    } else if (Ast.isPointOfViewTrait(snippet)) {
+        return "The answer is written in " + snippet.value;
+    }
+    // } else if (Ast.isParameterRef(snippet)) {
+    //     return "" ;
+    // } else if (Ast.isAssetReuse(snippet)) {
+    //     return "";
+    // } else if (Ast.isNegativeTrait(snippet)) {
+    //     return "";
+    // } else if (Ast.isCombinationTrait(snippet)) {
+    //     return "";
+    // } else if (Ast.isAudienceTrait(snippet)) {
+    //     return "";
+    // } else if (Ast.isMediumTrait(snippet)) {
+    //     return "";
+    // }
+    return "";
+}

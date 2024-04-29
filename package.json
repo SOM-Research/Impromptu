@@ -30,7 +30,58 @@
                 "scopeName": "source.impromptu",
                 "path": "./syntaxes/impromptu.tmLanguage.json"
             }
-        ]
+        ],
+        "commands": [
+            {
+                "command": "impromptu.generateChatGPT",
+                "title": "Generate ChatGPT Python code",
+                "shortTitle": "Generate ChatGPT code",
+                "category": "Impromptu",
+                "icon": {
+                    "light": "icons/chatgpt-logo.png",
+                    "dark": "icons/chatgpt-logo.png"
+                }
+            },
+            {
+                "command": "impromptu.generateStableDiffusion",
+                "title": "Generate Stable Diffusion Python code",
+                "shortTitle": "Generate SD code",
+                "category": "Impromptu",
+                "icon": {
+                    "light": "icons/sd-logo.png",
+                    "dark": "icons/sd-logo.png"
+                }
+            },
+            {
+                "command": "impromptu.saveCodeDocument",
+                "title": "Save Python code",
+                "shortTitle": "Save Python code",
+                "category": "Impromptu",
+                "icon": {
+                    "light": "icons/download.png",
+                    "dark": "icons/download.png"
+                }
+            }
+        ],
+        "menus": {
+            "editor/title": [
+                {
+                    "when": "resourceLangId == impromptu",
+                    "command": "impromptu.generateChatGPT",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == impromptu",
+                    "command": "impromptu.generateStableDiffusion",
+                    "group": "navigation"
+                },
+                {
+                    "when": "liveCodePreviewer",
+                    "command": "impromptu.saveCodeDocument",
+                    "group": "navigation"
+                }
+            ]
+        }
     },
     "activationEvents": [
         "onLanguage:impromptu"

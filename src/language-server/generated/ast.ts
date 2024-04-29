@@ -125,6 +125,7 @@ export interface AlternativeTrait extends AstNode {
     readonly $type: 'AlternativeTrait';
     content: Array<Snippet>
     contents: Array<Snippet>
+    validator?: '[reinforced]'
 }
 
 export const AlternativeTrait = 'AlternativeTrait';
@@ -150,6 +151,7 @@ export interface AudienceTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'AudienceTrait';
     content: Snippet
+    validator?: '[reinforced]'
 }
 
 export const AudienceTrait = 'AudienceTrait';
@@ -161,6 +163,7 @@ export function isAudienceTrait(item: unknown): item is AudienceTrait {
 export interface ByAuthorTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'ByAuthorTrait';
+    validator?: '[reinforced]'
     value: Snippet
 }
 
@@ -173,6 +176,7 @@ export function isByAuthorTrait(item: unknown): item is ByAuthorTrait {
 export interface CameraAngleTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'CameraAngleTrait';
+    validator?: '[reinforced]'
     value: CameraAngle
 }
 
@@ -185,6 +189,7 @@ export function isCameraAngleTrait(item: unknown): item is CameraAngleTrait {
 export interface CameraSettingsTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'CameraSettingsTrait';
+    validator?: '[reinforced]'
     value: CameraSettings
 }
 
@@ -196,8 +201,10 @@ export function isCameraSettingsTrait(item: unknown): item is CameraSettingsTrai
 
 export interface Chain extends AstNode {
     readonly $container: Model;
-    readonly $type: 'Chain';
+    readonly $type: 'ByExpressionOutputTesting' | 'Chain';
     name: QualifiedName
+    priorVersion?: Reference<ExecutableAsset>
+    refines?: Reference<ExecutableAsset>
 }
 
 export const Chain = 'Chain';
@@ -210,6 +217,7 @@ export interface CombinationTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'CombinationTrait';
     contents: Array<Snippet>
+    validator?: '[reinforced]'
 }
 
 export const CombinationTrait = 'CombinationTrait';
@@ -222,8 +230,11 @@ export interface Composer extends AstNode {
     readonly $container: Model;
     readonly $type: 'Composer';
     contents: Contents
+    language: Reference<Language>
     name: QualifiedName
     pars: Parameters
+    priorVersion?: Reference<ExecutableAsset>
+    refines?: Reference<ExecutableAsset>
 }
 
 export const Composer = 'Composer';
@@ -260,6 +271,7 @@ export function isCore(item: unknown): item is Core {
 export interface EffectsTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'EffectsTrait';
+    validator?: '[reinforced]'
     value: Effects
 }
 
@@ -267,6 +279,18 @@ export const EffectsTrait = 'EffectsTrait';
 
 export function isEffectsTrait(item: unknown): item is EffectsTrait {
     return reflection.isInstance(item, EffectsTrait);
+}
+
+export interface Equivalency extends AstNode {
+    readonly $container: Model;
+    readonly $type: 'Equivalency';
+    assets: Array<Reference<Asset>>
+}
+
+export const Equivalency = 'Equivalency';
+
+export function isEquivalency(item: unknown): item is Equivalency {
+    return reflection.isInstance(item, Equivalency);
 }
 
 export interface HyperParam extends AstNode {
@@ -299,6 +323,7 @@ export interface IncludesTrait extends AstNode {
     readonly $type: 'IncludesTrait';
     contents: Array<Snippet>
     times?: number
+    validator?: '[reinforced]'
 }
 
 export const IncludesTrait = 'IncludesTrait';
@@ -307,9 +332,24 @@ export function isIncludesTrait(item: unknown): item is IncludesTrait {
     return reflection.isInstance(item, IncludesTrait);
 }
 
+export interface Language extends AstNode {
+    readonly $container: Model;
+    readonly $type: 'Language';
+    code: string
+    name: string
+    region: string
+}
+
+export const Language = 'Language';
+
+export function isLanguage(item: unknown): item is Language {
+    return reflection.isInstance(item, Language);
+}
+
 export interface LanguageRegisterTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'LanguageRegisterTrait';
+    validator?: '[reinforced]'
     value: LanguageRegister
 }
 
@@ -322,6 +362,7 @@ export function isLanguageRegisterTrait(item: unknown): item is LanguageRegister
 export interface LightingTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'LightingTrait';
+    validator?: '[reinforced]'
     value: Lighting
 }
 
@@ -334,6 +375,7 @@ export function isLightingTrait(item: unknown): item is LightingTrait {
 export interface LiteraryStyleTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'LiteraryStyleTrait';
+    validator?: '[reinforced]'
     value: LiteraryStyle
 }
 
@@ -346,6 +388,7 @@ export function isLiteraryStyleTrait(item: unknown): item is LiteraryStyleTrait 
 export interface MediumTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'MediumTrait';
+    validator?: '[reinforced]'
     value: Medium
 }
 
@@ -358,6 +401,8 @@ export function isMediumTrait(item: unknown): item is MediumTrait {
 export interface Model extends AstNode {
     readonly $type: 'Model';
     assets: Array<Asset>
+    equivalencies?: Equivalency
+    languages: Array<Language>
 }
 
 export const Model = 'Model';
@@ -397,6 +442,7 @@ export interface NegativeTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'NegativeTrait';
     content: Snippet
+    validator?: '[reinforced]'
 }
 
 export const NegativeTrait = 'NegativeTrait';
@@ -457,6 +503,7 @@ export function isParamInvokation(item: unknown): item is ParamInvokation {
 export interface PointOfViewTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'PointOfViewTrait';
+    validator?: '[reinforced]'
     value: PointOfView
 }
 
@@ -481,15 +528,18 @@ export function isPrefix(item: unknown): item is Prefix {
 
 export interface Prompt extends AstNode {
     readonly $container: Model;
-    readonly $type: 'Prompt';
+    readonly $type: 'ByExpressionOutputTesting' | 'Prompt';
     core: Core
     description?: string
     hyper?: HyperParameters
+    language: Reference<Language>
     name: QualifiedName
     output: Media
     outputDesc?: string
     pars: Parameters
     prefix?: Prefix
+    priorVersion?: Reference<ExecutableAsset>
+    refines?: Reference<ExecutableAsset>
     suffix?: Suffix
 }
 
@@ -502,6 +552,7 @@ export function isPrompt(item: unknown): item is Prompt {
 export interface ProximityTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'ProximityTrait';
+    validator?: '[reinforced]'
     value: Proximity
 }
 
@@ -515,6 +566,7 @@ export interface SimilarToTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'SimilarToTrait';
     contents: Array<Snippet>
+    validator?: '[reinforced]'
 }
 
 export const SimilarToTrait = 'SimilarToTrait';
@@ -556,6 +608,7 @@ export interface TargetSizeTrait extends AstNode {
     dimension: Dimension
     type: SizeConstraint
     unit: Unit
+    validator?: '[reinforced]'
 }
 
 export const TargetSizeTrait = 'TargetSizeTrait';
@@ -588,6 +641,18 @@ export function isWeight(item: unknown): item is Weight {
     return reflection.isInstance(item, Weight);
 }
 
+export interface ByExpressionOutputTesting extends Chain, Prompt {
+    readonly $container: Model;
+    readonly $type: 'ByExpressionOutputTesting';
+    validator: Reference<ExecutableAsset>
+}
+
+export const ByExpressionOutputTesting = 'ByExpressionOutputTesting';
+
+export function isByExpressionOutputTesting(item: unknown): item is ByExpressionOutputTesting {
+    return reflection.isInstance(item, ByExpressionOutputTesting);
+}
+
 export interface ImpromptuAstType {
     AlternativeTrait: AlternativeTrait
     Asset: Asset
@@ -595,6 +660,7 @@ export interface ImpromptuAstType {
     AudienceTrait: AudienceTrait
     BaseSnippet: BaseSnippet
     ByAuthorTrait: ByAuthorTrait
+    ByExpressionOutputTesting: ByExpressionOutputTesting
     CameraAngleTrait: CameraAngleTrait
     CameraSettingsTrait: CameraSettingsTrait
     Chain: Chain
@@ -603,6 +669,7 @@ export interface ImpromptuAstType {
     Contents: Contents
     Core: Core
     EffectsTrait: EffectsTrait
+    Equivalency: Equivalency
     ExecutableAsset: ExecutableAsset
     HyperParam: HyperParam
     HyperParameters: HyperParameters
@@ -610,6 +677,7 @@ export interface ImpromptuAstType {
     IncludesTrait: IncludesTrait
     Input: Input
     InputRef: InputRef
+    Language: Language
     LanguageRegisterTrait: LanguageRegisterTrait
     LightingTrait: LightingTrait
     LiteraryStyleTrait: LiteraryStyleTrait
@@ -641,7 +709,7 @@ export interface ImpromptuAstType {
 export class ImpromptuAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
+        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -694,6 +762,9 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             case ParameterRef: {
                 return this.isSubtype(InputRef, supertype);
             }
+            case ByExpressionOutputTesting: {
+                return this.isSubtype(Prompt, supertype) || this.isSubtype(Chain, supertype);
+            }
             case ImageTrait:
             case MediumIndependentTrait:
             case TextTrait: {
@@ -708,8 +779,27 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
     getReferenceType(refInfo: ReferenceInfo): string {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
-            case 'AssetReuse:asset': {
+            case 'AssetReuse:asset':
+            case 'Equivalency:assets': {
                 return Asset;
+            }
+            case 'ByExpressionOutputTesting:validator':
+            case 'ByExpressionOutputTesting:priorVersion':
+            case 'ByExpressionOutputTesting:refines':
+            case 'ByExpressionOutputTesting:priorVersion':
+            case 'ByExpressionOutputTesting:refines':
+            case 'Chain:priorVersion':
+            case 'Chain:refines':
+            case 'Composer:priorVersion':
+            case 'Composer:refines':
+            case 'Prompt:priorVersion':
+            case 'Prompt:refines': {
+                return ExecutableAsset;
+            }
+            case 'ByExpressionOutputTesting:language':
+            case 'Composer:language':
+            case 'Prompt:language': {
+                return Language;
             }
             case 'MultimodalRef:param': {
                 return Multimodal;
@@ -758,6 +848,14 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
                     ]
                 };
             }
+            case 'Equivalency': {
+                return {
+                    name: 'Equivalency',
+                    mandatory: [
+                        { name: 'assets', type: 'array' }
+                    ]
+                };
+            }
             case 'HyperParameters': {
                 return {
                     name: 'HyperParameters',
@@ -778,7 +876,8 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
                 return {
                     name: 'Model',
                     mandatory: [
-                        { name: 'assets', type: 'array' }
+                        { name: 'assets', type: 'array' },
+                        { name: 'languages', type: 'array' }
                     ]
                 };
             }

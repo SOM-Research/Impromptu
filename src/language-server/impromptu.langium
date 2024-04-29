@@ -1,12 +1,29 @@
 grammar Impromptu
 
+// Identifiers
+QualifiedName returns string: ID ('.' ID)*;
+ParamId returns string:'@'+ID;
+FileId returns string:'$'+ID;
+
+// Terminals
+hidden terminal WS: /\s+/;
+terminal ID returns string: /[_a-zA-Z][\w_]*/;
+terminal INT returns number: /[0-9]+/;
+terminal STRING: /"[^"]*"|'[^']*'/;
+
+// Comments
+hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
+hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
+
 entry Model:
-    (assets+=Asset)*;
+    (languages+=Language)+
+    (assets+=Asset)+
+    (equivalencies=Equivalency)*;
 
 Asset:
-    ExecutableAsset  | Composer;
+    ExecutableAsset | Composer;
 
-ExecutableAsset: 
+ExecutableAsset:
     Prompt | Chain;
 
 Prompt:
@@ -15,6 +32,9 @@ Prompt:
     core=Core
     (suffix=Suffix)?
     (hyper=HyperParameters)?
+    AssetLanguage
+    AssetRelationships
+    (ByExpressionOutputTesting)*
     ;
 
 HyperParameters:
@@ -26,10 +46,15 @@ HyperParam:
     ;
 
 Chain:
-    'chain' name=QualifiedName;
+    'chain' name=QualifiedName
+    AssetRelationships
+    (ByExpressionOutputTesting)*
+    ;
 
 Composer:
     'composer' name=QualifiedName  pars=Parameters contents=Contents
+    AssetLanguage
+    AssetRelationships
     ;
 
 Prefix:
@@ -42,34 +67,43 @@ TextTrait:
     LiteraryStyleTrait | LanguageRegisterTrait | PointOfViewTrait;
 
 LiteraryStyleTrait:
-    'literary-style' '(' value=LiteraryStyle ')';
+    'literary-style' '(' value=LiteraryStyle ')'
+    ByReinforcedTraitOutputTesting;
 
 LanguageRegisterTrait:
-    'language-register' '(' value=LanguageRegister')';
+    'language-register' '(' value=LanguageRegister')'
+    ByReinforcedTraitOutputTesting;
 
 PointOfViewTrait: 
-    'point-of-view' '(' value=PointOfView')';
+    'point-of-view' '(' value=PointOfView')'
+    ByReinforcedTraitOutputTesting;
 
 ImageTrait:
     MediumTrait | CameraAngleTrait | CameraSettingsTrait | LightingTrait | ProximityTrait | EffectsTrait;
 
 MediumTrait: 
-    'medium'       '(' value=Medium ')';
+    'medium'       '(' value=Medium ')'
+    ByReinforcedTraitOutputTesting;
 
 CameraAngleTrait:
-    'camera-angle' '(' value=CameraAngle ')';
+    'camera-angle' '(' value=CameraAngle ')'
+    ByReinforcedTraitOutputTesting;
 
 CameraSettingsTrait:
-    'camera-settings' '(' value=CameraSettings ')';
+    'camera-settings' '(' value=CameraSettings ')'
+    ByReinforcedTraitOutputTesting;
 
 LightingTrait:
-    'lighting'     '(' value=Lighting ')';
+    'lighting'     '(' value=Lighting ')'
+    ByReinforcedTraitOutputTesting;
 
 ProximityTrait:
-    'promixity'    '(' value=Proximity ')';
+    'promixity'    '(' value=Proximity ')'
+    ByReinforcedTraitOutputTesting;
 
 EffectsTrait:
-    'effects'      '(' value=Effects ')';
+    'effects'      '(' value=Effects ')'
+    ByReinforcedTraitOutputTesting;
 
 MediumIndependentTrait:
     RelativeTrait | AudienceTrait | IncludesTrait | SimilarToTrait | ByAuthorTrait | TargetSizeTrait ;
@@ -78,28 +112,36 @@ RelativeTrait:
     NegativeTrait | AlternativeTrait | CombinationTrait;
 
 NegativeTrait:
-    'no' '(' content=Snippet ')';
+    'no' '(' content=Snippet ')'
+    ByReinforcedTraitOutputTesting;
 
 AlternativeTrait:
-    'alternative' '(' contents+=Snippet (',' content+=Snippet)+ ')' ;
+    'alternative' '(' contents+=Snippet (',' content+=Snippet)+ ')'
+    ByReinforcedTraitOutputTesting;
 
 CombinationTrait:
-    'between' '(' contents+=Snippet (',' contents+=Snippet)+ ')' ;
+    'between' '(' contents+=Snippet (',' contents+=Snippet)+ ')'
+    ByReinforcedTraitOutputTesting;
 
 AudienceTrait:
-    'audience' '(' content=Snippet ')';
+    'audience' '(' content=Snippet ')'
+    ByReinforcedTraitOutputTesting;
 
 IncludesTrait:
-    'includes' '(' (times=INT ':')? contents+=Snippet (',' contents+=Snippet)* ')';
+    'includes' '(' (times=INT ':')? contents+=Snippet (',' contents+=Snippet)* ')'
+    ByReinforcedTraitOutputTesting;
 
 SimilarToTrait:
-    'like' '(' contents+=Snippet (',' contents+=Snippet)* ')';
+    'like' '(' contents+=Snippet (',' contents+=Snippet)* ')'
+    ByReinforcedTraitOutputTesting;
 
 ByAuthorTrait:
-    'author' '(' value=Snippet ')';
+    'author' '(' value=Snippet ')'
+    ByReinforcedTraitOutputTesting;
 
 TargetSizeTrait:
-    'size' '(' dimension=Dimension ',' type=SizeConstraint ',' amount=INT ',' unit=Unit ')';
+    'size' '(' dimension=Dimension ',' type=SizeConstraint ',' amount=INT ',' unit=Unit ')'
+    ByReinforcedTraitOutputTesting;
 
 Contents:
     snippets+=Snippet (',' snippets+=Snippet)*;
@@ -172,17 +214,50 @@ Lighting returns string: 'accent' | 'ambient' | 'atmospheric' | 'back' | 'volume
 Proximity returns string: 'extreme close-up' | 'close-up' | 'medium shot' | 'long shot' | 'extreme long shot';
 Effects returns string: 'blur' | 'reflection' | 'distortion' ;
 
-// Identifiers
-QualifiedName returns string: ID ('.' ID)*;
-ParamId returns string:'@'+ID;
-FileId returns string:'$'+ID;
+// ----------------------------------------------------------------------------------------
+// 2024-01-17 SEMO: Extension - Language support, refinements and equivalencies
+// ----------------------------------------------------------------------------------------
 
-// Terminals
-hidden terminal WS: /\s+/;
-terminal ID returns string: /[_a-zA-Z][\w_]*/;
-terminal INT returns number: /[0-9]+/;
-terminal STRING: /"[^"]*"|'[^']*'/;
+Language:
+    'language'
+    name=ID
+    'code=' code=STRING
+    'region=' region=STRING
+    ;
 
-// Comments
-hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
-hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
+fragment AssetLanguage:
+    'language=' language=[Language:ID]
+    ;
+
+fragment AssetRelationships:
+    ('priorVersion=' priorVersion=[Asset:ID])?
+    ('refines=' refines=[Asset:ID])?
+    ;
+
+Equivalency:
+    'equivalency'
+    'assets=' ('(' (assets+=[Asset:ID])
+        ((','assets+=[Asset:ID])*')'))?;
+
+// ----------------------------------------------------------------------------------------
+// 2024-01-17 SEMO: Extension - Output validators
+// ----------------------------------------------------------------------------------------
+
+//OutputValidator:
+//    ByExpression | ByReinforcedTrait;
+
+ByExpressionOutputTesting:
+    'validator=['validator=[ExecutableAsset:ID]']';
+    //'validators=' '[' (validator=STRING) ']'
+    //    ((',['validator=STRING)*']')?;
+
+//ByReinforcedTrait:
+    //'traitValidator'
+    //validator=[ExecutableAsset:ID]
+    //;
+
+fragment ByReinforcedTraitOutputTesting:
+    (validator='[reinforced]')?;
+
+//TraitValidator:
+//    '['validator=[ExecutableAsset:ID]']';
