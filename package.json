@@ -1,12 +1,26 @@
 {
     "name": "impromptu",
     "displayName": "impromptu",
-    "icon": "icon.png",
     "description": "A domain-specific language for prompt engineering.",
     "version": "1.0.0",
     "engines": {
         "vscode": "^1.56.0"
     },
+    "publisher": "SOMResearchGroup",
+    "author": {
+        "name": "Robert Clarisó"
+    },
+    "homepage": "https://github.com/SOM-Research/Impromptu",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/SOM-Research/Impromptu"
+    },
+    "keywords": [
+        "Generative AI",
+        "Model-Driven Engineering",
+        "LLM",
+        "DSL"
+    ],
     "categories": [
         "Programming Languages"
     ],
