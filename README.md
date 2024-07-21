@@ -39,3 +39,12 @@ To invoke the command-line interface, simply run the following command:
     ./bin/cli genprompt examples/example.prm -d <output-dir> -t <target-ai-system>
 
 You can specify the output directory and the target AI system that will execute the prompt (currently `midjourney`or `stable-diffusion`).
+
+## License
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+The source code for the site is licensed under the MIT License, which you can find in the LICENSE.md file.
+
+All graphical assets are licensed under the
+[Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/).
