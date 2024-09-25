@@ -1,0 +1,20 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt
+    ValidatorByExpression
+    'This prompt is intended for validation using a prompt'
+    () : text
+    core='Is the content implying hope and happiness?'
+    language=English
+
+prompt
+    PromptToValidate
+    'This prompt is an example to be validated'
+    () : text
+    core='Provide a text that describes a new year beginning tomorrow','It is expected to be full of hope and happiness',language-register(ironic)[reinforced]
+    suffix=literary-style(song)[reinforced]
+    language=English
+    validator=[ValidatorByExpression]

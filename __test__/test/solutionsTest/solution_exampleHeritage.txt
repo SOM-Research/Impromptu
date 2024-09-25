@@ -1,0 +1,3 @@
+Draw a,@element,drawing,Draw a,@animal1,
+,@animal1,[@animal1 : @animal2 :0.5],for children::2,--no @animal1,--no scary,drawing,Draw a,eagle,
+,eagle,[eagle : horse :0.5],for children::2,--no eagle,--no scary,

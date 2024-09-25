@@ -7,7 +7,7 @@ import { extractAstNode, extractDocument } from './cli-util';
 import { generateJavaScript } from './generator';
 import { generatePrompt } from './generate-prompt';
 import { NodeFileSystem } from 'langium/node';
-
+import { readdirSync } from 'node:fs';
 
 export const generateAction = async (fileName: string, opts: GenerateOptions): Promise<void> => {
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
@@ -19,13 +19,58 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
 export const generatePromptAction = async (fileName: string, opts: GenPromptOptions): Promise<void> => {
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     const model = await extractAstNode<Model>(fileName, services);
-    const generatedFilePath = generatePrompt(model, fileName, opts.destination, opts.target);
-    console.log(chalk.green(`Prompt generated successfully: ${generatedFilePath}`));
+    var validPrompt= true;
+    if(opts.prompt){
+        validPrompt= false;
+        if (model.assets.find(element => element.name == opts.prompt)){
+            validPrompt= true;
+        }
+    }
+    if(validPrompt){  
+        try{
+            const generatedFilePath = generatePrompt(model, fileName, opts.destination, opts.target, opts.variables, opts.prompt);
+            console.log(chalk.green(`Prompt generated successfully: ${generatedFilePath}`));
+        } 
+        catch(e){}
+        
+    }
+    else console.log(chalk.red(`Incorrect command. Prompt ${opts.prompt} does not exist in that document.`));
+    
 };
+
+
+
+/**
+ *  Promise of the testing command 
+ */
+export const testing = async(): Promise<void> => {
+    //const services = createImpromptuServices(NodeFileSystem).Impromptu;
+    //const dir= 'examples/test/'
+    //const testList= ['exampleChatGPT.prm','exampleHeritage.prm','output-validators.prm','testMissingPrompt.prm']
+
+
+    //var testFile=dir+testList[0] // Example of Heritage. Check that NewMain runs Draw() beacuse it runs Mixture
+
+    //const model = await extractAstNode<Model>(fileName, services);
+};
+
+
+export const generateAll = async(fileName: string, opts: GenPromptOptions):Promise<void> =>{
+    
+    readdirSync(fileName).forEach(file => {
+        if (/[^].prm/.test(file)){
+            generatePromptAction(fileName+'/'+file, opts)
+        }
+    });
+};
+
 
 export type GenPromptOptions = {
     destination?: string;
     target?: string;
+    variables?: string[];
+    prompt?: string;
+    
 }
 
 export const parseAndValidate = async (fileName: string): Promise<void> => {
@@ -68,6 +113,8 @@ export default function(): void {
         .command('genprompt')
         .argument('<file>', `source file (possible file extensions: ${fileExtensions})`)
         .option('-d, --destination <dir>', 'destination directory of generating')
+        .option('-p, --prompt <prompt>', 'Prompt where the varaibles are used')
+        .option('-v, --variables <var...>', 'arguments transmitted to the prompt')
         .option('-t, --target <name>', 'name of the target generative AI system that will receive the prompt')
         .description('Generate the textual prompt stored in a given file')
         .action(generatePromptAction);
@@ -76,7 +123,20 @@ export default function(): void {
         .command('parseAndValidate')
         .argument('<file>', `Source file to parse & validate (ending in ${fileExtensions})`)
         .description('Indicates where a program parses & validates successfully, but produces no output code')
-        .action(parseAndValidate) 
+        .action(parseAndValidate)
+
+    program
+        .command('testing')
+        .description('Uses several examples to check that the progem works properly')
+        .action(testing)
+
+    program
+        .command('genpromptAll')
+        .argument('<file>', `source directory (possible file extensions: ${fileExtensions})`)
+        .option('-d, --destination <dir>', 'destination directory of generating')
+        .option('-t, --target <name>', 'name of the target generative AI system that will receive the prompt')
+        .description('Generate the textual prompt stored in a given file')
+        .action(generateAll);
 
     program.parse(process.argv);
 }

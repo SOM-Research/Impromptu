@@ -1,0 +1,16 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt promptA(): image
+core = "Get promptA"
+language=English
+
+prompt promptB(@example): image
+core = "Get promptB", @example
+language=English
+
+prompt promptC(@example): image
+core = "Get promptC", @example
+language=English

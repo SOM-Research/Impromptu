@@ -203,8 +203,8 @@ export interface Chain extends AstNode {
     readonly $container: Model;
     readonly $type: 'ByExpressionOutputTesting' | 'Chain';
     name: QualifiedName
-    priorVersion?: Reference<ExecutableAsset>
-    refines?: Reference<ExecutableAsset>
+    priorVersion?: Reference<Asset>
+    refines?: Reference<Asset>
 }
 
 export const Chain = 'Chain';
@@ -233,8 +233,8 @@ export interface Composer extends AstNode {
     language: Reference<Language>
     name: QualifiedName
     pars: Parameters
-    priorVersion?: Reference<ExecutableAsset>
-    refines?: Reference<ExecutableAsset>
+    priorVersion?: Reference<Asset>
+    refines?: Reference<Asset>
 }
 
 export const Composer = 'Composer';
@@ -538,8 +538,8 @@ export interface Prompt extends AstNode {
     outputDesc?: string
     pars: Parameters
     prefix?: Prefix
-    priorVersion?: Reference<ExecutableAsset>
-    refines?: Reference<ExecutableAsset>
+    priorVersion?: Reference<Asset>
+    refines?: Reference<Asset>
     suffix?: Suffix
 }
 
@@ -780,10 +780,6 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
             case 'AssetReuse:asset':
-            case 'Equivalency:assets': {
-                return Asset;
-            }
-            case 'ByExpressionOutputTesting:validator':
             case 'ByExpressionOutputTesting:priorVersion':
             case 'ByExpressionOutputTesting:refines':
             case 'ByExpressionOutputTesting:priorVersion':
@@ -792,8 +788,12 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             case 'Chain:refines':
             case 'Composer:priorVersion':
             case 'Composer:refines':
+            case 'Equivalency:assets':
             case 'Prompt:priorVersion':
             case 'Prompt:refines': {
+                return Asset;
+            }
+            case 'ByExpressionOutputTesting:validator': {
                 return ExecutableAsset;
             }
             case 'ByExpressionOutputTesting:language':

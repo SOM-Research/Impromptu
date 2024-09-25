@@ -1,0 +1,17 @@
+language
+    English
+    code='en'
+    region='EN'
+prompt Rec1(@animal): text
+core = 
+  "Draw an", @animal
+  language= English
+
+prompt Rec2(@animal1, @animal2): text
+core = 
+  Rec1(@animal1),"and",Rec1(@animal2)
+  language= English
+
+prompt NewMain(): image
+core=Rec2("eagle", "horse")
+language=English

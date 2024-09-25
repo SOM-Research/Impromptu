@@ -1,0 +1,24 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt Draw(@element): image
+core = "Draw a ", @element
+language=English
+
+prompt Mixture(@animal1, @animal2): image
+core = 
+  medium( drawing ),
+  Draw(@animal1),
+  @animal1,
+  between(@animal1, @animal2),
+  audience("children" ) weight high,
+  no(@animal1 ), no("scary")
+  language= English
+
+  
+
+prompt NewMain(): image
+core=Mixture("eagle", "horse")
+language=English

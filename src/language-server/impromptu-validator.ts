@@ -1,5 +1,5 @@
 import { ValidationAcceptor, ValidationChecks } from 'langium';
-import { ImpromptuAstType, Multimodal, Model, Parameters, Prompt, isPrompt, isByExpressionOutputTesting } from './generated/ast';
+import { ImpromptuAstType, Multimodal, Model, Parameters, Prompt, isPrompt, isByExpressionOutputTesting, AssetReuse, isChain } from './generated/ast';
 import type { ImpromptuServices } from './impromptu-module';
 
 /**
@@ -11,6 +11,7 @@ export function registerValidationChecks(services: ImpromptuServices) {
     const checks: ValidationChecks<ImpromptuAstType> = {
         Model: validator.checkModelWellFormedRules,
         Parameters: validator.checkUniqueParams,
+        AssetReuse: validator.checkAssetReuse,
         Multimodal: validator.checkMultimodalInputNotText
     };
     registry.register(checks, validator);
@@ -54,6 +55,8 @@ export class ImpromptuValidator {
             reported.add(a.name);
         });
     }
+
+
 
     checkUniqueParams(parset: Parameters, accept: ValidationAcceptor): void {
         // create a set of visited parameters
@@ -115,6 +118,31 @@ export class ImpromptuValidator {
                     accept('error', `A validator cannot have an output validation itself.`,  {node: validator, property: 'validator'});
             }
         });
+    }
+
+        /**
+         * Validations done to the `AssetReuse` objects:
+         * 
+         * 1- The number of parameters in `pars` match with the number of parameters of the `Asset`
+         * referenced 
+         * 
+         * @param assetReuse 
+         * @param accept 
+         */
+    checkAssetReuse(assetReuse: AssetReuse, accept: ValidationAcceptor){
+        const values=assetReuse.pars
+        const ogAsset= assetReuse.asset.ref
+
+        if (! isChain(ogAsset)){
+            if(ogAsset?.pars.pars.length != values?.pars.length){
+                accept('error', `The number of variables does not match with the number of variables of the referenced Asset`,  {node: assetReuse})
+            }
+        }
+        else{
+            if(values){
+                accept('error',`The Asset referenced is a Chain. A Chain does not have nay parameters.`,  {node: assetReuse})
+            }
+        }
     }
 
 //     isDescendant(model: Model, asset: Asset, accept: ValidationAcceptor) {
