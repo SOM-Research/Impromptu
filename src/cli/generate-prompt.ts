@@ -595,6 +595,12 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
         return genAudienceTrait_SD(snippet);
     } else if (Ast.isMediumTrait(snippet)) {
         return genMediumTrait_SD(snippet);
+    } else if (Ast.isCameraAngleTrait(snippet)) {
+        return genCameraAngleTrait_SD(snippet);
+    } else if (Ast.isProximityTrait(snippet)) {
+        return genProximityTrait_SD(snippet);
+    } else if (Ast.isLightingTrait(snippet)) {
+        return genLightingTrait_SD(snippet);
     } 
    return "";
 }
@@ -615,6 +621,20 @@ function genAudienceTrait_SD(snippet: Ast.AudienceTrait): string  {
     const content  = snippet.content;
     const text     = genSnippet_SD(content);
     return "for " + text;
+}
+
+function genCameraAngleTrait_SD(snippet: Ast.CameraAngleTrait): string  {
+    const text = snippet.value
+    return "from a " + text;
+}
+
+function genProximityTrait_SD(snippet: Ast.ProximityTrait): string  {
+    const text = snippet.value
+    return text +" picture";
+}
+function genLightingTrait_SD(snippet: Ast.LightingTrait): string  {
+    const text = snippet.value
+    return text +" lighting";
 }
 
 function genMediumTrait_SD(snippet: Ast.MediumTrait): string {

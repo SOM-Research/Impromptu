@@ -1,0 +1,4 @@
+Positive prompt:
+ Is the content implying hope and happiness? Negative prompt:
+ Positive prompt:
+ Provide a text that describes a new year beginning tomorrow It is expected to be full of hope and happiness Negative prompt:

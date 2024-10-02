@@ -16,7 +16,7 @@
   },
   "include": [
      "src/**/*.ts"
-  ],
+, "bin/server_main.js", ],
   "exclude": [
      "out",
      "node_modules",

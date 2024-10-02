@@ -312,12 +312,6 @@ test('reference_in_audience_trait', async() => {
   expect(genBaseSnippet_MJ(mock_audience_trait,map)).toContain("@elemento"); // Checks the parameter is not changed
 })
   
-test('reference_in_audience_trait', async() => {
-  expect(genBaseSnippet_MJ(mock_audience_trait, map)).not.toContain("fuego"); // Checks the map is NOT used
-  expect(genAudienceTrait_MJ(mock_audience_trait)).toContain("@elemento"); // Checks the parameter is not changed
-})
-
-
 test('reference_in_negation_trait', async() => {
 let map= new Map<string,string>;
 map.set( "@elemento","fuego")
