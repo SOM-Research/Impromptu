@@ -79,8 +79,15 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
     if (model) {
         var prompt = await requestPromptAndValidation(generator, model);
         if (prompt) {
+            /**
+             * code that generates the prompt
+             */
             const returner = generator.generateCode(model, aiSystem, prompt);
             let title : string = 'Code Test Scenario';
+
+            /**
+             * webview panel
+             */
             previewPanel = vscode.window.createWebviewPanel(
                 // Webview id
                 'liveCodePreviewer',
@@ -105,6 +112,12 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
     }
 }
 
+/**
+ * Generate the prompt and visualize it in the vscode window
+ * @param generator 
+ * @param model .prm flie selected 
+ * @returns 
+ */
 async function requestPromptAndValidation(generator: CodeGenerator, model: string) {
     const prompts = generator.getPromptsList(model);
     if (prompts) {
@@ -112,7 +125,7 @@ async function requestPromptAndValidation(generator: CodeGenerator, model: strin
         prompts.forEach(prompt => {
             if (prompt) quickPickItems.push({label: prompt.name, description: prompt.description})
         });
-        if (quickPickItems && quickPickItems.length > 1) {
+        if (quickPickItems && quickPickItems.length > 1) { // The file has more than one asset -> one should be selected
             const pick = await vscode.window.showQuickPick(
                 quickPickItems,
                 {
@@ -127,6 +140,11 @@ async function requestPromptAndValidation(generator: CodeGenerator, model: strin
     return undefined;
 }
 
+/**
+ * Vissualize a text in the panel webview
+ * 
+ * @param code text to be visualized
+ */
 function updateCodePreview(code : string | void) {
     if (previewPanel && code) {
         previewPanel.webview.html = code;

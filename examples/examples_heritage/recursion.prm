@@ -1,0 +1,12 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt funtionA(): image
+core = "You are in A", functionB
+language=English
+
+prompt funtionB(): image
+core = "You are in B", functionA
+language=English

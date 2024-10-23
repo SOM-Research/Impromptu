@@ -21,7 +21,7 @@ entry Model:
     (equivalencies=Equivalency)*;
 
 Asset:
-    ExecutableAsset | Composer;
+    ExecutableAsset | Composer | ImportedAsset;
 
 ExecutableAsset:
     Prompt | Chain;
@@ -32,10 +32,17 @@ Prompt:
     core=Core
     (suffix=Suffix)?
     (hyper=HyperParameters)?
+    AssetSeparator
     AssetLanguage
     AssetRelationships
     (ByExpressionOutputTesting)*
     ;
+
+ImportedAsset:
+    'import' name=QualifiedName 'from' library=QualifiedName
+    AssetSeparator
+    AssetLanguage
+    AssetRelationships;
 
 HyperParameters:
     hyper+=HyperParam (',' hyper+=HyperParam)*
@@ -52,7 +59,8 @@ Chain:
     ;
 
 Composer:
-    'composer' name=QualifiedName  pars=Parameters contents=Contents
+    'composer' name=QualifiedName  pars=Parameters contents=Contents (separator=STRING)?
+    AssetSeparator
     AssetLanguage
     AssetRelationships
     ;
@@ -77,6 +85,7 @@ LanguageRegisterTrait:
 PointOfViewTrait: 
     'point-of-view' '(' value=PointOfView')'
     ByReinforcedTraitOutputTesting;
+
 
 ImageTrait:
     MediumTrait | CameraAngleTrait | CameraSettingsTrait | LightingTrait | ProximityTrait | EffectsTrait;
@@ -106,7 +115,7 @@ EffectsTrait:
     ByReinforcedTraitOutputTesting;
 
 MediumIndependentTrait:
-    RelativeTrait | AudienceTrait | IncludesTrait | SimilarToTrait | ByAuthorTrait | TargetSizeTrait ;
+    RelativeTrait | AudienceTrait | IncludesTrait | SimilarToTrait | ByAuthorTrait | TargetSizeTrait | ComparisonTrait ;
 
 RelativeTrait:
     NegativeTrait | AlternativeTrait | CombinationTrait;
@@ -114,6 +123,9 @@ RelativeTrait:
 NegativeTrait:
     'no' '(' content=Snippet ')'
     ByReinforcedTraitOutputTesting;
+
+ComparisonTrait:
+    'compare' '(' content1=Snippet ',' content2=Snippet ',' comparison=Snippet ')';
 
 AlternativeTrait:
     'alternative' '(' contents+=Snippet (',' content+=Snippet)+ ')'
@@ -205,7 +217,6 @@ LiteraryStyle returns string: 'report' | 'essay' | 'interview' | 'letter' | 'pla
 LanguageRegister returns string: 'bench-level' | 'dialect' | 'facetious' | 'formal' | 'in-house' | 'ironic' | 'neutral' | 'slang' | 'taboo' | 'technical' | 'vulgar';
 PointOfView returns string: 'first person' | 'second person' | 'third person';
 
-
 // Image Traits
 Medium returns string: 'photography' | 'drawing' | 'painting' | 'portrait' | 'comic book art' | 'digital art' | '3D art';
 CameraAngle returns string: 'overhead view' | 'low angle' | 'aerial view' | 'tilted frame' |  'over-the-shoulder shot';
@@ -227,6 +238,10 @@ Language:
 
 fragment AssetLanguage:
     'language=' language=[Language:ID]
+    ;
+
+fragment AssetSeparator:
+    ('separator=' separator=STRING)?
     ;
 
 fragment AssetRelationships:

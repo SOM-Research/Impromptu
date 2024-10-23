@@ -1,0 +1,2 @@
+Write a test exam.The questions should be regarding geography.The exam should consist of 50 questions.The questions should be selected to test people with university knowledge level..
+The possible answers of the questions should be true or false

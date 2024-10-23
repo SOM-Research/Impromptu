@@ -1,0 +1,8 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt C():text
+core="Has llegado a C"
+language=English

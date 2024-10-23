@@ -1,0 +1,16 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt Draw(): text
+core = "Draw a", "picture"
+separator= ""
+language=English
+
+prompt NewMain(): text
+core=Draw(), "In a front view", "In a forest."
+separator="."
+language=English
+
+ 

@@ -1,0 +1,13 @@
+language
+    English
+    code='en'
+    region='EN'
+
+
+import main from libraries.tests.import_testA
+language=English
+
+
+prompt NewMain(): image
+core=main()
+language=English

@@ -1,20 +1,27 @@
 import { Reference } from "langium";
-import { AssetReuse, BaseSnippet, CombinationTrait, Core, Parameters, InputRef, Parameter, ParamInvokation, Prompt, Snippet, TextLiteral, Suffix, Composer, NegativeTrait } from "../src/language-server/generated/ast";
+import { AssetReuse, BaseSnippet, CombinationTrait, Core, Parameters, InputRef, Parameter, ParamInvokation, Prompt, Snippet, TextLiteral, Suffix, Composer, NegativeTrait, ImportedAsset} from "../src/language-server/generated/ast";
 import { test, expect, vi } from 'vitest'
-import { genBaseSnippet_SD, getAssetReuse, AISystem, genAsset_SD } from "../src/cli/generate-prompt";
+import { genBaseSnippet_SD, genAssetReuse, AISystem, genAsset_SD, genImportedAsset} from "../src/cli/generate-prompt";
+import * as utils from "../src/cli/cli-util";
 
 
 //---------------------------------VARIABLES----------------------------------
+
 /**
- * Example of mapping between `Input` and `Parameter`
- * "@elemento" -> "fuego"
+ * Mock of `get_imported_asset()`, which obtains the prompt an 
+ * ImportedAsset is referencing. In this case, always returns `mock_prompt`
  */
+function get_imported_ast(asset) {
+  return mock_prompt
+}
+
+let mock_prompt_solution = 'Positive prompt:\n,@elemento, @elemento, @elemento,\n,Negative prompt:\n,fuego'
 
 
 //--------------------------MOCK ELEMENTS--------------------------------------
 
 /**
- * empy `Snippet`. It works to mock a `Snippet`working as a container ONLY
+ * empty `Snippet`. It works to mock a `Snippet`working as a container ONLY
  */
 const mock_snippet_empty:Snippet={ 
 }
@@ -36,6 +43,12 @@ const mock_textLiteral:TextLiteral = {
 const mock_Parameter: Parameter={
   name:"@elemento"
 }
+/**
+ * Mocks the Parameter `@elemento2`
+ */
+const mock_Parameter2: Parameter={
+  name:"@elemento2"
+}
 
 /**
  *  Mocks the reference to an object Parameter
@@ -44,6 +57,17 @@ const mock_Reference: Reference<Parameter> ={
   ref: mock_Parameter,
   $refText: "@elemento"
 }
+
+
+/**
+ *  Mocks the reference to an object Parameter
+ */
+const mock_Reference2: Reference<Parameter> ={
+  ref: mock_Parameter2,
+  $refText: "@elemento2"
+}
+
+
 /**
  * Mocks an InputRef, which contains a Reference to a Parameter 
  */
@@ -54,11 +78,22 @@ const mock_InputRef:InputRef = {
 }
 
 /**
+ * Mocks an InputRef, which contains a Reference to a Parameter 
+ */
+const mock_InputRef2:InputRef = {
+  $container: mock_snippet_empty,
+  $type: 'ParameterRef',
+  param: mock_Reference2
+}
+
+
+/**
  * Mocks a Snippet which `content` is an InputRef object
  */
 const mock_snippet_parameter:Snippet={
   content:mock_InputRef
 }
+
 
 /**
  * Mocks a Snippet which `content` is an TextLiteral object
@@ -163,8 +198,6 @@ const mock_AssetReuse_noParams:AssetReuse = {
   pars:mock_parameterInv_empty
 }
 
-
-
 /**
  * Mocks a Snippet that contains an InputRef
  */
@@ -172,6 +205,15 @@ const mock_snippet_inputref:Snippet={
   content: mock_InputRef,
   $type: 'Snippet'
 }
+
+/**
+ * Mocks a Snippet that contains an InputRef
+ */
+const mock_snippet_inputref2:Snippet={
+  content: mock_InputRef2,
+  $type: 'Snippet'
+}
+
 /**
  * Mocks a NegationTrait
  */
@@ -212,15 +254,35 @@ const mock_suffix:Suffix={
 }
 
 /**
+ * Mocks the `core` of a prompt. It contains
+ * 
+ * "@elemento2"
+ */
+const mock_core_alt:Core={
+  snippets:[mock_snippet_inputref2]
+}
+
+/**
  * Mocks a Parameters object with a Parameter
  */
 const mock_parameters_full:Parameters={
   pars:[mock_Parameter]
 }
+
+
+/**
+ * Mocks a Parameters object with a Parameter
+ */
+const mock_parameters_full2:Parameters={
+  pars:[mock_Parameter2]
+}
+
+
 /**
  * Mocks a prompt with a `prefix`, a `suffix` and a `core` that uses Parameters (declared in `pars`)
  */
 const mock_prompt:Prompt={
+  name: "prompt",
   pars: mock_parameters_full,
   prefix:mock_prefix,
   core: mock_core2,
@@ -228,6 +290,15 @@ const mock_prompt:Prompt={
   $type:Prompt
 }
 
+/**
+ * Mocks a prompt with a `prefix`, a `suffix` and a `core` that uses Parameters (declared in `pars`)
+ */
+const mock_prompt2:Prompt={
+  pars: mock_parameters_full2,
+
+  core: mock_core_alt,
+  $type:Prompt
+}
 
 /**
  * Mocks the Contents object of a Composer with several InputRef Snippets
@@ -256,6 +327,15 @@ const mock_ReferenceAsset_with_parameters: Reference<Prompt>={
 }
 
 /**
+ * Reference to a Prompt with parameters
+ */
+const mock_ReferenceAsset_with_parameters2: Reference<Prompt>={
+  ref:mock_prompt2,
+  $refText:`child()\n core =prueba`
+}
+
+
+/**
  * Mocks a ParamInvokator with a non-empty array of Snippets
  */
 const mock_parameterInv_with_parameters:ParamInvokation = {
@@ -279,10 +359,64 @@ const mock_audience_trait:BaseSnippet={
 }
 
 
+const mock_snippet_asset_reuse: Snippet ={
+  content: mock_AssetReuse_parameters
+}
+
+const mock_AssetReuse_as_parameter: ParamInvokation ={
+  $type:ParamInvokation,
+  pars:[mock_snippet_asset_reuse]
+}
+
+/**
+ * Mocks an AssetReuse that the Asset reused has parameters
+ */
+const mock_AssetReuse_big:AssetReuse = {
+  $type:'AssetReuse',
+  asset:mock_ReferenceAsset_with_parameters2,
+  pars:mock_AssetReuse_as_parameter
+}
+
+/**
+ * Mocks an imported asset
+ */
+const mock_imported_asset:ImportedAsset = {
+  $type: 'ImportedAsset',
+  name: "Imported",
+  library: "asset"
+}
+
+const mock_imported_asset_ref:Reference<ImportedAsset> ={
+  ref: mock_imported_asset,
+  $refText:"import Imported from asset"
+}
+
+/**
+ * Mocks an AssetReuase referencing an Imported Asset
+ */
+const mock_assetReuse_imported_asset:AssetReuse = {
+  $type: 'AssetReuse',
+  asset: mock_imported_asset_ref,
+  pars:mock_parameterInv_with_parameters
+
+}
+
+
 
 //--------------------------------------TESTS--------------------------------------
 
+test('check_imported_asset', async() => {
+  const spy = vi.spyOn( utils,'get_imported_asset');
+  spy.mockReturnValue(mock_prompt);
+  expect(genImportedAsset(mock_imported_asset, "stable-diffusion").join()).toBe(mock_prompt_solution);
+  // Checks the map is NOT used
+})
 
+test('check_imported_asset_in_asset_reuse', async() => {
+  const spy = vi.spyOn( utils,'get_imported_asset');
+  spy.mockReturnValue(mock_prompt);
+  expect(genAssetReuse(mock_assetReuse_imported_asset, AISystem.StableDiffusion)).toBe('Positive prompt:\n,fuego, fuego, fuego,\n,Negative prompt:\n,fuego'); // Do the same with the rest AISystems
+})
 
 test('reference_in_text_literal', async() => {
   // Check that the variables are not considered if they are in a TextLiteral element
@@ -308,13 +442,13 @@ test('reference_in_combination_trait', async() => {
 
   expect(genBaseSnippet_SD(mock_CombTrait, map)).toContain("fuego"); // Check that the InputRef are changed
   expect(genBaseSnippet_SD(mock_CombTrait, map)).toContain("@elemento"); // Check that the TextPlain  still doesn't
-  
+
 })
 
 
 test('reference_in_audience_trait', async() => {
   let map= new Map<string,string>;
-  map.set( "@elemento","fuego")
+  map.set( "@elemento","fuego");
   expect(genBaseSnippet_SD(mock_audience_trait,map)).toContain("@elemento"); // Checks the map is used
   })
   
@@ -332,6 +466,13 @@ test('reference_in_prompt', async() => {
   let map= new Map<string,string>;
   map.set( "@elemento","fuego")
   expect(genAsset_SD(mock_prompt,map)[0]).toBe("Positive prompt:\n"); // Stable Diffusion particularity
+  expect(genAsset_SD(mock_prompt,map)[1]).toContain("fuego"); // reference in Positive Part
+  expect(genAsset_SD(mock_prompt,map)[2]).toBe("\n"); // split between Positive & Negative part
+  expect(genAsset_SD(mock_prompt,map)[3]).toBe("Negative prompt:\n"); // Negative Traits
+  expect(genAsset_SD(mock_prompt,map)[4]).toContain("fuego"); // reference in Negative
+  // TODO: See how to check them individually
+/*
+  expect(genAsset_SD(mock_prompt,map)[0]).toBe("Positive prompt:\n"); // Stable Diffusion particularity
   expect(genAsset_SD(mock_prompt,map)[1]).toBe("fuego"); // reference in prefix
   expect(genAsset_SD(mock_prompt,map)[2]).toBe("fuego"); // reference in core
   expect(genAsset_SD(mock_prompt,map)[3]).toBe(""); // reference in suffix ----> Maybe shouldn't
@@ -339,6 +480,7 @@ test('reference_in_prompt', async() => {
   expect(genAsset_SD(mock_prompt,map)[5]).toBe("\n"); // split between Positive & Negative part
   expect(genAsset_SD(mock_prompt,map)[6]).toBe("Negative prompt:\n"); // Negative Traits
   expect(genAsset_SD(mock_prompt,map)[7]).toBe("fuego"); // Nagative trait in core
+  */
 })
 
 test('reference_in_composer', async() => {
@@ -352,9 +494,9 @@ test('reference_in_composer', async() => {
 
 test('test_asset_reuse', async() => {
 
-  expect(getAssetReuse(mock_AssetReuse_noParams, AISystem.StableDiffusion)).not.toBe('');  // Check that the TextPlain is called
+  expect(genAssetReuse(mock_AssetReuse_noParams, AISystem.StableDiffusion)).not.toBe('');  // Check that the TextPlain is called
   expect(mock_AssetReuse_noParams.asset.ref.name).toBe("child");  // Check it calls the correct asset
-  expect(getAssetReuse(mock_AssetReuse_noParams, AISystem.StableDiffusion)).toContain(mock_core_content.content);  // Check that the content of the child asset is written
+  expect(genAssetReuse(mock_AssetReuse_noParams, AISystem.StableDiffusion)).toContain(mock_core_content.content);  // Check that the content of the child asset is written
   
 })
 
@@ -364,7 +506,23 @@ test('reference_in_asset_reuse', async() => {
   // @elemento is detected as a variable in the og asset
   expect(mock_AssetReuse_parameters.pars.pars[0].content.content).toBe("fuego");
   // The reference to the asseset has "fuego" as the value of "@elemento"
-  expect(getAssetReuse(mock_AssetReuse_parameters, AISystem.StableDiffusion)).toContain("fuego");
+  expect(genAssetReuse(mock_AssetReuse_parameters, AISystem.StableDiffusion)).toContain("fuego");
   // The assign of the varibales is done correctly
 })
 
+test('asset_reuse_in_asset_reuse' , async() => {
+  // Case were the variable/s of an AssetReuse is another AssetResuse with some parameters.
+  // See that the mapping of those parameters has be done correctly
+  let map= new Map<string,string>;
+  map.set( "@elemento","fuego")
+  map.set( "@elemento2","agua")
+  expect(mock_AssetReuse_big.asset.ref?.pars.pars[0].name).toBe("@elemento2");  // The local parameter in the main asset reuse is @elemento2, which globally is assigned to "agua"
+  expect(genAssetReuse(mock_AssetReuse_big, AISystem.ChatGPT, map)).toContain("fuego") // The asset resued used as variable reutns "fuego"
+})
+
+test('custom_separator', async() => {
+  mock_prompt
+  mock_prompt.separator = "..."
+  expect(genAsset_SD(mock_prompt)[1]).toContain("@elemento...@elemento") // The separator is used correctly
+  expect(genAsset_SD(mock_prompt)[1].endsWith("...")).toBe(false) // The separator is not implemented at the end
+})

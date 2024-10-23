@@ -1,0 +1,18 @@
+language
+    English
+    code='en'
+    region='EN'
+
+import B from libraries.tests.import_testB
+language=English
+
+import C from libraries.tests.import_testC
+language=English
+
+prompt main():text
+core=A()
+language=English
+
+prompt A():text
+core="hola",B("ssa")
+language=English

@@ -4,9 +4,9 @@
  * DO NOT EDIT MANUALLY!
  ******************************************************************************/
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isHyperParameters = exports.HyperParameters = exports.isHyperParam = exports.HyperParam = exports.isEquivalency = exports.Equivalency = exports.isEffectsTrait = exports.EffectsTrait = exports.isCore = exports.Core = exports.isContents = exports.Contents = exports.isComposer = exports.Composer = exports.isCombinationTrait = exports.CombinationTrait = exports.isChain = exports.Chain = exports.isCameraSettingsTrait = exports.CameraSettingsTrait = exports.isCameraAngleTrait = exports.CameraAngleTrait = exports.isByAuthorTrait = exports.ByAuthorTrait = exports.isAudienceTrait = exports.AudienceTrait = exports.isAssetReuse = exports.AssetReuse = exports.isAlternativeTrait = exports.AlternativeTrait = exports.isTrait = exports.Trait = exports.isTextTrait = exports.TextTrait = exports.isRelativeTrait = exports.RelativeTrait = exports.isMediumIndependentTrait = exports.MediumIndependentTrait = exports.isInputRef = exports.InputRef = exports.isInput = exports.Input = exports.isImageTrait = exports.ImageTrait = exports.isExecutableAsset = exports.ExecutableAsset = exports.isBaseSnippet = exports.BaseSnippet = exports.isAsset = exports.Asset = void 0;
-exports.isByExpressionOutputTesting = exports.ByExpressionOutputTesting = exports.isWeight = exports.Weight = exports.isTextLiteral = exports.TextLiteral = exports.isTargetSizeTrait = exports.TargetSizeTrait = exports.isSuffix = exports.Suffix = exports.isSnippet = exports.Snippet = exports.isSimilarToTrait = exports.SimilarToTrait = exports.isProximityTrait = exports.ProximityTrait = exports.isPrompt = exports.Prompt = exports.isPrefix = exports.Prefix = exports.isPointOfViewTrait = exports.PointOfViewTrait = exports.isParamInvokation = exports.ParamInvokation = exports.isParameters = exports.Parameters = exports.isParameterRef = exports.ParameterRef = exports.isParameter = exports.Parameter = exports.isNegativeTrait = exports.NegativeTrait = exports.isMultimodalRef = exports.MultimodalRef = exports.isMultimodal = exports.Multimodal = exports.isModel = exports.Model = exports.isMediumTrait = exports.MediumTrait = exports.isLiteraryStyleTrait = exports.LiteraryStyleTrait = exports.isLightingTrait = exports.LightingTrait = exports.isLanguageRegisterTrait = exports.LanguageRegisterTrait = exports.isLanguage = exports.Language = exports.isIncludesTrait = exports.IncludesTrait = void 0;
-exports.reflection = exports.ImpromptuAstReflection = void 0;
+exports.isHyperParam = exports.HyperParam = exports.isEquivalency = exports.Equivalency = exports.isEffectsTrait = exports.EffectsTrait = exports.isCore = exports.Core = exports.isContents = exports.Contents = exports.isComposer = exports.Composer = exports.isComparisonTrait = exports.ComparisonTrait = exports.isCombinationTrait = exports.CombinationTrait = exports.isChain = exports.Chain = exports.isCameraSettingsTrait = exports.CameraSettingsTrait = exports.isCameraAngleTrait = exports.CameraAngleTrait = exports.isByAuthorTrait = exports.ByAuthorTrait = exports.isAudienceTrait = exports.AudienceTrait = exports.isAssetReuse = exports.AssetReuse = exports.isAlternativeTrait = exports.AlternativeTrait = exports.isTrait = exports.Trait = exports.isTextTrait = exports.TextTrait = exports.isRelativeTrait = exports.RelativeTrait = exports.isMediumIndependentTrait = exports.MediumIndependentTrait = exports.isInputRef = exports.InputRef = exports.isInput = exports.Input = exports.isImageTrait = exports.ImageTrait = exports.isExecutableAsset = exports.ExecutableAsset = exports.isBaseSnippet = exports.BaseSnippet = exports.isAsset = exports.Asset = void 0;
+exports.isTextLiteral = exports.TextLiteral = exports.isTargetSizeTrait = exports.TargetSizeTrait = exports.isSuffix = exports.Suffix = exports.isSnippet = exports.Snippet = exports.isSimilarToTrait = exports.SimilarToTrait = exports.isProximityTrait = exports.ProximityTrait = exports.isPrompt = exports.Prompt = exports.isPrefix = exports.Prefix = exports.isPointOfViewTrait = exports.PointOfViewTrait = exports.isParamInvokation = exports.ParamInvokation = exports.isParameters = exports.Parameters = exports.isParameterRef = exports.ParameterRef = exports.isParameter = exports.Parameter = exports.isNegativeTrait = exports.NegativeTrait = exports.isMultimodalRef = exports.MultimodalRef = exports.isMultimodal = exports.Multimodal = exports.isModel = exports.Model = exports.isMediumTrait = exports.MediumTrait = exports.isLiteraryStyleTrait = exports.LiteraryStyleTrait = exports.isLightingTrait = exports.LightingTrait = exports.isLanguageRegisterTrait = exports.LanguageRegisterTrait = exports.isLanguage = exports.Language = exports.isIncludesTrait = exports.IncludesTrait = exports.isImportedAsset = exports.ImportedAsset = exports.isHyperParameters = exports.HyperParameters = void 0;
+exports.reflection = exports.ImpromptuAstReflection = exports.isByExpressionOutputTesting = exports.ByExpressionOutputTesting = exports.isWeight = exports.Weight = void 0;
 /* eslint-disable */
 const langium_1 = require("langium");
 exports.Asset = 'Asset';
@@ -99,6 +99,11 @@ function isCombinationTrait(item) {
     return exports.reflection.isInstance(item, exports.CombinationTrait);
 }
 exports.isCombinationTrait = isCombinationTrait;
+exports.ComparisonTrait = 'ComparisonTrait';
+function isComparisonTrait(item) {
+    return exports.reflection.isInstance(item, exports.ComparisonTrait);
+}
+exports.isComparisonTrait = isComparisonTrait;
 exports.Composer = 'Composer';
 function isComposer(item) {
     return exports.reflection.isInstance(item, exports.Composer);
@@ -134,6 +139,11 @@ function isHyperParameters(item) {
     return exports.reflection.isInstance(item, exports.HyperParameters);
 }
 exports.isHyperParameters = isHyperParameters;
+exports.ImportedAsset = 'ImportedAsset';
+function isImportedAsset(item) {
+    return exports.reflection.isInstance(item, exports.ImportedAsset);
+}
+exports.isImportedAsset = isImportedAsset;
 exports.IncludesTrait = 'IncludesTrait';
 function isIncludesTrait(item) {
     return exports.reflection.isInstance(item, exports.IncludesTrait);
@@ -261,7 +271,7 @@ function isByExpressionOutputTesting(item) {
 exports.isByExpressionOutputTesting = isByExpressionOutputTesting;
 class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
     getAllTypes() {
-        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
+        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'ComparisonTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'ImportedAsset', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
     computeIsSubtype(subtype, supertype) {
         switch (subtype) {
@@ -278,6 +288,7 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
             }
             case exports.AudienceTrait:
             case exports.ByAuthorTrait:
+            case exports.ComparisonTrait:
             case exports.IncludesTrait:
             case exports.SimilarToTrait:
             case exports.TargetSizeTrait:
@@ -297,6 +308,7 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
                 return this.isSubtype(exports.ExecutableAsset, supertype);
             }
             case exports.Composer:
+            case exports.ImportedAsset:
             case exports.ExecutableAsset: {
                 return this.isSubtype(exports.Asset, supertype);
             }
@@ -330,10 +342,6 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
             case 'AssetReuse:asset':
-            case 'Equivalency:assets': {
-                return exports.Asset;
-            }
-            case 'ByExpressionOutputTesting:validator':
             case 'ByExpressionOutputTesting:priorVersion':
             case 'ByExpressionOutputTesting:refines':
             case 'ByExpressionOutputTesting:priorVersion':
@@ -342,12 +350,19 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
             case 'Chain:refines':
             case 'Composer:priorVersion':
             case 'Composer:refines':
+            case 'Equivalency:assets':
+            case 'ImportedAsset:priorVersion':
+            case 'ImportedAsset:refines':
             case 'Prompt:priorVersion':
             case 'Prompt:refines': {
+                return exports.Asset;
+            }
+            case 'ByExpressionOutputTesting:validator': {
                 return exports.ExecutableAsset;
             }
             case 'ByExpressionOutputTesting:language':
             case 'Composer:language':
+            case 'ImportedAsset:language':
             case 'Prompt:language': {
                 return exports.Language;
             }

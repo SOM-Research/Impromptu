@@ -1,0 +1,14 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt independent_function(@var2, @var1): image
+core = 
+  medium( drawing ),
+  "The first variable is", @var2,"\n The second variable is", @var1
+  language= English  
+
+prompt NewMain(@var1, @var2): image
+core=independent_function(@var1,@var2)
+language=English

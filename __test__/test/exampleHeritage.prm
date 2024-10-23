@@ -5,7 +5,9 @@ language
 
 prompt Draw(@element): image
 core = "Draw a ", @element
+separator= " "
 language=English
+
 
 prompt Mixture(@animal1, @animal2): image
 core = 
@@ -16,8 +18,6 @@ core =
   audience("children" ) weight high,
   no(@animal1 ), no("scary")
   language= English
-
-  
 
 prompt NewMain(): image
 core=Mixture("eagle", "horse")

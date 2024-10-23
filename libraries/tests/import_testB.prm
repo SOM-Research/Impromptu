@@ -1,0 +1,15 @@
+language
+    English
+    code='en'
+    region='EN'
+
+import A from libraries.tests.import_testA
+language=English
+
+prompt B(): text
+core="You arrive to B"
+language=English
+
+prompt notRead():text
+core="Shouldn't be here"
+language=English

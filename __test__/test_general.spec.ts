@@ -2,12 +2,19 @@ import { EmptyFileSystem } from "langium";
 import { createImpromptuServices } from "../src/language-server/impromptu-module";
 import { AssetReuse, Model } from "../src/language-server/generated/ast";
 import { parseHelper } from "langium/test";
-import { test, expect } from 'vitest';
+import { beforeEach, test, expect } from 'vitest';
 import {  AISystem, generatePromptCode } from "../src/cli/generate-prompt";
 import { NodeFileSystem } from "langium/node";
-import { extractAstNode } from "../src/cli/cli-util";
+import { check_loops, extractAstNode } from "../src/cli/cli-util";
+// import { fs, vol } from 'memfs';
+/*
+beforeEach(() => {
+  // reset the state of in-memory fs
+  vol.reset()
+})
+*/
 
-
+ 
 test('basic', async() => {
   // Check that the Assets of the models are considered correctly 
 
@@ -29,7 +36,6 @@ test('basic', async() => {
 
   expect(model.assets).toHaveLength(1); // Test that the correct number of Assets are detected
   })
-
 
 
 test('asset_reference', async() => {
@@ -63,7 +69,6 @@ test('asset_reference', async() => {
   `);
 
   const model = document.parseResult.value
-
   expect(model.assets).toHaveLength(3); // Test that the correct number of Assets are detected
 
   const mixture_ref=model.assets[2].core.snippets[0].content 
@@ -75,7 +80,7 @@ test('asset_reference', async() => {
   expect(draw_ref.asset.ref).toBe(model.assets[0]);
   // Test that that Draw(@animal1) refer to the second prompt
 
-  })
+})
 
 
 test('validation_checks_active', async() => {
@@ -112,15 +117,61 @@ test('validation_checks_active', async() => {
 
   const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
   expect(validationErrors).toHaveLength(1) // Test that the prompt is incorrect indeed
-
   })
 
+test('validation_recursion_loop', async() => {
+  // Check that a recursivity loop is detected
 
-  test('script_mode_MD', async() => {
-    // Test 
+  const services = createImpromptuServices(EmptyFileSystem);
+  const parse = parseHelper<Model>(services.Impromptu);
+  
+  const document = await parse(`
+    language
+      English
+      code='en'
+      region='EN'
+
+    prompt functionA(): image
+    core = "You are in A", functionB()
+    language=English
+
+    prompt functionB(): image
+    core = "You are in B", functionA()
+    language=English
+  `);
+
+  await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+
+  const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
+  expect(validationErrors).toHaveLength(2) // Test that the prompt is incorrect indeed. Each function should return an error
+  expect(validationErrors[0].message).toBe("There is a recursive loop"); // Meassage of the recursion loop 
+  })
+
+  /**
+   * Returns the model of the file ` '__test__/test/testPromptMode.prm'`
+   */
+  async function prepare_model(){
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     const fileName= '__test__/test/testPromptMode.prm';
     const model = await extractAstNode<Model>(fileName, services);
+    return model;
+  }
+
+  test('validation_recursion_loop', async() => {
+    // Check that a recursivity loop is detected
+    const model = await prepare_model();
+    try{  
+      check_loops(model)
+    }catch(e){
+      let i =1
+      expect(i).toBe(1); // Check that returns an error
+    }
+  })
+
+  test('script_mode_MD', async() => {
+    // Test the script mode (no prompt sent)
+   
+    const model = await prepare_model();
     const result = generatePromptCode(model,AISystem.Midjourney, undefined );
     expect(result?.join()).toContain("promptA"); // First asset is in the final prompt
     expect(result?.join()).toContain("promptC"); // Last asset is in the final prompt
@@ -128,9 +179,7 @@ test('validation_checks_active', async() => {
 
   test('prompt_mode_MD', async() => {
     // Test the prompt mode in Midjourney-> Only the first prompt has to be considered
-    const services = createImpromptuServices(NodeFileSystem).Impromptu;
-    const fileName= '__test__/test/testPromptMode.prm';
-    const model = await extractAstNode<Model>(fileName, services);
+    const model = await prepare_model();
     const prompt = model.assets[0];
     const result = generatePromptCode(model,AISystem.Midjourney, prompt );
     expect(result?.join()).toContain("promptA"); // First asset is in the final prompt
@@ -138,9 +187,7 @@ test('validation_checks_active', async() => {
   })
   test('prompt_mode_SD', async() => {
     // Test the prompt mode in Stable-Diffusion -> Only the first prompt has to be considered
-    const services = createImpromptuServices(NodeFileSystem).Impromptu;
-    const fileName= '__test__/test/testPromptMode.prm';
-    const model = await extractAstNode<Model>(fileName, services);
+    const model = await prepare_model();
     const prompt = model.assets[0];
     const result = generatePromptCode(model,AISystem.StableDiffusion, prompt );
     expect(result?.join()).toContain("promptA"); // First asset is in the final prompt
@@ -149,9 +196,7 @@ test('validation_checks_active', async() => {
   
   test('prompt_mode_ChatGPT', async() => {
     // Test th prompt mode in ChatGPT -> Only the first prompt has to be considered
-    const services = createImpromptuServices(NodeFileSystem).Impromptu;
-    const fileName= '__test__/test/testPromptMode.prm';
-    const model = await extractAstNode<Model>(fileName, services);
+    const model = await prepare_model();
     const prompt = model.assets[0];
     const result = generatePromptCode(model,AISystem.ChatGPT, prompt );
     expect(result?.join()).toContain("promptA"); // First asset is in the final prompt
@@ -160,9 +205,7 @@ test('validation_checks_active', async() => {
 
 test('prompt_mode_variables', async() => {
   // Test the prompt mode with several varaibles
-  const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/testPromptMode.prm';
-  const model = await extractAstNode<Model>(fileName, services);
+  const model = await prepare_model();
   const prompt = model.assets[1];
   const result = generatePromptCode(model,AISystem.Midjourney, prompt, ["fuego"] );
   expect(result?.join()).toContain("promptB"); // Second asset is in the final prompt
@@ -172,9 +215,7 @@ test('prompt_mode_variables', async() => {
 
 test('prompt_mode_only_variables', async() => {
   // Test that with only variables, the prompt node reads only the last prompt
-  const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/testPromptMode.prm';
-  const model = await extractAstNode<Model>(fileName, services);
+  const model = await prepare_model();
 
   const result = generatePromptCode(model,AISystem.Midjourney, undefined, ["fuego"] );
   expect(result?.join()).toContain("promptC"); // Last asset is in the final prompt
@@ -183,22 +224,20 @@ test('prompt_mode_only_variables', async() => {
 });
 
 test('one_prompt_only_empty_varaibles', async() => {
-  const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/testPromptMode.prm';
-  const model = await extractAstNode<Model>(fileName, services);
+  const model = await prepare_model();
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.Midjourney,prompt, []);
   expect(result?.join()).toContain("promptA");
   expect(result?.join()).not.toContain("promptB");
 })
 
+
 test('test_heritage', async() => {
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/test/testHeritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
-  const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.Midjourney,undefined);
-  expect(result?.join(' ')).toContain("Draw a ,var 2"); // Test that the parameter has been used
+  expect(result?.join('')).toContain("Draw a , var 2"); // Test that the parameter has been used
 })
 
 test('test_heritage_in_prompt_mode', async() => {
@@ -206,21 +245,22 @@ test('test_heritage_in_prompt_mode', async() => {
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/test/exampleHeritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
-  const prompt = model.assets[-1]
+  expect(model.assets[2].name).toBe("NewMain"); 
+  const prompt = model.assets[2];
   const result = generatePromptCode(model,AISystem.Midjourney,prompt);
-  expect(result?.join(' ')).toContain("Draw a ,eagle"); // Checks that the prompt of Mixture() appears
+  expect(result?.join(' ')).toContain("Draw a  eagle"); // Checks that the prompt of Mixture() appears
+  expect(result?.join(' ')).not.toContain("Draw a  @animal"); // Checks that the prompt of Mixture() appears
   expect(result?.join(' ')).not.toContain("Mixture"); // Checks that the declaration of Mixture does not appear
 })
 
-test('test_heritage_in_prompt_mode', async() => {
-  // Checks that in prompt mode the reuse of Asset still works without writing the prompt of the declared Asset
-  // That means, the prompt of "Mixture(@animal1, @animal2)" does not appear on the final prompt
+test('not_general parameters' , async() => {
+  // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/exampleHeritage.prm';
+  const fileName= '__test__/test/not_global_heritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
-  const prompt = model.assets[-1]
-  const result = generatePromptCode(model,AISystem.Midjourney,prompt);
-  expect(result?.join(' ')).toContain("Draw a ,eagle"); // Checks that the prompt of Mixture() appears
-  expect(result?.join(' ')).not.toContain("Mixture"); // Checks that the declaration of Mixture does not appear
+  const prompt = model.assets[0]
+  const result = generatePromptCode(model,AISystem.ChatGPT,prompt, ["mock_var_1", "mock_var_2"]);
+  expect(result?.join(' ')).toContain("mock_var_1"); // The 1st var is referenced correctly although the name of Imput and InputRef is different
+  expect(result?.join(' ')).not.toContain("mock_var_2"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
 })
 

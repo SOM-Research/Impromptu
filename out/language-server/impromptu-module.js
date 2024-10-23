@@ -4,6 +4,7 @@ exports.createImpromptuServices = exports.ImpromptuModule = void 0;
 const langium_1 = require("langium");
 const module_1 = require("./generated/module");
 const impromptu_validator_1 = require("./impromptu-validator");
+const impromptu_scope_1 = require("./impromptu-scope");
 /**
  * Dependency injection module that overrides Langium default services and contributes the
  * declared custom services. The Langium defaults can be partially specified to override only
@@ -12,6 +13,9 @@ const impromptu_validator_1 = require("./impromptu-validator");
 exports.ImpromptuModule = {
     validation: {
         ImpromptuValidator: () => new impromptu_validator_1.ImpromptuValidator()
+    },
+    references: {
+        ScopeProvider: (services) => new impromptu_scope_1.ScopeParamProvider(services)
     }
 };
 /**

@@ -9,9 +9,7 @@ import * as Ast from '../language-server/generated/ast';
          isComposer, isTextLiteral, isParameterRef, isAssetReuse, isNegativeTrait, 
          isCombinationTrait, isAudienceTrait, isMediumTrait } from '../language-server/generated/ast';
          */
-import { extractDestinationAndName } from './cli-util';
-import { error } from 'console';
-
+import { extractDestinationAndName, get_imported_asset } from './cli-util';
 export const AISystem = {
 	ChatGPT: "chatgpt",
 	StableDiffusion: "stable-diffusion",
@@ -24,7 +22,7 @@ export const AISystem = {
 * *Generate a prompt for each asset (Generate the single requested prompt).
 *
 *   @param model 
-*   @param prompt 
+*   @param prompt  Prompt object that it will be addresed
 *   @param variables Variables transmitted by command line.
 *   @param promptName Prompt transmitted by command line. If it is not declared, `variables` are used in the last prompt of the document
 */
@@ -65,7 +63,11 @@ export function generatePromptTraitValidators(model: Ast.Model, prompt: Ast.Prom
         // traits with value
         if (Ast.isTextTrait(s)) { // || Ast.isImageTrait(s)) {
             if (s.validator)
-                result.push({ trait: s.value, condition: genBaseSnippet_ChatGPT(s)});// s.validator}); //genTraitValidatorPrompt(model, s.validator?.$refText)});
+                if (! Ast.isSnippet(s.value)) 
+                    result.push({ trait: s.value, condition: genBaseSnippet_ChatGPT(s)});// s.validator}); //genTraitValidatorPrompt(model, s.validator?.$refText)});
+                else{
+                    result.push({ trait: '', condition: genBaseSnippet_ChatGPT(s)});
+                }
         }
     })
     return result.filter(t => t.condition); //snippets.flatMap(s => ({trait: s.value, condition: genValidatorPrompt(model, s.validator?.$refText)})).filter(function(e){return e});
@@ -108,7 +110,7 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
         }
         else{
             console.log(chalk.red(`An asset with that name does not exist`));
-            throw error() 
+            throw new Error();
         }
     }
     else
@@ -122,10 +124,10 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
 }
 
 export function getPromptsList(model: Ast.Model) {
-    return model.assets.map(asset => getAssetDescription(asset)).filter(e => e !== undefined);
+    return model.assets.map(asset => genAssetDescription(asset)).filter(e => e !== undefined);
 }
 
-function getAssetDescription(asset: Ast.Asset) {
+function genAssetDescription(asset: Ast.Asset) {
     if (Ast.isPrompt(asset)) return { name: asset.name, description: asset.description};
     else return undefined;
 }
@@ -158,7 +160,7 @@ function generatePrompt_MJ(model: Ast.Model, prompt: Ast.Prompt | undefined, var
         }
         else{
             console.log(chalk.red(`The number of values and variables of the prompt does not match.`));
-            throw error()
+            throw new Error(`The number of values and variables of the prompt does not match.`)
         }
         
     }
@@ -178,16 +180,18 @@ function generatePrompt_MJ(model: Ast.Model, prompt: Ast.Prompt | undefined, var
             }          
             else{
                 console.log(chalk.red(`The number of values and variables of the prompt does not match.`));
-                throw error()  
+                throw new Error(`The number of values and variables of the prompt does not match.`)  
             }
         }
         else
-            return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined) as string[];     
+            return model.assets.flatMap(asset => 
+                {if (asset.$container==model){return genAsset_MJ(asset)} else return undefined}).filter(e => e !== undefined) as string[];     
     }
 
     // Generate a prompt for each asset
     else {
-        return model.assets.flatMap(asset => genAsset_MJ(asset)).filter(e => e !== undefined) as string[];
+        return model.assets.flatMap(asset => 
+            {if (asset.$container==model){return genAsset_MJ(asset)} else return undefined}).filter(e => e !== undefined) as string[];
     }
 }
 
@@ -202,6 +206,10 @@ function generatePrompt_MJ(model: Ast.Model, prompt: Ast.Prompt | undefined, var
  */
 export function genAsset_MJ(asset: Ast.Asset, variables?: Map<string,string>): string[] {
     if (Ast.isPrompt(asset)) {
+        let separator = ', ';
+        if (asset.separator !== undefined){
+            separator = asset.separator;
+        }
         const prefix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_MJ(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_MJ(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         
@@ -216,18 +224,74 @@ export function genAsset_MJ(asset: Ast.Asset, variables?: Map<string,string>): s
         }
 
         var core  = asset.core.snippets.flatMap(snippet => genSnippet_MJ(snippet,variables)).filter(e => e !== undefined) as string[];
-        return prefix.concat(text, core, suffix,`\n\n`);
+        let prompt = prefix.concat(text, core, suffix);
+        return [prompt.filter(function(e){return e}).join(separator)];
     } else if (Ast.isComposer(asset)) {
         return asset.contents.snippets.flatMap(snippet => genSnippet_MJ(snippet,variables)).filter(e => e !== undefined) as string[];
     } else if (Ast.isChain(asset)) {
         return [];
+    } else if (Ast.isImportedAsset(asset)) {
+        return genImportedAsset(asset, AISystem.Midjourney, variables);
     }
-    return [];
-    
- }
+    return [];  
+}
 
 
- 
+
+/**
+ * Generate the prompt of an imported Asset
+ * 
+ * @param asset the ImportedAsset
+ * @param aiSystem AI used
+ * @param variables Mapping used in the father's asset
+ * @returns prompt realted to the imported asset (string[])
+ */
+
+export function genImportedAsset(asset:Ast.ImportedAsset, aiSystem:string|undefined, variables?: Map<string,string>):string[]{
+
+    // get the prompt that is wanted to be imported: it should have the same name but different container from the desired "library" (contained in asset.library)
+    let imported_asset = get_imported_asset(asset)
+    if (Ast.isAsset(imported_asset)){
+        let new_map
+
+        if (variables){
+            // In case parameters were given, we have to extend that map to the imported asset
+            new_map = variables;
+        }
+        // If not variables are sent it is undefined and thus no map will be sent to the Asset
+
+        let result;
+        switch(aiSystem) {
+            case AISystem.Midjourney: {
+                result = genAsset_MJ(imported_asset,new_map);
+                break;
+            }
+            case AISystem.StableDiffusion: {   
+                result = genAsset_SD(imported_asset,new_map);
+                break;
+            }
+            case AISystem.ChatGPT: {
+                result = genAsset_ChatGPT(imported_asset,new_map);
+                break;
+            }
+            default: {
+                console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+                throw new Error();
+            }
+        }
+        return result;
+    }
+    else {
+        console.log(chalk.red(`Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
+        throw new Error();
+    }
+}
+
+/**
+ * Get the snippets that are `medium`. In case of more than one, only the first one is returned
+ * @param snippets array of Snippets
+ * @returns value of the `medium` snippet
+ */
 function extractMedium(snippets: Ast.Snippet[]): string | undefined {
     const mediumOnly = snippets.filter(s => Ast.isMediumTrait(s.content));
     const medium     = (mediumOnly as unknown) as Ast.MediumTrait[];
@@ -263,16 +327,18 @@ function extractMedium(snippets: Ast.Snippet[]): string | undefined {
         return text;
     }
 }
+
 /**
  * Get the `name` of all the `Snippet` in the container `pars`
  * @param pars 
  * @param previousMap Map of the variables and their value, declared in a `Prompt` different of where these Snippet is located.
  * @returns 
  */
-function getParamNames(pars:Ast.Snippet[],previousMap?:Map<string,string>): string[]{
+function getParamNames(pars:Ast.Snippet[], aiSystem:string|undefined,previousMap?:Map<string,string>): string[]{
+
     let sol=[]
     for(let element in pars){
-        sol.push(getParamName(pars[element], previousMap))
+        sol.push(getParamName(pars[element], aiSystem,previousMap))
     }
     return sol
 }
@@ -283,16 +349,10 @@ function getParamNames(pars:Ast.Snippet[],previousMap?:Map<string,string>): stri
  * @param previousMap Map of the variables and its value, declared in a foreigner `Prompt`.
  * @returns string[]
  */
-function getParamName(element:Ast.Snippet, previousMap?:Map<string,string>): string{
+function getParamName(element:Ast.Snippet, aiSystem:string|undefined, previousMap?:Map<string,string>): string{
 
     if (Ast.isAssetReuse(element.content)){
-        var reference = element.content.asset.ref ;
-        if ( reference){
-            return genAsset_MJ( reference, previousMap).toString()
-        }
-        else{
-            return ""
-        }
+        return genAssetReuse( element.content, aiSystem, previousMap).toString(); 
     }
     else if (Ast.isTextLiteral(element.content)){
         return element.content.content
@@ -306,6 +366,8 @@ function getParamName(element:Ast.Snippet, previousMap?:Map<string,string>): str
     else return ''
 }
 
+
+
 /**
  * Give the return prompt of an `AssetReuse` object. An `AssetReuse` references another `Asset`, 
  * but the variables used inthat prompt are changed by the `values` indicated in the paramters `pars` of `AssetReuse`,
@@ -316,20 +378,52 @@ function getParamName(element:Ast.Snippet, previousMap?:Map<string,string>): str
  * 
  * @returns string
  */
-export function getAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefined,  previousMap?:Map<string,string>): string{
+export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefined,  previousMap?:Map<string,string>): string{
     let snippetRef= assetReuse.asset.ref
         // In case the Assets had variables we have to change them
-        if (Ast.isPrompt(snippetRef) || Ast.isComposer(snippetRef)){     
+        
+        // Check the number of variables is correct
+        if(Ast.isImportedAsset(snippetRef)){
+            let imported_asset= get_imported_asset(snippetRef);
+            if( Ast.isPrompt(imported_asset) || Ast.isComposer(imported_asset)){
+                if (imported_asset.pars.pars.length != assetReuse.pars?.pars.length){
+                    console.log(chalk.red("The imported asset "+snippetRef.name+" needs "+imported_asset.pars.pars.length+" variables."));
+                    throw Error("The imported asset "+snippetRef.name+" needs "+imported_asset.pars.pars.length+" variables." )
+                }
+
+            }else if(Ast.isChain(imported_asset)){
+                if(assetReuse.pars?.pars && assetReuse.pars?.pars.length>0){
+                    console.log(chalk.red("A Chain cannot have parameters"));
+                    throw Error("A Chain cannot have parameters");
+                }
+            }
+            else{
+                console.log(chalk.red("You can't import an import"));
+                throw Error("You can't import an import");
+            }
+        }
+
+        if (Ast.isAsset(snippetRef)){     
             // Variables
-            let variables = snippetRef.pars.pars
+            
             var map = new Map<string,string>()
             if (assetReuse.pars){
                 // Mapping the value of the variables
-                let values = getParamNames(assetReuse.pars?.pars, previousMap)
+                let values = getParamNames(assetReuse.pars?.pars, aiSystem, previousMap)
                 // Create Mapping
-                for (let variable in variables){
-                    map.set(variables[variable].name,values[variable])
+                let variables
+                if (!Ast.isImportedAsset(snippetRef)&& !Ast.isChain(snippetRef)){
+                    variables = snippetRef.pars.pars
+                }else if(Ast.isImportedAsset(snippetRef)){
+                    let imported_asset = get_imported_asset(snippetRef)
+                    variables = imported_asset.pars.pars
                 }
+                if(variables){
+                    for (let variable in variables){
+                        map.set(variables[variable].name,values[variable])
+                    }
+                }
+                
                 var result
                 switch(aiSystem) {
                     case AISystem.Midjourney: {
@@ -385,7 +479,7 @@ export function genBaseSnippet_MJ(snippet: Ast.BaseSnippet, variables?:Map<strin
         else{
             return variables.get(((snippet as unknown) as Ast.ParameterRef).param.$refText) as string ;}
     } else if (Ast.isAssetReuse(snippet)) {
-        return getAssetReuse(snippet, AISystem.Midjourney, variables)
+        return genAssetReuse(snippet, AISystem.Midjourney, variables)
     } else if (Ast.isNegativeTrait(snippet)) {
         return genNegativeTrait_MJ(snippet,variables);
     } else if (Ast.isCombinationTrait(snippet)) {
@@ -442,8 +536,8 @@ function genMediumTrait_MJ(snippet: Ast.MediumTrait): string {
 }
 
 /**
- * 
- *  Generate a prompt for each asset (Generate the single requested prompt).
+ * Generate a prompt for each asset (Generate the single requested prompt).
+ * StableDiffusion Version
  *
  *   @param model 
  *   @param prompt 
@@ -453,6 +547,7 @@ function genMediumTrait_MJ(snippet: Ast.MediumTrait): string {
  */
 function generatePrompt_SD(model: Ast.Model, prompt: Ast.Prompt | undefined, variables?: string[]): string[] {
     // Generate the single requested prompt
+
     
     if (prompt){
         const parameters= prompt.pars
@@ -471,12 +566,13 @@ function generatePrompt_SD(model: Ast.Model, prompt: Ast.Prompt | undefined, var
         }
         else{    
             console.log(chalk.red(`The number of values and variables of the prompt does not match.`));
-            throw error()
+            throw new Error()
         }
         
     }
     else if (variables){
         const lastPrompt = model.assets[model.assets.length -1];
+        model.assets[0].name
         if(Ast.isPrompt(lastPrompt)){
             console.log(chalk.yellow(`No prompt were given. Chosing the last one by default`));
             const paramaters= lastPrompt.pars 
@@ -490,16 +586,20 @@ function generatePrompt_SD(model: Ast.Model, prompt: Ast.Prompt | undefined, var
             }
             else{
                 console.log(chalk.red(`The number of values and variables of the prompt does not match.`));
-                throw error() 
+                throw new Error() 
             }   
         }
         else
-            return model.assets.flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined) as string[];     
+            return model.assets.flatMap(asset => {
+                if (asset.$container==model){return genAsset_SD(asset)} else return undefined
+            }).filter(e => e !== undefined) as string[];     
     }
 
     // Generate a prompt for each asset
     else {
-        return model.assets.flatMap(asset => genAsset_SD(asset)).filter(e => e !== undefined) as string[];
+        return model.assets.flatMap(asset => 
+            {if (asset.$container==model){return genAsset_SD(asset)} else return undefined
+        }).filter(e => e !== undefined) as string[];
     }
 }
 
@@ -513,7 +613,10 @@ function generatePrompt_SD(model: Ast.Model, prompt: Ast.Prompt | undefined, var
 export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): string[] {
     if (Ast.isPrompt(asset)) {
         
-        
+        let separator = ', ';
+        if (asset.separator !== undefined){
+            separator = asset.separator;
+        }
         const prefix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         
@@ -531,22 +634,29 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
         }
         
         const core  = asset.core.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];
-        
+        let positive_prompt = prefix.concat(text,core, suffix).filter(function(e){return e}).join(separator);
+
         const negativeModifiers = extractNegativeModifiers(asset.core.snippets);
         const negativeText = negativeModifiers.flatMap(snippet => genSnippet_SD(((snippet.content as unknown) as Ast.NegativeTrait).content, variables)).filter(e => e !== undefined) as string[];
-
+        let negative_prompt = negativeText.filter(function(e){return e}).join(separator);
         // Build the final prompt
-        const positive = ["Positive prompt:\n"].concat(prefix, text, core, suffix);
-        const negative = ["Negative prompt:\n"].concat(negativeText);
+        const positive = ["Positive prompt:\n"].concat(positive_prompt);
+        const negative = ["Negative prompt:\n"].concat(negative_prompt);
         return positive.concat(['\n'], negative);
     } else if (Ast.isComposer(asset)) {
         return asset.contents.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];;
     } else if (Ast.isChain(asset)) {
         return [];
+    } else if (Ast.isImportedAsset(asset)) {
+        return genImportedAsset(asset, AISystem.StableDiffusion, variables);
     }
     return [];
  }
-
+/**
+ * For an array of snippets, extract the ones that (their content) are NegativeTrait
+ * @param snippets 
+ * @returns 
+ */
  function extractNegativeModifiers(snippets: Ast.Snippet[]): Ast.Snippet[] {
     const negative = snippets.filter(s => Ast.isNegativeTrait(s.content));
     return negative;
@@ -586,9 +696,9 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
         else{
             return variables.get((snippet  as Ast.ParameterRef).param.$refText) as string ;}
     } else if (Ast.isAssetReuse(snippet)) {
-        return getAssetReuse(snippet,AISystem.StableDiffusion, variables); 
+        return genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
     } else if (Ast.isNegativeTrait(snippet)) {
-        return ""; // It does not exxits Negative Traits in SD. They are in the Negative Prompt part
+        return ""; // the Negative Traits in SD are in the Negative Prompt part, as an ordary Trait
     } else if (Ast.isCombinationTrait(snippet)) {
         return genCombinationTrait_SD(snippet,variables);
     } else if (Ast.isAudienceTrait(snippet)) {
@@ -605,7 +715,8 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
    return "";
 }
 
-/* function genNegativeTrait_SD(snippet: Ast.NegativeTrait): string  {
+/* Not neccesary. Maybe reactivate?
+function genNegativeTrait_SD(snippet: Ast.NegativeTrait): string  {
     return genSnippet_SD(snippet.content).toString();
 } */
 
@@ -687,7 +798,7 @@ function generatePrompt_ChatGPT(model: Ast.Model, prompt: Ast.Prompt | undefined
         else{
             
             console.log(chalk.red(`The number of values and variables of the prompt does not match.`));
-            throw error()
+            throw new Error();
         }
         
     }
@@ -706,40 +817,68 @@ function generatePrompt_ChatGPT(model: Ast.Model, prompt: Ast.Prompt | undefined
             }
             else{
                 console.log(chalk.red(`The number of values and variables of the prompt does not match.`));
-                throw error()  
+                throw new Error();  
             }
                    
         }
         else
-            return model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined) as string[];     
+            return model.assets.flatMap(asset => {
+                if (asset.$container==model){return genAsset_ChatGPT(asset)} else return undefined
+            }).filter(e => e !== undefined) as string[];     
     }
 
     // Generate a prompt for each asset
     else {
-        return model.assets.flatMap(asset => genAsset_ChatGPT(asset)).filter(e => e !== undefined) as string[];
+        return model.assets.flatMap(asset =>{
+            if (asset.$container==model){return genAsset_ChatGPT(asset)} else return undefined
+        }).filter(e => e !== undefined) as string[];
     }
 }
 
+/**
+ * Generate the prompt for ChatGPT related to an Asset
+ * @param asset Asset
+ * @param variables Mapping of values-parameter transmited to the asset. In case no Map were sent, the Parameters names remains unchanged in the generated prompt.
+ * @returns 
+ */
 export function genAsset_ChatGPT(asset: Ast.Asset, variables?: Map <string, string>): string[] {
     if (Ast.isPrompt(asset)) {
+        let separator = '. ';
+        if (asset.separator !== undefined){
+            separator = asset.separator;
+        }
+
         const preffix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet, variables)) as string[] : []);
         const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet, variables)) as string[] : []);
         const core  = asset.core.snippets.flatMap(snippet => genSnippet_ChatGPT(snippet, variables));
         
         // Build the final prompt
-        const prompt = preffix.concat(core, suffix,`\n\n`);
+        const prompt = preffix.concat(core, suffix);
 
-        return [prompt.filter(function(e){return e}).join('. ')];
+        return [prompt.filter(function(e){return e}).join(separator)];
 
     } else if (Ast.isComposer(asset)) {
+        console.log(chalk.yellow("Composers are not implemented in ChatGPT yet"));
         return [];
     } else if (Ast.isChain(asset)) {
+        console.log(chalk.yellow("Composers are not implemented in ChatGPT yet"));
         return [];
+    } else if (Ast.isImportedAsset(asset)) {
+        return genImportedAsset(asset, AISystem.ChatGPT, variables);
     }
     return [];
  }
 
+ /**
+  * Generate the prompt of a Snippet in ChatGPT.
+  * @param snippet 
+  * @param variables 
+  * @returns 
+  */
  function genSnippet_ChatGPT(snippet: Ast.Snippet, variables?: Map <string, string>): string {
+    if (snippet.weight){
+        console.log(chalk.yellow("Weight of the snippet is not implemented in the ChatGPT mode, so it will be ignored."));
+    }
     return genBaseSnippet_ChatGPT(snippet.content, variables);
 }
 
@@ -765,10 +904,12 @@ export function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet, variables?: Map
         else{
             return variables.get(((snippet as unknown) as Ast.ParameterRef).param.$refText) as string ;}
     }else if (Ast.isAssetReuse(snippet)) {
-        return getAssetReuse(snippet, AISystem.ChatGPT, variables)
+        return genAssetReuse(snippet, AISystem.ChatGPT, variables)
+    }else if (Ast.isNegativeTrait(snippet)) {
+        return "Avoid " + genSnippet_ChatGPT(snippet.content, variables);
+    }else if (Ast.isComparisonTrait(snippet)) {
+        return genSnippet_ChatGPT(snippet.content1, variables) + " is more " + genSnippet_ChatGPT(snippet.comparison, variables) + " than " +genSnippet_ChatGPT(snippet.content2, variables);
     }
-    // } else if (Ast.isNegativeTrait(snippet)) {
-    //     return "";
     // } else if (Ast.isCombinationTrait(snippet)) {
     //     return "";
     // } else if (Ast.isAudienceTrait(snippet)) {

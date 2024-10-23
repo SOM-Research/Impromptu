@@ -1,0 +1,12 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt functionA(): image
+core = "You are in A", functionB(functionA())
+language=English
+
+prompt functionB(@element): image
+core = "You are in B"
+language=English

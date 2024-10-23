@@ -6,7 +6,7 @@
 /* eslint-disable */
 import { AstNode, AbstractAstReflection, Reference, ReferenceInfo, TypeMetaData } from 'langium';
 
-export type Asset = Composer | ExecutableAsset;
+export type Asset = Composer | ExecutableAsset | ImportedAsset;
 
 export const Asset = 'Asset';
 
@@ -74,7 +74,7 @@ export type Media = '3dobject' | 'audio' | 'image' | 'text' | 'video';
 
 export type Medium = '3D art' | 'comic book art' | 'digital art' | 'drawing' | 'painting' | 'photography' | 'portrait';
 
-export type MediumIndependentTrait = AudienceTrait | ByAuthorTrait | IncludesTrait | RelativeTrait | SimilarToTrait | TargetSizeTrait;
+export type MediumIndependentTrait = AudienceTrait | ByAuthorTrait | ComparisonTrait | IncludesTrait | RelativeTrait | SimilarToTrait | TargetSizeTrait;
 
 export const MediumIndependentTrait = 'MediumIndependentTrait';
 
@@ -226,6 +226,20 @@ export function isCombinationTrait(item: unknown): item is CombinationTrait {
     return reflection.isInstance(item, CombinationTrait);
 }
 
+export interface ComparisonTrait extends AstNode {
+    readonly $container: Snippet;
+    readonly $type: 'ComparisonTrait';
+    comparison: Snippet
+    content1: Snippet
+    content2: Snippet
+}
+
+export const ComparisonTrait = 'ComparisonTrait';
+
+export function isComparisonTrait(item: unknown): item is ComparisonTrait {
+    return reflection.isInstance(item, ComparisonTrait);
+}
+
 export interface Composer extends AstNode {
     readonly $container: Model;
     readonly $type: 'Composer';
@@ -235,6 +249,7 @@ export interface Composer extends AstNode {
     pars: Parameters
     priorVersion?: Reference<Asset>
     refines?: Reference<Asset>
+    separator?: string
 }
 
 export const Composer = 'Composer';
@@ -316,6 +331,23 @@ export const HyperParameters = 'HyperParameters';
 
 export function isHyperParameters(item: unknown): item is HyperParameters {
     return reflection.isInstance(item, HyperParameters);
+}
+
+export interface ImportedAsset extends AstNode {
+    readonly $container: Model;
+    readonly $type: 'ImportedAsset';
+    language: Reference<Language>
+    library: QualifiedName
+    name: QualifiedName
+    priorVersion?: Reference<Asset>
+    refines?: Reference<Asset>
+    separator?: string
+}
+
+export const ImportedAsset = 'ImportedAsset';
+
+export function isImportedAsset(item: unknown): item is ImportedAsset {
+    return reflection.isInstance(item, ImportedAsset);
 }
 
 export interface IncludesTrait extends AstNode {
@@ -540,6 +572,7 @@ export interface Prompt extends AstNode {
     prefix?: Prefix
     priorVersion?: Reference<Asset>
     refines?: Reference<Asset>
+    separator?: string
     suffix?: Suffix
 }
 
@@ -576,7 +609,7 @@ export function isSimilarToTrait(item: unknown): item is SimilarToTrait {
 }
 
 export interface Snippet extends AstNode {
-    readonly $container: AlternativeTrait | AudienceTrait | ByAuthorTrait | CombinationTrait | Contents | Core | IncludesTrait | NegativeTrait | ParamInvokation | Prefix | SimilarToTrait | Suffix;
+    readonly $container: AlternativeTrait | AudienceTrait | ByAuthorTrait | CombinationTrait | ComparisonTrait | Contents | Core | IncludesTrait | NegativeTrait | ParamInvokation | Prefix | SimilarToTrait | Suffix;
     readonly $type: 'Snippet';
     content: BaseSnippet
     weight?: Weight
@@ -665,6 +698,7 @@ export interface ImpromptuAstType {
     CameraSettingsTrait: CameraSettingsTrait
     Chain: Chain
     CombinationTrait: CombinationTrait
+    ComparisonTrait: ComparisonTrait
     Composer: Composer
     Contents: Contents
     Core: Core
@@ -674,6 +708,7 @@ export interface ImpromptuAstType {
     HyperParam: HyperParam
     HyperParameters: HyperParameters
     ImageTrait: ImageTrait
+    ImportedAsset: ImportedAsset
     IncludesTrait: IncludesTrait
     Input: Input
     InputRef: InputRef
@@ -709,7 +744,7 @@ export interface ImpromptuAstType {
 export class ImpromptuAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
+        return ['AlternativeTrait', 'Asset', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'ComparisonTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'ImportedAsset', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -727,6 +762,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             }
             case AudienceTrait:
             case ByAuthorTrait:
+            case ComparisonTrait:
             case IncludesTrait:
             case SimilarToTrait:
             case TargetSizeTrait:
@@ -746,6 +782,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
                 return this.isSubtype(ExecutableAsset, supertype);
             }
             case Composer:
+            case ImportedAsset:
             case ExecutableAsset: {
                 return this.isSubtype(Asset, supertype);
             }
@@ -789,6 +826,8 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             case 'Composer:priorVersion':
             case 'Composer:refines':
             case 'Equivalency:assets':
+            case 'ImportedAsset:priorVersion':
+            case 'ImportedAsset:refines':
             case 'Prompt:priorVersion':
             case 'Prompt:refines': {
                 return Asset;
@@ -798,6 +837,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             }
             case 'ByExpressionOutputTesting:language':
             case 'Composer:language':
+            case 'ImportedAsset:language':
             case 'Prompt:language': {
                 return Language;
             }

@@ -7,15 +7,7 @@ prompt Draw(@animal1): image
 core = "Draw a ", @animal1
 language=English
 
-prompt Mixture(@animal1, @animal2): image
-core = 
-  medium( drawing ),
-  Draw(@animal2),
-  between(@animal1, @animal2),
-  audience("children" ) weight high,
-  no(@animal1 ), no("scary")
-  language= English  
 
 prompt NewMain(): image
-core=Mixture("var 1","var 2")
+core=Draw("var 2")
 language=English

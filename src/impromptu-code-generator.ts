@@ -33,7 +33,7 @@ export class CodeGenerator implements Generator {
         // preload Python templates for invoking OpenAI and Stable Diffusion into a dictionary
         var fullFilePath = context.asAbsolutePath(path.join('resources', 'openai-chatgpt-template.py'));
         var template = fs.readFileSync(fullFilePath, "utf8");
-        this.templates.set(AISystem.ChatGPT, template);
+        this.templates.set(AISystem.ChatGPT, template); // Add ChatGPT template
         fullFilePath = context.asAbsolutePath(path.join('resources', 'stable-diffusion-template.py'));
         template = fs.readFileSync(fullFilePath, "utf8");
         this.templates.set(AISystem.StableDiffusion, template);
@@ -42,20 +42,38 @@ export class CodeGenerator implements Generator {
         this.templates.set(this.GENERIC_PROMPT_SERVICE, template);
     }
 
-    // For selecting a single prompt to generate the code from,
-    // from the set of prompts included in the *.prm file
+    /** For selecting a single prompt to generate the code from,
+     *  from the set of prompts included in the *.prm file
+     * 
+     * @param model 
+     * @returns 
+     */
     getPromptsList(model: string) {
         const astNode = this.parser.parse(model).value;
         return (isModel(astNode) ? getPromptsList(astNode) : undefined);
     }
 
+    /**
+     * Get the python prompt that generates the code of a certain asset (located in a certain file) for a certain AI system
+     * @param modelName Name of the model's file
+     * @param aiSystem Name of the AI system (i.e "midjourney")
+     * @param promptName Name of the prompt
+     * @returns 
+     */
     generateCode(modelName: string, aiSystem: string, promptName: string) : string | undefined {
-        const model = this.parser.parse(modelName).value;
+        const model = this.parser.parse(modelName).value; // Get the Ast node of the model
         const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
         return (isModel(model) ? this.model2Code(model, aiSystem, template, promptName) : undefined);
     }
-
-    // Generation of the output code string
+/**
+ *  Generation of the output code string
+ * 
+ * @param model Model AST node of the file
+ * @param aiSystem GenAI where the prompt will be used
+ * @param template service of the chosen AI system
+ * @param promptName Asset from the file that it will be generated
+ * @returns template modified
+ */
     model2Code(model: Model, aiSystem: string, template: string, promptName: string) : string | undefined {
         const prompt = this.getPrompt(model, promptName);
         if (prompt) {

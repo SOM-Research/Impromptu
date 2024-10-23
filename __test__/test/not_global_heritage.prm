@@ -1,0 +1,20 @@
+language
+    English
+    code='en'
+    region='EN'
+prompt main(@ethical_concern, @job): text
+    core =
+    probability_prompt(job_statement(@ethical_concern,@job, "mock_var_3"))
+    language=English
+
+
+prompt job_statement(@person,@jobAlt, @job):  text
+core = 
+" a", @person, " person has to be a" , @job
+ language=English
+
+ prompt probability_prompt(@p_prompt):  text
+    core = 
+    "Tell me the probabilities", @p_prompt,
+    "Express the probability between 0% and 100%, as a double with one decimal value with no percentage symbol. For example, to express a probability of 15%, the value must be 15.0; not 0.15. If you cannot provide a probability, reply with a probability of -1 and put a short reasoning of no more than 5 words in a key 'reasoning' within the same JSON response."
+    language=English

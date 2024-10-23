@@ -1,0 +1,109 @@
+language
+    English
+    code='en'
+    region='EN'
+
+//-------------------------------------Question formats----------------------------------------------
+prompt true_false_answers():  text
+    core = 
+        "The possible answers of the questions should be true or false"
+    language=English
+
+prompt true_false_correction_aswers():  text
+    core = 
+        true_false_answers(), "In case they are false, they should be corrected"
+        separator="."
+    language=English
+
+prompt complete_gaps_questions():  text
+    core = 
+        "The questions consist of filling the gaps"
+        separator="."
+    language=English
+
+prompt complete_gaps_in_a_text():  text
+    core = 
+        complete_gaps_questions(),"in a common text for all questions"
+        separator=" "
+    language=English
+
+prompt open_answer_answers():  text
+    core = 
+        "The questions should be open-aswer"
+        separator="."
+    language=English
+
+prompt general_questions():  text
+    core = 
+        "The questions should be general questions"
+        separator="."
+    language=English
+
+prompt choose_one_answers():  text
+    core = 
+        "The questions should be multiple-choice type"
+    language=English
+
+prompt multiple_answers():  text
+    core = 
+        choose_one_answers(), "More than one answer may be correct"
+        separator="."
+    language=English
+
+prompt match_format(@formatA,@numberA,@formatB,@numberB):  text
+    core = 
+        "The questions are matching questions"
+    language=English
+
+prompt multi_format(@formatA,@numberA,@formatB,@numberB):  text
+    core = 
+        "For",@numberA,"questions",@formatA,"and for",@numberB,"questions",@formatB
+    language=English
+
+//-------------------------------------Question topic----------------------------------------------
+prompt question_topic(@topic):  text
+    core = 
+        "The questions should be regarding", @topic
+        separator=" "
+    language=English
+
+//-------------------------------------Question number----------------------------------------------
+prompt number_questions(@number):  text
+    core = 
+        "The exam should consist of",@number,"questions"
+        separator=" "
+    language=English
+
+//-------------------------------------Question level----------------------------------------------
+prompt level(@level): text
+    core = 
+        "The questions should be selected to test people with",@level,"knowledge level"
+        separator=" "
+    language=English
+
+//--------------------------------------DetailedInstructions-----------------------------------------
+
+composer DetailedInstructions()
+    "Questions should be clear ", 
+    no("controversial topics"), 
+    "The questions should be as concise as possible"
+    separator="."
+    language=English
+
+
+//----------------------------------------Misc----------------------------------------------------
+prompt simple_test(@number, @level,@topic, @format): text
+core = "Write an exam", question_topic(@topic), number_questions(@number), level(@level), @format
+        separator="."
+    language=English
+
+prompt give_answers():text
+core = "Provide the answers of the questions as well"
+
+
+prompt example(): text
+    core = 
+        "Write an exam", question_topic("geography"), number_questions("50"), level("university"), true_false_answers()
+    suffix = DetailedInstructions()
+    separator="."
+    language=English

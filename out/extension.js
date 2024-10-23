@@ -102,8 +102,14 @@ function generateCodeService(context, aiSystem) {
         if (model) {
             var prompt = yield requestPromptAndValidation(generator, model);
             if (prompt) {
+                /**
+                 * code that generates the prompt
+                 */
                 const returner = generator.generateCode(model, aiSystem, prompt);
                 let title = 'Code Test Scenario';
+                /**
+                 * webview panel
+                 */
                 previewPanel = vscode.window.createWebviewPanel(
                 // Webview id
                 'liveCodePreviewer', 
@@ -126,6 +132,12 @@ function generateCodeService(context, aiSystem) {
         }
     });
 }
+/**
+ * Generate the prompt and visualize it in the vscode window
+ * @param generator
+ * @param model .prm flie selected
+ * @returns
+ */
 function requestPromptAndValidation(generator, model) {
     return __awaiter(this, void 0, void 0, function* () {
         const prompts = generator.getPromptsList(model);
@@ -135,7 +147,7 @@ function requestPromptAndValidation(generator, model) {
                 if (prompt)
                     quickPickItems.push({ label: prompt.name, description: prompt.description });
             });
-            if (quickPickItems && quickPickItems.length > 1) {
+            if (quickPickItems && quickPickItems.length > 1) { // The file has more than one asset -> one should be selected
                 const pick = yield vscode.window.showQuickPick(quickPickItems, {
                     placeHolder: 'Select which prompt do you want to query the model with.',
                     canPickMany: false
@@ -148,6 +160,11 @@ function requestPromptAndValidation(generator, model) {
         return undefined;
     });
 }
+/**
+ * Vissualize a text in the panel webview
+ *
+ * @param code text to be visualized
+ */
 function updateCodePreview(code) {
     if (previewPanel && code) {
         previewPanel.webview.html = code;

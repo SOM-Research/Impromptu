@@ -1,0 +1,13 @@
+language
+    English
+    code='en'
+    region='EN'
+
+prompt Mixture():  text
+core = 
+  "Statement: ",
+  no("JSON"),
+ 'Begin your answer with Yes or No'
+ language=English
+
+ 

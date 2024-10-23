@@ -3,7 +3,7 @@ import { Command } from 'commander';
 import { Model } from '../language-server/generated/ast';
 import { ImpromptuLanguageMetaData } from '../language-server/generated/module';
 import { createImpromptuServices } from '../language-server/impromptu-module';
-import { extractAstNode, extractDocument } from './cli-util';
+import { check_loops, extractAstNode, extractDocument } from './cli-util';
 import { generateJavaScript } from './generator';
 import { generatePrompt } from './generate-prompt';
 import { NodeFileSystem } from 'langium/node';
@@ -18,25 +18,36 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
 
 export const generatePromptAction = async (fileName: string, opts: GenPromptOptions): Promise<void> => {
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
-    const model = await extractAstNode<Model>(fileName, services);
-    var validPrompt= true;
-    if(opts.prompt){
-        validPrompt= false;
-        if (model.assets.find(element => element.name == opts.prompt)){
-            validPrompt= true;
-        }
-    }
-    if(validPrompt){  
-        try{
-            const generatedFilePath = generatePrompt(model, fileName, opts.destination, opts.target, opts.variables, opts.prompt);
-            console.log(chalk.green(`Prompt generated successfully: ${generatedFilePath}`));
-        } 
-        catch(e){}
+    try{
+        const model = await extractAstNode<Model>(fileName, services);
         
-    }
-    else console.log(chalk.red(`Incorrect command. Prompt ${opts.prompt} does not exist in that document.`));
+        check_loops(model) // Ckecks thet any recursion loop happens
+
+        var validPrompt= true;
+        if(opts.prompt){
+            // In case a certain prompt is sent, we have to check that the prompt exists
+            validPrompt= false;
+            if (model.assets.find(element => element.name == opts.prompt)){
+                validPrompt= true;
+            }
+        }
+
+        if(validPrompt){  
+            try{
+                const generatedFilePath = generatePrompt(model, fileName, opts.destination, opts.target, opts.variables, opts.prompt);
+                console.log(chalk.green(`Prompt generated successfully: ${generatedFilePath}`));
+            } 
+            catch(e){}
+            
+        }
+        else {
+            console.log(chalk.red(`Incorrect command. Prompt ${opts.prompt} does not exist in that document.`))
+            throw new Error(`Incorrect command. Prompt ${opts.prompt} does not exist in that document.`)
+        }     
+    }catch(e){}
     
 };
+
 
 
 
