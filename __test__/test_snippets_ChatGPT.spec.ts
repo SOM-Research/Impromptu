@@ -1,7 +1,8 @@
 import { Reference } from "langium";
 import { AssetReuse, BaseSnippet, CombinationTrait, Core, Parameters, InputRef, Parameter, ParamInvokation, Prompt, Snippet, TextLiteral, Suffix, Composer, NegativeTrait, ImportedAsset } from "../src/language-server/generated/ast";
 import { test, expect, vi } from 'vitest'
-import { genBaseSnippet_ChatGPT, AISystem, genAsset_ChatGPT, genAssetReuse, genImportedAsset } from "../src/cli/generate-prompt";
+import { AISystem, genAssetReuse, genImportedAsset } from "../src/cli/generate-prompt";
+import { genBaseSnippet_ChatGPT, genAsset_ChatGPT } from "../src/cli/generate-prompt_ChatGPT";
 import * as utils from "../src/cli/cli-util";
 
 //---------------------------------VARIABLES----------------------------------
@@ -339,7 +340,7 @@ const mock_audience_trait:BaseSnippet={
 }
 const mock_negation_trait:NegativeTrait={
   $container: mock_snippet_empty,
-  $type:'NegativeTrait',
+  $type: NegativeTrait,
   content:mock_snippet_values
 }
 
@@ -364,19 +365,28 @@ const mock_AssetReuse_big:AssetReuse = {
   pars:mock_AssetReuse_as_parameter
 }
 
-
 /**
- * Mocks an imported asset
+ * Mocks an AssetImport
  */
-const mock_imported_asset:ImportedAsset = {
-  $type: 'ImportedAsset',
+const mock_asset_import:AssetImport = {
+  $type: 'AssetImport',
   name: "Imported",
   library: "asset"
 }
 
 
+/**
+ * Mocks an ImportedAsset, whch contains an AssetImport
+ */
+const mock_imported_asset:ImportedAsset = {
+  $type: 'ImportedAsset',
+  asset_name: [mock_asset_import],
+  library: "asset"
+}
+
+
 const mock_imported_asset_ref:Reference<ImportedAsset> ={
-  ref: mock_imported_asset,
+  ref: mock_asset_import,
   $refText:"import Imported from asset"
 }
 

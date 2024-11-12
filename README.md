@@ -19,6 +19,8 @@ This repository is the companion to the research paper providing a description o
 
 Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. In order to run Impromptu you need [Node.js](https://nodejs.org/) and [Visual Studio Code](https://code.visualstudio.com/) in your system.
 
+In addition, the Node module `csv-parser` has to be installed. Write in the CLI ```npm install csv-parser```
+
 ## Installing
 
 Impromptu is offered as a Visual Studio Code extension. You can install the extension by downloading the `.vsix` file and running:
@@ -181,6 +183,28 @@ for children::2, --no violent, --no scary
 ```
 
 In case that parameters but no prompt were declared in the command, the last asset in the file will be used. That means that in the previous example we may have omitted `-p Mixture` and we would have obtained the same result. 
+
+#### Types of errors and their syntax
+
+There are two types of possible errors that it may occurr: validation errors or compilation errors.
+- <b>Validation errors</b>. These errors are related to errors of the impromptu syntaxt in the langium document. Therefore, they are detected before creating the AST.
+- <b>Compilation errors</b>. There are another errors that are only detected when the prompt is being generated.
+
+The errors have the following syntax:
+```
+[<file>: <line>] Error: <description>
+```
+In case the error occurs in a imported file, that file and all their parents have errors. <b> The first one which sends the error is the child</b>:
+```
+There are validation errors:
+[libraries/tests/import_testB.prm: 9] Error : Expecting: one of these possible Token sequences:
+  1. [@]
+  2. [$]
+but found: ':' [:]
+[libraries/tests/import_testB.prm: 9] Error : Expecting token of type `)` but found `:`. [:]
+[libraries/tests/import_testA.prm: 6] Error : error in imported asset B.
+[examples/examples_import/error_in_import.prm: 7] Error : error in imported asset main.
+```
 
 
 ### Code generation for prompt execution and output validation

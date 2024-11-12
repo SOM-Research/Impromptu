@@ -16,12 +16,12 @@ hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
 hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
 
 entry Model:
-    (languages+=Language)+
-    (assets+=Asset)+
+    (language=Language)+ // Only one language per file
+    (assets+=Asset|imports+=ImportedAsset)+
     (equivalencies=Equivalency)*;
 
 Asset:
-    ExecutableAsset | Composer | ImportedAsset;
+    ExecutableAsset | Composer ;
 
 ExecutableAsset:
     Prompt | Chain;
@@ -33,16 +33,18 @@ Prompt:
     (suffix=Suffix)?
     (hyper=HyperParameters)?
     AssetSeparator
-    AssetLanguage
+    AssetLanguage 
     AssetRelationships
     (ByExpressionOutputTesting)*
     ;
 
 ImportedAsset:
-    'import' name=QualifiedName 'from' library=QualifiedName
-    AssetSeparator
-    AssetLanguage
-    AssetRelationships;
+    'import' asset_name+=AssetImport (',' asset_name+=AssetImport)* 'from' library=QualifiedName
+    ;
+
+AssetImport:
+    [Asset:QualifiedName];
+
 
 HyperParameters:
     hyper+=HyperParam (',' hyper+=HyperParam)*
@@ -186,7 +188,9 @@ MultimodalRef:
     param=[Multimodal:FileId];
 
 AssetReuse:
-    asset=[Asset:QualifiedName] (pars=ParamInvokation)?;
+    asset=[Referenciable:QualifiedName] (pars=ParamInvokation)?;
+
+type Referenciable = Asset|AssetImport;
 
 ParamInvokation:
     '(' pars+=Snippet (',' pars+=Snippet )*  ')' | '(' ')';
@@ -229,15 +233,14 @@ Effects returns string: 'blur' | 'reflection' | 'distortion' ;
 // 2024-01-17 SEMO: Extension - Language support, refinements and equivalencies
 // ----------------------------------------------------------------------------------------
 
-Language:
-    'language'
-    name=ID
-    'code=' code=STRING
-    'region=' region=STRING
+Language: // Change: Language should be the same for all the file -> Does not make sense
+    'language=' name=(ID|STRING)
+    //('code=' code=STRING)?
+    ('region=' region=STRING)? //CHANGED
     ;
 
 fragment AssetLanguage:
-    'language=' language=[Language:ID]
+    ('language=' language=ID)?
     ;
 
 fragment AssetSeparator:

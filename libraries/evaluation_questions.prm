@@ -1,56 +1,53 @@
-language
-    English
-    code='en'
-    region='EN'
+language= English
 
 //-------------------------------------Question formats----------------------------------------------
-prompt true_false_answers():  text
+prompt true_false_answers(@option):  text
     core = 
-        "The possible answers of the questions should be true or false"
+        "The possible answers of the questions should be true or false",@option
     language=English
 
-prompt true_false_correction_aswers():  text
+prompt correct_answers_option():  text
     core = 
-        true_false_answers(), "In case they are false, they should be corrected"
+        "In case they are false, they should be corrected"
         separator="."
     language=English
 
-prompt complete_gaps_questions():  text
+prompt complete_gaps_questions(@option):  text
     core = 
-        "The questions consist of filling the gaps"
+        "The questions consist of filling the gaps", @option
         separator="."
     language=English
 
-prompt complete_gaps_in_a_text():  text
+prompt only_one_text_option():  text
     core = 
-        complete_gaps_questions(),"in a common text for all questions"
+        "Use a common text for all questions"
         separator=" "
-    language=English
 
-prompt open_answer_answers():  text
+prompt open_answer_question(@lenght):  text
     core = 
-        "The questions should be open-aswer"
+        "The questions should be open-answer"
         separator="."
     language=English
 
-prompt general_questions():  text
+prompt paraphrase():text
     core = 
-        "The questions should be general questions"
+        "The exercise should require students to rephrase a given sentence using new vocabulary"
         separator="."
     language=English
 
-prompt choose_one_answers():  text
+prompt choose_one_answers(@option):  text
     core = 
-        "The questions should be multiple-choice type"
+        "The questions should be multiple-choice type",@option
+    separator="."
     language=English
 
-prompt multiple_answers():  text
+prompt multiple_answers_option():  text
     core = 
-        choose_one_answers(), "More than one answer may be correct"
-        separator="."
+        "More than one answer may be correct"
+    separator="."
     language=English
 
-prompt match_format(@formatA,@numberA,@formatB,@numberB):  text
+prompt match_format():  text
     core = 
         "The questions are matching questions"
     language=English
@@ -58,40 +55,91 @@ prompt match_format(@formatA,@numberA,@formatB,@numberB):  text
 prompt multi_format(@formatA,@numberA,@formatB,@numberB):  text
     core = 
         "For",@numberA,"questions",@formatA,"and for",@numberB,"questions",@formatB
+    separator=" "
     language=English
 
+prompt search_errors(@text_topic ): text 
+    core= "The questions should be about searching for grammar and spelling errors in a text about", @text_topic
+    language=English
+    
 //-------------------------------------Question topic----------------------------------------------
 prompt question_topic(@topic):  text
     core = 
-        "The questions should be regarding", @topic
+        "Write a", @topic,"exam"
         separator=" "
+    language=English
+
+prompt question_from_picture (@element ): text
+    core = 
+        "Base your questions on",@element, "in the image"
+    separator=" "
+    language= English
+
+prompt goal_content(@source):  text
+    core = 
+        "Base your questions on", @source
+        separator=" "
+    language=English
+
+prompt answer_options(@number,@answers, @distractors): text
+    prefix= number_questions(@number)
+    core= "You have to select the correct answers from the list:",@answers,
+    "and the distractors from the following list:",@distractors,"The distractors may not be in order"
+    suffix= "Do not reveal what the distractors nor the correct answers are. Only use each correct answer once"
+    separator=" "
+    language= English
+
+
+
+prompt distractor_selection(@example):text
+    core="Select the distractors of the question imitating the following example", @example
     language=English
 
 //-------------------------------------Question number----------------------------------------------
 prompt number_questions(@number):  text
     core = 
-        "The exam should consist of",@number,"questions"
+        "The exam will consist of", @number,"questions"
         separator=" "
     language=English
 
 //-------------------------------------Question level----------------------------------------------
 prompt level(@level): text
     core = 
-        "The questions should be selected to test people with",@level,"knowledge level"
+        "The questions should be selected to test people with",@level,"knowledge level. Try that the questions are as difficult as possible."
+        separator=" "
+    language=English
+
+prompt example_question(@example):text
+    core = 
+        "Takes this question as an example:",@example
+        separator=" "
+    language=English
+
+prompt duration_exam(@level,@times): text
+    core = 
+        "Select the questions so that it can be solved by",@level,"students in",@times,"minutes"
         separator=" "
     language=English
 
 //--------------------------------------DetailedInstructions-----------------------------------------
+composer InitialConditions()
+    "Write an exam. Before writing the question, give a brief explanation of the task"
+    language=English
 
 composer DetailedInstructions()
     "Questions should be clear ", 
     no("controversial topics"), 
-    "The questions should be as concise as possible"
+    "The questions should be as concise as possible."
     separator="."
     language=English
 
 
 //----------------------------------------Misc----------------------------------------------------
+prompt answer_format(@format):text
+core = "Use a", @format ,"format for your response."
+    language=English
+
+
 prompt simple_test(@number, @level,@topic, @format): text
 core = "Write an exam", question_topic(@topic), number_questions(@number), level(@level), @format
         separator="."
@@ -99,11 +147,11 @@ core = "Write an exam", question_topic(@topic), number_questions(@number), level
 
 prompt give_answers():text
 core = "Provide the answers of the questions as well"
-
+language=English
 
 prompt example(): text
     core = 
-        "Write an exam", question_topic("geography"), number_questions("50"), level("university"), true_false_answers()
+        "Write an exam", question_topic("geography"), number_questions("50"), level("university"), true_false_answers("")
     suffix = DetailedInstructions()
     separator="."
     language=English

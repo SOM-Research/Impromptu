@@ -1,3 +1,4 @@
+language=English
 prompt Mixture(@animal1, @animal2): image
 core = 
   medium( drawing ),

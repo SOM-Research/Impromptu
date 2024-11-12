@@ -1,7 +1,4 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
 
 prompt Draw(@animal1): image
 core = "Draw a ", @animal1

@@ -1,13 +1,10 @@
-language
-    English
-    code='en'
-    region='EN'
-
-import A from libraries.tests.import_testA
 language=English
 
+import A from libraries.tests.import_testA
+
+
 prompt B(): text
-core="You arrive to B"
+core=A(),"You arrive to B"
 language=English
 
 prompt notRead():text

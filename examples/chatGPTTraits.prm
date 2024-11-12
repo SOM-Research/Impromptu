@@ -1,8 +1,4 @@
-language
-    English
-    code='en'
-    region='EN'
-
+language=English
 prompt Mixture():  text
 core = 
   "Statement: ",

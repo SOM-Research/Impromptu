@@ -10,10 +10,11 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
+            "env": {"WORKSPACE": "${workspaceFolder}"}, // Variable to pass the workspace to the vscode extension
             "args": [
                 "${workspaceFolder}/examples/",
                 "--extensionDevelopmentPath=${workspaceFolder}"
-            ]
+            ],
         },
         {
             "name": "Attach to Language Server",

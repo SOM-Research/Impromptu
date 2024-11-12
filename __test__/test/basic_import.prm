@@ -1,0 +1,9 @@
+
+language=English
+
+import roling_prompt from libraries.ethic_questions
+
+
+prompt NewMain(): image
+core =roling_prompt()
+language=English

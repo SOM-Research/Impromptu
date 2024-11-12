@@ -185,28 +185,45 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "elements": [
           {
             "$type": "Assignment",
-            "feature": "languages",
-            "operator": "+=",
+            "feature": "language",
+            "operator": "=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@72"
+                "$ref": "#/rules@73"
               },
               "arguments": []
             },
             "cardinality": "+"
           },
           {
-            "$type": "Assignment",
-            "feature": "assets",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@10"
+            "$type": "Alternatives",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "assets",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@10"
+                  },
+                  "arguments": []
+                }
               },
-              "arguments": []
-            },
+              {
+                "$type": "Assignment",
+                "feature": "imports",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@13"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
             "cardinality": "+"
           },
           {
@@ -216,7 +233,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@76"
+                "$ref": "#/rules@77"
               },
               "arguments": []
             },
@@ -246,14 +263,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@17"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@13"
+              "$ref": "#/rules@18"
             },
             "arguments": []
           }
@@ -282,7 +292,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@16"
+              "$ref": "#/rules@17"
             },
             "arguments": []
           }
@@ -337,7 +347,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@54"
+                "$ref": "#/rules@55"
               },
               "arguments": []
             }
@@ -353,7 +363,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@58"
+                "$ref": "#/rules@59"
               },
               "arguments": []
             }
@@ -378,7 +388,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@18"
+                "$ref": "#/rules@19"
               },
               "arguments": []
             },
@@ -391,7 +401,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@43"
+                "$ref": "#/rules@44"
               },
               "arguments": []
             }
@@ -403,7 +413,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@44"
+                "$ref": "#/rules@45"
               },
               "arguments": []
             },
@@ -416,25 +426,11 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@14"
+                "$ref": "#/rules@15"
               },
               "arguments": []
             },
             "cardinality": "?"
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@74"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@73"
-            },
-            "arguments": []
           },
           {
             "$type": "RuleCall",
@@ -446,7 +442,21 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@77"
+              "$ref": "#/rules@74"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@76"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@78"
             },
             "arguments": [],
             "cardinality": "*"
@@ -472,15 +482,37 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           },
           {
             "$type": "Assignment",
-            "feature": "name",
-            "operator": "=",
+            "feature": "asset_name",
+            "operator": "+=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@0"
+                "$ref": "#/rules@14"
               },
               "arguments": []
             }
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": ","
+              },
+              {
+                "$type": "Assignment",
+                "feature": "asset_name",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@14"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "*"
           },
           {
             "$type": "Keyword",
@@ -497,29 +529,30 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
               },
               "arguments": []
             }
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@74"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@73"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@75"
-            },
-            "arguments": []
           }
         ]
+      },
+      "definesHiddenTokens": false,
+      "entry": false,
+      "fragment": false,
+      "hiddenTokens": [],
+      "parameters": [],
+      "wildcard": false
+    },
+    {
+      "$type": "ParserRule",
+      "name": "AssetImport",
+      "definition": {
+        "$type": "Assignment",
+        "feature": "name",
+        "operator": "=",
+        "terminal": {
+          "$type": "RuleCall",
+          "rule": {
+            "$ref": "#/rules@0"
+          },
+          "arguments": []
+        }
       },
       "definesHiddenTokens": false,
       "entry": false,
@@ -541,7 +574,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@15"
+                "$ref": "#/rules@16"
               },
               "arguments": []
             }
@@ -560,7 +593,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@15"
+                    "$ref": "#/rules@16"
                   },
                   "arguments": []
                 }
@@ -657,14 +690,14 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@75"
+              "$ref": "#/rules@76"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@77"
+              "$ref": "#/rules@78"
             },
             "arguments": [],
             "cardinality": "*"
@@ -707,7 +740,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@54"
+                "$ref": "#/rules@55"
               },
               "arguments": []
             }
@@ -719,7 +752,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@42"
+                "$ref": "#/rules@43"
               },
               "arguments": []
             }
@@ -740,6 +773,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
+              "$ref": "#/rules@75"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
               "$ref": "#/rules@74"
             },
             "arguments": []
@@ -747,14 +787,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@73"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@75"
+              "$ref": "#/rules@76"
             },
             "arguments": []
           }
@@ -793,7 +826,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -812,7 +845,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -838,21 +871,21 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@20"
+              "$ref": "#/rules@21"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@24"
+              "$ref": "#/rules@25"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@31"
+              "$ref": "#/rules@32"
             },
             "arguments": []
           }
@@ -874,13 +907,6 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@21"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@22"
             },
             "arguments": []
@@ -889,6 +915,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "$type": "RuleCall",
             "rule": {
               "$ref": "#/rules@23"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@24"
             },
             "arguments": []
           }
@@ -922,7 +955,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@64"
               },
               "arguments": []
             }
@@ -934,7 +967,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -968,7 +1001,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@64"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -980,7 +1013,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1014,7 +1047,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@65"
+                "$ref": "#/rules@66"
               },
               "arguments": []
             }
@@ -1026,7 +1059,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1045,13 +1078,6 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
       "definition": {
         "$type": "Alternatives",
         "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@25"
-            },
-            "arguments": []
-          },
           {
             "$type": "RuleCall",
             "rule": {
@@ -1086,6 +1112,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
               "$ref": "#/rules@30"
             },
             "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@31"
+            },
+            "arguments": []
           }
         ]
       },
@@ -1117,7 +1150,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@66"
+                "$ref": "#/rules@67"
               },
               "arguments": []
             }
@@ -1129,7 +1162,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1163,7 +1196,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@67"
+                "$ref": "#/rules@68"
               },
               "arguments": []
             }
@@ -1175,7 +1208,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1209,7 +1242,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@68"
+                "$ref": "#/rules@69"
               },
               "arguments": []
             }
@@ -1221,7 +1254,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1255,7 +1288,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@69"
+                "$ref": "#/rules@70"
               },
               "arguments": []
             }
@@ -1267,7 +1300,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1301,7 +1334,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@70"
+                "$ref": "#/rules@71"
               },
               "arguments": []
             }
@@ -1313,7 +1346,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1347,7 +1380,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@71"
+                "$ref": "#/rules@72"
               },
               "arguments": []
             }
@@ -1359,7 +1392,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1381,14 +1414,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@32"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@37"
+              "$ref": "#/rules@33"
             },
             "arguments": []
           },
@@ -1423,7 +1449,14 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@34"
+              "$ref": "#/rules@42"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@35"
             },
             "arguments": []
           }
@@ -1445,14 +1478,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@33"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@35"
+              "$ref": "#/rules@34"
             },
             "arguments": []
           },
@@ -1460,6 +1486,13 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "$type": "RuleCall",
             "rule": {
               "$ref": "#/rules@36"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@37"
             },
             "arguments": []
           }
@@ -1493,7 +1526,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1505,7 +1538,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1539,7 +1572,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1555,7 +1588,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1571,7 +1604,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1610,7 +1643,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1629,7 +1662,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -1644,7 +1677,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1678,7 +1711,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1697,7 +1730,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -1712,7 +1745,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1746,7 +1779,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1758,7 +1791,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1814,7 +1847,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1833,7 +1866,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -1848,7 +1881,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1882,7 +1915,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1901,7 +1934,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -1916,7 +1949,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1950,7 +1983,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -1962,7 +1995,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -1996,7 +2029,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@60"
+                "$ref": "#/rules@61"
               },
               "arguments": []
             }
@@ -2012,7 +2045,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@61"
+                "$ref": "#/rules@62"
               },
               "arguments": []
             }
@@ -2044,7 +2077,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@62"
+                "$ref": "#/rules@63"
               },
               "arguments": []
             }
@@ -2056,7 +2089,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@78"
+              "$ref": "#/rules@79"
             },
             "arguments": []
           }
@@ -2082,7 +2115,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -2101,7 +2134,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -2144,7 +2177,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -2163,7 +2196,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -2206,7 +2239,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@46"
+                "$ref": "#/rules@47"
               },
               "arguments": []
             }
@@ -2225,7 +2258,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -2259,7 +2292,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@59"
+                "$ref": "#/rules@60"
               },
               "arguments": []
             }
@@ -2286,7 +2319,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@47"
+                "$ref": "#/rules@48"
               },
               "arguments": []
             }
@@ -2298,7 +2331,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@45"
+                "$ref": "#/rules@46"
               },
               "arguments": []
             },
@@ -2322,13 +2355,6 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@48"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@49"
             },
             "arguments": []
@@ -2336,14 +2362,21 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@52"
+              "$ref": "#/rules@50"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@19"
+              "$ref": "#/rules@53"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@20"
             },
             "arguments": []
           }
@@ -2387,14 +2420,14 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@50"
+              "$ref": "#/rules@51"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@51"
+              "$ref": "#/rules@52"
             },
             "arguments": []
           }
@@ -2417,7 +2450,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "terminal": {
           "$type": "CrossReference",
           "type": {
-            "$ref": "#/rules@56"
+            "$ref": "#/rules@57"
           },
           "terminal": {
             "$type": "RuleCall",
@@ -2446,7 +2479,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "terminal": {
           "$type": "CrossReference",
           "type": {
-            "$ref": "#/rules@57"
+            "$ref": "#/rules@58"
           },
           "terminal": {
             "$type": "RuleCall",
@@ -2478,7 +2511,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "CrossReference",
               "type": {
-                "$ref": "#/rules@10"
+                "$ref": "#/types@0"
               },
               "terminal": {
                 "$type": "RuleCall",
@@ -2497,7 +2530,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@54"
               },
               "arguments": []
             },
@@ -2532,7 +2565,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@46"
+                    "$ref": "#/rules@47"
                   },
                   "arguments": []
                 }
@@ -2551,7 +2584,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@46"
+                        "$ref": "#/rules@47"
                       },
                       "arguments": []
                     }
@@ -2607,7 +2640,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@55"
+                    "$ref": "#/rules@56"
                   },
                   "arguments": []
                 }
@@ -2626,7 +2659,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@55"
+                        "$ref": "#/rules@56"
                       },
                       "arguments": []
                     }
@@ -2672,14 +2705,14 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@56"
+              "$ref": "#/rules@57"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@57"
+              "$ref": "#/rules@58"
             },
             "arguments": []
           }
@@ -2761,7 +2794,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@58"
+                "$ref": "#/rules@59"
               },
               "arguments": []
             }
@@ -2786,7 +2819,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@45"
+                "$ref": "#/rules@46"
               },
               "arguments": []
             },
@@ -3392,51 +3425,53 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "elements": [
           {
             "$type": "Keyword",
-            "value": "language"
+            "value": "language="
           },
           {
             "$type": "Assignment",
             "feature": "name",
             "operator": "=",
             "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@4"
-              },
-              "arguments": []
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@4"
+                  },
+                  "arguments": []
+                },
+                {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@6"
+                  },
+                  "arguments": []
+                }
+              ]
             }
           },
           {
-            "$type": "Keyword",
-            "value": "code="
-          },
-          {
-            "$type": "Assignment",
-            "feature": "code",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@6"
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "region="
               },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Keyword",
-            "value": "region="
-          },
-          {
-            "$type": "Assignment",
-            "feature": "region",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@6"
-              },
-              "arguments": []
-            }
+              {
+                "$type": "Assignment",
+                "feature": "region",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@6"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
           }
         ]
       },
@@ -3463,21 +3498,15 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "feature": "language",
             "operator": "=",
             "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@72"
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@4"
               },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@4"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false
+              "arguments": []
             }
           }
-        ]
+        ],
+        "cardinality": "?"
       },
       "definesHiddenTokens": false,
       "entry": false,
@@ -3743,11 +3772,34 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
       "wildcard": false
     }
   ],
+  "types": [
+    {
+      "$type": "Type",
+      "typeAlternatives": [
+        {
+          "$type": "AtomType",
+          "refType": {
+            "$ref": "#/rules@10"
+          },
+          "isArray": false,
+          "isRef": false
+        },
+        {
+          "$type": "AtomType",
+          "refType": {
+            "$ref": "#/rules@14"
+          },
+          "isArray": false,
+          "isRef": false
+        }
+      ],
+      "name": "Referenciable"
+    }
+  ],
   "definesHiddenTokens": false,
   "hiddenTokens": [],
   "imports": [],
   "interfaces": [],
-  "types": [],
   "usedGrammars": []
 }`));
 exports.ImpromptuGrammar = ImpromptuGrammar;

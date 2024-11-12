@@ -1,0 +1,11 @@
+language=English
+
+prompt functionA(): image
+core = "You are in A", functionB()
+language=English
+
+prompt functionB(): image 
+core = 
+medium(photography),medium(photography),
+no("You are in B"), "gooog"
+language=English

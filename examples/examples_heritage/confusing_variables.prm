@@ -1,7 +1,4 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
 
 prompt independent_function(@var2, @var1): image
 core = 

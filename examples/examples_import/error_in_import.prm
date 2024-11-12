@@ -1,0 +1,10 @@
+language=English
+
+
+prompt main(): image
+core="hello"
+language=English
+
+prompt NewMain(): image
+core=main()
+language=English

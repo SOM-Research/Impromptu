@@ -16,11 +16,14 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
     console.log(chalk.green(`JavaScript code generated successfully: ${generatedFilePath}`));
 };
 
+
 export const generatePromptAction = async (fileName: string, opts: GenPromptOptions): Promise<void> => {
+   
+    
+
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     try{
         const model = await extractAstNode<Model>(fileName, services);
-        
         check_loops(model) // Ckecks thet any recursion loop happens
 
         var validPrompt= true;

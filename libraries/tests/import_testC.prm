@@ -1,8 +1,5 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
 
 prompt C():text
-core="Has llegado a C"
+core = "Has llegado a C","hola"
 language=English

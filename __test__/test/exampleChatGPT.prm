@@ -1,7 +1,5 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
+    
 prompt Rec1(@animal): text
 core = 
   "Draw an", @animal

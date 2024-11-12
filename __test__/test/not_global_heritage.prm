@@ -1,7 +1,5 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
+    
 prompt main(@ethical_concern, @job): text
     core =
     probability_prompt(job_statement(@ethical_concern,@job, "mock_var_3"))

@@ -1,10 +1,7 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
 
 prompt main(@animal, @animal2): image
-core =  between(@animal, @animal2), camera-angle(aerial view), lighting(back),'adorable'
+core =  between(@animal, @animal2), lighting(back),'adorable'
 language=English
 
 

@@ -98,9 +98,20 @@ class CodeGenerator {
         }
         return 'ERROR: Cannot generate prompt code.';
     }
+    /**
+     * Get the prompt object with a certain name in the model. In case is not a prompt, it does not return nothing
+     * @param model
+     * @param promptName prompt name
+     * @returns
+     */
     getPrompt(model, promptName) {
         return model.assets.filter(a => (0, ast_js_1.isPrompt)(a)).filter(a => a.name == promptName)[0];
     }
+    /**
+     * Get the format output of the prompt
+     * @param prompt
+     * @returns
+     */
     getPromptOutputMedia(prompt) {
         return (prompt.output) ? prompt.output : 'text';
     }

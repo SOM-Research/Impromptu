@@ -1,0 +1,17 @@
+
+language=Spanish
+
+
+import question_topic, example_question, paraphrase,duration_exam,goal_content,give_answers,correct_answers_option,InitialConditions, DetailedInstructions from libraries.evaluation_questions
+
+prompt main(): text
+    prefix = InitialConditions()
+    core = 
+        question_topic("B2-level English"), paraphrase(), 
+        duration_exam("B2 English","10"),goal_content("job application vocabulary"),
+        give_answers(), example_question("I am writing you about the job offer
+         Words: job application
+         Answer:______________")
+    suffix = DetailedInstructions()
+    separator="."
+    language=English

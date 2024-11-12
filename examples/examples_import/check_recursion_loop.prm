@@ -1,12 +1,6 @@
-language
-    English
-    code='en'
-    region='EN'
-
-
-import main from libraries.tests.import_testA
 language=English
 
+import main from libraries.tests.import_testA
 
 prompt NewMain(): image
 core=main()

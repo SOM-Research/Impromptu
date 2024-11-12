@@ -1,11 +1,12 @@
 import {
     createDefaultModule, createDefaultSharedModule, DefaultSharedModuleContext, inject,
     LangiumServices, LangiumSharedServices, Module, PartialLangiumServices,
+    ScopeComputation,
     ScopeProvider
 } from 'langium';
 import { ImpromptuGeneratedModule, ImpromptuGeneratedSharedModule } from './generated/module';
 import { ImpromptuValidator, registerValidationChecks } from './impromptu-validator';
-import { ScopeParamProvider } from './impromptu-scope';
+import { ImpromptuScopeComputation, ScopeParamProvider } from './impromptu-scope';
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -16,7 +17,8 @@ export type ImpromptuAddedServices = {
     }
     
     references:{
-        ScopeProvider: ScopeProvider
+        ScopeProvider: ScopeProvider,
+        ScopeComputation: ScopeComputation
     }
         
 }
@@ -37,7 +39,8 @@ export const ImpromptuModule: Module<ImpromptuServices, PartialLangiumServices &
         ImpromptuValidator: () => new ImpromptuValidator()
     },
     references: {
-        ScopeProvider: (services) => new ScopeParamProvider(services)
+        ScopeProvider: (services) => new ScopeParamProvider(services),
+        ScopeComputation: (services) => new ImpromptuScopeComputation(services)
     }
         
 };

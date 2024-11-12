@@ -44,8 +44,14 @@ const generate_prompt_1 = require("./cli/generate-prompt");
 const fs_1 = __importDefault(require("fs"));
 let client;
 let previewPanel;
-// This function is called when the extension is activated.
+/**
+ * This function is called when the extension is activated.
+ * */
 function activate(context) {
+    //@ts-ignore
+    global.VSMODE = true;
+    //@ts-ignore
+    console.log("extension activated in 1", global.VSMODE);
     client = startLanguageClient(context);
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', () => __awaiter(this, void 0, void 0, function* () {
         yield generateCodeService(context, generate_prompt_1.AISystem.ChatGPT);
@@ -58,7 +64,9 @@ function activate(context) {
     })));
 }
 exports.activate = activate;
-// This function is called when the extension is deactivated.
+/**
+ * This function is called when the extension is deactivated.
+ * */
 function deactivate() {
     if (client) {
         return client.stop();
@@ -94,6 +102,11 @@ function startLanguageClient(context) {
     client.start();
     return client;
 }
+/**
+ * Service of the extention that enables the generation of the code file.
+ * @param context
+ * @param aiSystem
+ */
 function generateCodeService(context, aiSystem) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -120,7 +133,7 @@ function generateCodeService(context, aiSystem) {
                     // Enable scripts in the webview
                     enableScripts: false,
                     retainContextWhenHidden: false,
-                    // And restrict the webview to only loading content from our extension's 'assets' directory.
+                    // And restrict the webview to only loading content from our extension's 'assets' directory. -> PROBLEM WITH IMPORTS
                     localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
                 });
                 setPreviewActiveContext('liveCodePreviewer', true);
@@ -133,7 +146,7 @@ function generateCodeService(context, aiSystem) {
     });
 }
 /**
- * Generate the prompt and visualize it in the vscode window
+ * Select the prompt it wants to be generated + validated
  * @param generator
  * @param model .prm flie selected
  * @returns
@@ -161,7 +174,7 @@ function requestPromptAndValidation(generator, model) {
     });
 }
 /**
- * Vissualize a text in the panel webview
+ * Visualize a text in the panel webview
  *
  * @param code text to be visualized
  */

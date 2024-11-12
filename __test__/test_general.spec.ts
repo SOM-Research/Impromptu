@@ -22,10 +22,7 @@ test('basic', async() => {
   const parse = parseHelper<Model>(services.Impromptu);
   
   const document = await parse(`
-    language
-    English
-    code='en'
-    region='EN'
+    language=English
 
     prompt Draw(@animal1, @animal2): image
     core = "Draw a", @animal1, " and ",@animal2
@@ -44,10 +41,7 @@ test('asset_reference', async() => {
   const parse = parseHelper<Model>(services.Impromptu);
   
   const document = await parse(`
-    language
-    English
-    code='en'
-    region='EN'
+    language= English
 
     prompt Draw(@element): image
     core = "Draw a", @element
@@ -90,10 +84,7 @@ test('validation_checks_active', async() => {
   const parse = parseHelper<Model>(services.Impromptu);
   
   const document = await parse(`
-        language
-        English
-        code='en'
-        region='EN'
+    language=English
 
     prompt Draw(@animal1): image
     core = "Draw a", @animal1
@@ -126,10 +117,7 @@ test('validation_recursion_loop', async() => {
   const parse = parseHelper<Model>(services.Impromptu);
   
   const document = await parse(`
-    language
-      English
-      code='en'
-      region='EN'
+    language=English
 
     prompt functionA(): image
     core = "You are in A", functionB()
@@ -146,6 +134,53 @@ test('validation_recursion_loop', async() => {
   expect(validationErrors).toHaveLength(2) // Test that the prompt is incorrect indeed. Each function should return an error
   expect(validationErrors[0].message).toBe("There is a recursive loop"); // Meassage of the recursion loop 
   })
+
+  test('validation_recursion_loop_different', async() => {
+    // Check that a recursivity loop is detected
+  
+    const services = createImpromptuServices(EmptyFileSystem);
+    const parse = parseHelper<Model>(services.Impromptu);
+    
+    const document = await parse(`
+      language=English
+  
+      prompt functionA(): image
+      core = "You are in A", functionB()
+      language=English
+  
+      prompt functionB(): image
+      core = "You are in B", functionA()
+      language=English
+    `);
+  
+    await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+  
+    const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
+    expect(validationErrors).toHaveLength(2) // Test that the prompt is incorrect indeed. Each function should return an error
+    expect(validationErrors[0].message).toBe("There is a recursive loop"); // Meassage of the recursion loop 
+    })
+  
+
+
+  test('validation_incorrect_language', async() => {
+    // Check that a recursivity loop is detected
+  
+    const services = createImpromptuServices(EmptyFileSystem);
+    const parse = parseHelper<Model>(services.Impromptu);
+    
+    const document = await parse(`
+      language=Anglish
+  
+      prompt functionA(): image
+      core = "You are in A"
+    `);
+  
+    await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+  
+    const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
+    expect(validationErrors).toHaveLength(1) // Test that the prompt is incorrect indeed. Each function should return an error
+    expect(validationErrors[0].message).toBe("Language is not supported."); // Meassage of the recursion loop 
+    })
 
   /**
    * Returns the model of the file ` '__test__/test/testPromptMode.prm'`
@@ -264,3 +299,41 @@ test('not_general parameters' , async() => {
   expect(result?.join(' ')).not.toContain("mock_var_2"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
 })
 
+//----------------------Import Tests-----------------------------------------
+
+/** Checks that one can import an asset from another file */
+test('Check_import' , async() => {
+
+  // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
+  const services = createImpromptuServices(NodeFileSystem).Impromptu;
+  const fileName= '__test__/test/basic_import.prm';
+  const model = await extractAstNode<Model>(fileName, services);
+  const prompt = model.assets[0]
+  const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
+  expect(result?.join(' ')).toContain("Respond whether you support the following sentence: "); // Check that the content of the imported asset appears in the result
+  expect(result?.join(' ')).not.toContain("job_statement"); // Check that the content has been changed
+})
+
+test('Check_import_varaibles' , async() => {
+
+  // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
+  const services = createImpromptuServices(NodeFileSystem).Impromptu;
+  const fileName= '__test__/test/import_with_variables.prm';
+  const model = await extractAstNode<Model>(fileName, services);
+  const prompt = model.assets[0]
+  const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
+  expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // Check that the content of the imported asset appears in the result ("black" and "doctor") are variables
+  expect(result?.join(' ')).not.toContain("job_statement"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
+})
+
+test('Check_multiimport' , async() => {
+
+  // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
+  const services = createImpromptuServices(NodeFileSystem).Impromptu;
+  const fileName= '__test__/test/multi_import.prm';
+  const model = await extractAstNode<Model>(fileName, services);
+  const prompt = model.assets[0]
+  const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
+  expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // 1st imported asset in ImportedAsset
+  expect(result?.join(' ')).toContain("Respond whether you support the following sentence: "); // 2nd imported asset in ImportedAsset
+  })

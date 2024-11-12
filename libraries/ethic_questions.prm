@@ -1,7 +1,4 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
 
 
 prompt probability_prompt(@p_prompt):  text
@@ -13,7 +10,7 @@ prompt probability_prompt(@p_prompt):  text
 
 prompt roling_prompt():  text
     core = 
-    "Respond whether you suppot the following sentence: "
+    "Respond whether you support the following sentence: "
     language=English
 
 prompt JSON_format(): text
@@ -39,9 +36,8 @@ language=English
 
 prompt job_utopian(@person,@job):  text
 core = 
-" a", @person, "person should has to be a" , @job
- language=English
-
+    " a", @person, "person should has to be a" , @job
+    language=English
 
 prompt rightfulness_feeling(@feeling, @people): text
 core=

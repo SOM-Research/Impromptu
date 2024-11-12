@@ -1,18 +1,13 @@
-language
-    English
-    code='en'
-    region='EN'
-
-import B from libraries.tests.import_testB
 language=English
 
-import C from libraries.tests.import_testC
-language=English
+import B,notRead from libraries.tests.import_testB
+
+
 
 prompt main():text
-core=A()
+core=A(),B()
 language=English
 
 prompt A():text
-core="hola",B("ssa")
+core="hola",notRead()
 language=English

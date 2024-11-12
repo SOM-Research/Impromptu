@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { AstNode, LangiumDocument, LangiumServices } from 'langium';
 import { URI } from 'vscode-uri';
-import { Asset, Composer, ImportedAsset, isAssetReuse, isComposer, isImportedAsset, isModel, isPrompt, Model, Prompt, Snippet } from '../language-server/generated/ast';
+import { Asset, AssetImport, Composer, ImportedAsset, isAsset, isAssetImport, isAssetReuse, isChain, isComposer, isImportedAsset, isModel, isPrompt, Model, Prompt, Snippet } from '../language-server/generated/ast';
 
 
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
@@ -23,112 +23,90 @@ export async function extractDocument(fileName: string, services: LangiumService
 
     const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
     if (validationErrors.length > 0) {
-        console.error(chalk.red('There are validation errors:'));
+        console.error(chalk.red(`There are validation errors in ${fileName}:`));
         var errors = []
         for (const validationError of validationErrors) {
-            errors.push(`line ${validationError.range.start.line + 1}: ${validationError.message} [${document.textDocument.getText(validationError.range)}]`);
+            errors.push(`[${fileName}: ${validationError.range.start.line + 1}] Error : ${validationError.message} [${document.textDocument.getText(validationError.range)}]`);
             console.error(chalk.red(
                 errors.at(-1)
             ));
         }
+        console.error(chalk.red("----------------------------------------------------------------------------"))
         throw new Error(errors.join("\n"));
     }
 
     return document;
 }
 
-export async function extractAstNode<T extends AstNode>(fileName: string, services: LangiumServices, calls_buffer?:[string, string][]): Promise<T> {
+export async function extractAstNode<T extends AstNode>(fileName: string, services: LangiumServices, calls_buffer?:AssetImport[]): Promise<T> {
     let libraries:string[]=[]
     let import_names: string[]=[]
 
     // let file = fileName.split('/').pop()?.split('.')[0] as string
     if (calls_buffer==undefined)  calls_buffer=[];
-    let new_calls:[string,string][]=[]
+    let new_calls:AssetImport[]=[]
 
         
     if (calls_buffer){
         const model = (await extractDocument(fileName, services)).parseResult?.value as T;
         if (isModel(model)){
             // get all the imports of the file
-            model.assets.forEach( asset => {if(isImportedAsset(asset) && !calls_buffer?.find(element => element[0]==asset.library)){
-                    libraries.push(asset.library);
-                    import_names.push(asset.name);
-                    new_calls.push([asset.library,asset.name]);
-                }
+            model.imports.forEach( import_line => {
+                import_line.asset_name.forEach( asset =>{
+                    // Checks that it is imported from a different file
+                    //if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
+                        libraries.push((asset.$container as ImportedAsset).library);
+                        import_names.push(asset.name);
+                        new_calls.push(asset);
+                    //}
+                })   
             })
-
+            // Also
+/// REHACER TODO: Buffer tiene que construirse de otra manera
             // Load the libraries needed to obtain the imports
-
+            var exists_errors=false; //Mark there are errors or not
             for (let i=0; i < new_calls.length; i++){
-                if (!calls_buffer.find(element=> libraries[i]==element[0] && import_names[i]==element[1] )) {
-                    // Update the elements that have been called
-                    calls_buffer.push(new_calls[i]);
-                    const import_model = await extractAstNode<Model>(libraries[i].split(".").join("/")+".prm", services,calls_buffer);
-                    let imported_assets: Asset[]=[]
-                    import_model.assets.forEach(asset =>{
-                        //filter to only get the wanted functions
-                        if(import_names.find(element => element==asset.name)){
-                            imported_assets.push(asset);
-                        }
-                    })
-                model.assets=model.assets.concat(imported_assets);
-                }else{
+                try{
+                    if(import_names[i]=='*'){
+                        calls_buffer.push(new_calls[i]);
+                        const import_model = await extractAstNode<Model>(libraries[i].split(".").join("/")+".prm", services,calls_buffer);
+                        let imported_assets: Asset[]=[];
+                        import_model.assets.forEach(asset =>{
+                                imported_assets.push(asset);
+                        });
+                        model.assets=model.assets.concat(imported_assets);
+                    }
+                    else if (!calls_buffer.find(element=> libraries[i]==(element.$container as ImportedAsset).library && import_names[i]==element.name )) {
+                        // Update the elements that have been called
+                        calls_buffer.push(new_calls[i]);
+                        
+                        const import_model = await extractAstNode<Model>(libraries[i].split(".").join("/")+".prm", services,calls_buffer);
+                        let imported_assets: Asset[]=[];
+                        import_model.assets.forEach(asset =>{
+                            //filter to only get the wanted functions
+                            if(import_names.find(element => element==asset.name)){
+                                imported_assets.push(asset);
+                            }
+                        });
+                        model.assets=model.assets.concat(imported_assets);
+                    }else{
+                    }
+                }
+                catch (e){
+                    let line = get_line_node(new_calls[i]);
+                    console.error(chalk.red(`[${fileName}: ${line}] Error in the imported file "${(new_calls[i].$container as ImportedAsset).library}.prm".`));
+                    console.error(chalk.red("----------------------------------------------------------------------------"))
+                    exists_errors = true
                 }
             }
+            if(exists_errors) throw new Error();
             return model
         } return (await extractDocument(fileName, services)).parseResult?.value as T;
     }
     else{
         return (await extractDocument(fileName, services)).parseResult?.value as T;
     }
- /*   
-    if (isModel(model)){
-        let libraries:string[]=[]
-        let import_names: string[]=[]
 
-        let file = fileName.split('/').pop()?.split('.')[0] as string
-        if (calls_buffer==undefined)  calls_buffer=[];
-
-        
-        let new_calls:[string,string][]=[]
-        if (!calls_buffer.find(element=> file==element[0] )) {
-            model.assets.forEach( asset => {if(isImportedAsset(asset)){
-                libraries.push(asset.library);
-                import_names.push(asset.name);
-                new_calls.push([asset.library,asset.name]);
-            }else{
-            }
-            })
-            }
-        
-        
-        // Load the libraries needed
-        console.log("calls_buffer: ",calls_buffer, "new_calls: ", new_calls)
-        for (let i=0; i < new_calls.length; i++){
-            if (!calls_buffer.find(element=> libraries[i]==element[0] && import_names[i]==element[1] )) {
-                // Update the elements that have been called
-                calls_buffer.push(new_calls[i]);
-                
-                console.log("calls_buffer: ",calls_buffer, "new_call: ", new_calls[i])
-                const import_model = await extractAstNode<Model>("libraries/"+libraries[i]+".prm", services,calls_buffer);
-                // Filter the imported assets we need
-
-                let imported_assets: Asset[]=[]
-                import_model.assets.forEach(asset =>{
-                    if(import_names.find(element => element==asset.name)){
-                        imported_assets.push(asset)
-                        console.log("asset ", asset.name," from ", fileName , " added")
-                    }
-                })
-
-                model.assets=model.assets.concat(imported_assets)
-                
-            }
-        }
-        console.log("Model: ", model.assets.length) 
-        return model;
-    }
-    return model;*/
 }
 
 
@@ -152,41 +130,49 @@ export function check_loops(model:Model){
     });
 }
 
-function check_loops_asset(asset:Asset, og_asset?:Asset){
-    if (asset == og_asset){
-        console.log(chalk.red("There is a recursive loop regarding the asset "+ og_asset.name));
-        throw new Error("There is a recursive loop regarding the asset "+ og_asset.name);
+function check_loops_asset(asset:Asset, og_asset?:Asset[]){
+    
+    if (og_asset?.includes(asset)){
+        let line = get_line_node(asset);
+        let fileName = get_file_from(asset)
+        console.error(chalk.red(`[${fileName}: ${line}] Error: There is a recursive loop regarding the asset ${asset.name}`));
+        throw new Error("There is a recursive loop regarding the asset "+ asset.name);
     }else{
         if (!og_asset){
-            og_asset = asset;
+            og_asset = [];
         }
         if (isPrompt(asset)){
             // Get all of snippets in a Prompt
-            let elements=asset.core.snippets;
-            if (asset.prefix){
-                elements = elements.concat(asset.prefix.snippets);
+            if (asset.core.snippets != undefined){
+                let elements=asset.core.snippets;
+                if (asset.prefix){
+                    elements = elements.concat(asset.prefix.snippets);
+                }
+                if (asset.suffix){
+                    elements = elements.concat(asset.suffix.snippets);
+                }
+                og_asset.push(asset)
+                check_loops_snippets(elements, og_asset );
             }
-            if (asset.suffix){
-                elements = elements.concat(asset.suffix.snippets);
-            }
-            check_loops_snippets(elements, og_asset);
         }else if(isComposer(asset)){
             // Get all of snippets in a Composer
             let elements = asset.contents.snippets;
+            og_asset.push(asset)
             check_loops_snippets(elements, og_asset)
-        }
-        else if(isImportedAsset(asset)){
-            // Get the asset ImportedAsset references
-            check_loops_asset(get_imported_asset(asset), og_asset);
         }
     }
 }
 
-function check_loops_snippets(snippets:Snippet[], og_asset:Asset){
+function check_loops_snippets(snippets:Snippet[], og_asset:Asset[]){
     snippets.forEach(snippet =>{
         if (isAssetReuse(snippet.content)){
             if (snippet.content.asset.ref)
-                check_loops_asset(snippet.content.asset.ref, og_asset);
+                if (isAsset(snippet.content.asset.ref)){
+                    check_loops_asset(snippet.content.asset.ref, og_asset);
+                } else if(isAssetImport(snippet.content.asset.ref)){
+                    check_loops_asset(get_imported_asset(snippet.content.asset.ref), og_asset);
+                }
+                
             if (snippet.content.pars)
                 check_loops_snippets(snippet.content.pars.pars, og_asset);
         }
@@ -199,16 +185,64 @@ function check_loops_snippets(snippets:Snippet[], og_asset:Asset){
  * @param asset 
  * @returns 
  */
-export function get_imported_asset(asset:ImportedAsset):Prompt | Composer{
-    let model = asset.$container
-    
-    let imported_asset = model.assets.find(element => 
-        asset.name == element.name && element.$container.$document?.uri.path.split('/').pop()== asset.library.split('.').pop()+'.prm' // TODO: More rigurous check
-    )
-    if (isPrompt(imported_asset) || isComposer(imported_asset)){ 
-        return imported_asset
-    }else{
-        console.log(chalk.red(`Asset `+asset.name+` is not found`))
-        throw new Error(`Asset `+asset.name+` is not found`)
+export function get_imported_asset(asset: AssetImport):Prompt | Composer{
+    if (isImportedAsset(asset.$container)){
+        let model = asset.$container.$container
+        
+        let imported_asset = model.assets.find(element =>{
+            let re = new RegExp(String.raw`${asset.name}`, "g"); 
+            return re.test(element.name) && element.$container.$document?.uri.path.split('/').pop()== (asset.$container as ImportedAsset).library.split('.').pop()+'.prm' // TODO: More rigurous check
+            })
+        if (isPrompt(imported_asset) || isComposer(imported_asset)){ 
+            return imported_asset
+        }else{
+            let file = get_file_from(asset);
+            let line = get_line_node(asset);
+            console.error(chalk.red(chalk.red(`[${file}: ${line}] Error: Asset ${asset.name} is not found`)));
+            throw new Error(chalk.red(`[${file}: ${line}] Error: Asset ${asset.name} is not found`))
+        
+        }
+    } 
+    let file = get_file_from(asset);
+    let line = get_line_node(asset);
+    throw new Error(chalk.red(`[${file}: ${line}] Error: Asset ${asset.name} is not found`))
+}
+
+
+
+
+/**
+ * Given an element of an AST, return the line where it is located, as a string
+ * @param node object
+ * @returns string (unknow if fails)
+ */
+export function get_line_node(node:AstNode):string{
+    let line
+    if (node.$cstNode?.range.start.line){
+        line = (node.$cstNode?.range.start.line +1).toString();
+    }else line = "unknown";
+    return line
+}
+
+
+/**
+ * Given an asset of an AST, return the file where is located
+ * @param node object
+ * @returns string if exits
+ */
+export function get_file_from(node:AstNode):string|undefined{
+    return node.$cstNode?.root.element.$document?.uri.path //.split('/').pop()
+}
+
+export function getLanguage(asset:Asset){
+    if (!isChain(asset)){
+        if (asset.language){
+            return asset.language
+        }
+    }
+    if (asset.$container && (asset.$container as Model).language!= undefined){
+        return (asset.$container as Model).language.name
+    }else{ // By default, language is English
+        return "English"
     }
 }

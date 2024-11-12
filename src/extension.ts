@@ -11,9 +11,17 @@ let client: LanguageClient;
 
 let previewPanel : vscode.WebviewPanel;
 
-// This function is called when the extension is activated.
+/** 
+ * This function is called when the extension is activated.
+ * */
 export function activate(context: vscode.ExtensionContext): void {
+    
+    //@ts-ignore
+    global.VSMODE = true;
+    //@ts-ignore
+    console.log("extension activated in 1", global.VSMODE)
     client = startLanguageClient(context);
+    
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', async () => {
         await generateCodeService(context, AISystem.ChatGPT);
     }));
@@ -25,7 +33,9 @@ export function activate(context: vscode.ExtensionContext): void {
      }));
 }
 
-// This function is called when the extension is deactivated.
+/** 
+ * This function is called when the extension is deactivated.
+ * */
 export function deactivate(): Thenable<void> | undefined {
     if (client) {
         return client.stop();
@@ -34,10 +44,12 @@ export function deactivate(): Thenable<void> | undefined {
 }
 
 function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
+    
     const serverModule = context.asAbsolutePath(path.join('out', 'language-server', 'main'));
     // The debug options for the server
     // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging.
     // By setting `process.env.DEBUG_BREAK` to a truthy value, the language server will wait until a debugger is attached.
+    
     const debugOptions = { execArgv: ['--nolazy', `--inspect${process.env.DEBUG_BREAK ? '-brk' : ''}=${process.env.DEBUG_SOCKET || '6009'}`] };
 
     // If the extension is launched in debug mode then the debug server options are used
@@ -49,7 +61,6 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
 
     const fileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.prm');
     context.subscriptions.push(fileSystemWatcher);
-
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
         documentSelector: [{ scheme: 'file', language: 'impromptu' }],
@@ -66,12 +77,17 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
         serverOptions,
         clientOptions
     );
-
+    
     // Start the client. This will also launch the server
     client.start();
     return client;
 }
 
+/**
+ * Service of the extention that enables the generation of the code file.
+ * @param context 
+ * @param aiSystem 
+ */
 async function generateCodeService(context: vscode.ExtensionContext, aiSystem: string) {
 
     const generator =  new CodeGenerator(context);
@@ -88,6 +104,7 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
             /**
              * webview panel
              */
+            
             previewPanel = vscode.window.createWebviewPanel(
                 // Webview id
                 'liveCodePreviewer',
@@ -99,7 +116,7 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
                     // Enable scripts in the webview
                     enableScripts: false,
                     retainContextWhenHidden: false,
-                    // And restrict the webview to only loading content from our extension's 'assets' directory.
+                    // And restrict the webview to only loading content from our extension's 'assets' directory. -> PROBLEM WITH IMPORTS
                     localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
                 }
             )
@@ -113,7 +130,7 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
 }
 
 /**
- * Generate the prompt and visualize it in the vscode window
+ * Select the prompt it wants to be generated + validated 
  * @param generator 
  * @param model .prm flie selected 
  * @returns 
@@ -141,7 +158,7 @@ async function requestPromptAndValidation(generator: CodeGenerator, model: strin
 }
 
 /**
- * Vissualize a text in the panel webview
+ * Visualize a text in the panel webview
  * 
  * @param code text to be visualized
  */

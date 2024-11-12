@@ -20,7 +20,7 @@ export interface Generator {
 * Python code generator service main class
 */
 export class CodeGenerator implements Generator {
-
+    
     private readonly parser: LangiumParser;
 
     templates = new Map();
@@ -65,15 +65,15 @@ export class CodeGenerator implements Generator {
         const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
         return (isModel(model) ? this.model2Code(model, aiSystem, template, promptName) : undefined);
     }
-/**
- *  Generation of the output code string
- * 
- * @param model Model AST node of the file
- * @param aiSystem GenAI where the prompt will be used
- * @param template service of the chosen AI system
- * @param promptName Asset from the file that it will be generated
- * @returns template modified
- */
+    /**
+     *  Generation of the output code string
+     * 
+     * @param model Model AST node of the file
+     * @param aiSystem GenAI where the prompt will be used
+     * @param template service of the chosen AI system
+     * @param promptName Asset from the file that it will be generated
+     * @returns template modified
+     */
     model2Code(model: Model, aiSystem: string, template: string, promptName: string) : string | undefined {
         const prompt = this.getPrompt(model, promptName);
         if (prompt) {
@@ -90,10 +90,21 @@ export class CodeGenerator implements Generator {
         return 'ERROR: Cannot generate prompt code.';
     }
 
+    /**
+     * Get the prompt object with a certain name in the model. In case is not a prompt, it does not return nothing
+     * @param model 
+     * @param promptName prompt name
+     * @returns 
+     */
     getPrompt(model: Model, promptName: string): Prompt | undefined {
         return model.assets.filter(a => isPrompt(a)).filter(a => a.name == promptName)[0] as Prompt;
     }
 
+    /**
+     * Get the format output of the prompt
+     * @param prompt 
+     * @returns 
+     */
     getPromptOutputMedia(prompt: Prompt): string {
         return (prompt.output) ? prompt.output : 'text';
     }

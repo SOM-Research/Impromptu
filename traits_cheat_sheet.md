@@ -12,7 +12,7 @@
 |Proximity Trait**        | -  | -   | -    | `extreme close-up`, `close-up`, `medium shot`, `long shot`, `extreme long shot`|
 |Effects Trait**          | -   | -    | -    | `blur`, `reflection`, `distorsion`|
 |Camera Settings Trait**  | -   | -    | -    | `fast shutter`|
-|Lighting Trait**         | -   | -   | -    | `accent`, `ambient`, `atmospheric`, `back`, `volumetric`, `diffuse`,`neon`, `dark shadows`|
+|Lighting Trait**         | -   | Yes   | -    | `accent`, `ambient`, `atmospheric`, `back`, `volumetric`, `diffuse`,`neon`, `dark shadows`|
 
 
 \* Expected to be changed.

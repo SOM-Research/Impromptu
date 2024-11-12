@@ -1,7 +1,4 @@
-language
-    English
-    code='en'
-    region='EN'
+language=English
 
 prompt promptA(): image
 core = "Get promptA"
