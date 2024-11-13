@@ -42,8 +42,8 @@ ImportedAsset:
     'import' asset_name+=AssetImport (',' asset_name+=AssetImport)* 'from' library=QualifiedName
     ;
 
-AssetImport:
-    [Asset:QualifiedName];
+AssetImport: 
+    name=QualifiedName;
 
 
 HyperParameters:

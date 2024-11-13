@@ -115,13 +115,9 @@ language=English
 ```
 
 ```
-language
-    English
-    code='en'
-    region='EN'
+language=English
 
 import job_statement from ethic_questions
-language=English
 
 prompt NewMain(): image
 core=job_statement("black person", "doctor")
@@ -129,6 +125,17 @@ language=English
 ```
 Resulted prompt:
 > <i> a  black person  has to be a  doctor </i>
+
+One can even import more than one Asset at once:
+```
+language=English
+
+import job_statement,JSON_format from ethic_questions
+
+prompt NewMain(): image
+core=job_statement("black person", "doctor"),JSON_format()
+language=English
+```
 
 
 
@@ -212,10 +219,7 @@ but found: ':' [:]
 The editor menu displays two options: `"Generate Stable Diffusion Python code"` and `"Generate ChatGPT Python code"`. When clicking a menu item, you should select which prompt will be sent to the target AI system and validated. Then, a new panel appears with the corresponding Python code generated to invoke that AI platform with the selected prompt and its output validators. For instance, given the following Impromptu code:
 
 ```
-language
-    English
-    code='en'
-    region='EN'
+language=Englis
 
 prompt
     ValidatorByExpression
