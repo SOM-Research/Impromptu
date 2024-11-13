@@ -9,5 +9,5 @@ core=A(),B()
 language=English
 
 prompt A():text
-core="hola",notRead()
+core="hola",B()
 language=English

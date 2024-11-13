@@ -51,7 +51,7 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
             break;
         }
         default: {
-            console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+            console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
         }
     }
     return result;
@@ -118,7 +118,7 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
             var result = generatePromptCode(model, aiSystem, prompt, variables);
         }
         else{
-            console.log(chalk.red(`An asset with that name does not exist`));
+            console.error(chalk.red(`An asset with that name does not exist`));
             throw new Error();
         }
     }
@@ -198,7 +198,7 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
                 }catch(e){
                     let file = get_file_from(asset);
                     let line = get_line_node(asset);
-                    console.log(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -209,7 +209,7 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
                 }catch(e){
                     let file = get_file_from(asset);
                     let line = get_line_node(asset);
-                    console.log(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -220,14 +220,14 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
                 }catch(e){
                     let file = get_file_from(asset);
                     let line = get_line_node(asset);
-                    console.log(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
             }
             default: {
                 // No case should get here
-                console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+                console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
                 throw new Error();
             }
         }
@@ -236,7 +236,7 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
     else {
         let line = get_line_node(asset);
         let file = get_file_from(asset);
-        console.log(chalk.red(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
+        console.error(chalk.red(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
         throw new Error(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`);
     }
 }
@@ -313,7 +313,7 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
     let snippetRef= assetReuse.asset.ref
         // In case the Assets had variables we have to change them
         // Check the number of variables is correct
-    console.log("Type:", snippetRef?.$type)
+        
         if(Ast.isAssetImport(snippetRef)){
             var map = new Map<string,string>()
             // Get the line where the referenced asset is located (to define the errors)
@@ -360,12 +360,12 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                         break;
                     }
                     case undefined: {
-                        console.log(chalk.red(`No target provided. Using 'chatgpt' by default`));
+                        console.error(chalk.red(`No target provided. Using 'chatgpt' by default`));
                         result = genAsset_ChatGPT(imported_asset,map).toString()
                         break;
                     }
                     default: {
-                        console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+                        console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
                         result=""
                     }
                 }
@@ -405,12 +405,12 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                         break;
                     }
                     case undefined: {
-                        console.log(chalk.red(`No target provided. Using 'chatgpt' by default`));
+                        console.error(chalk.red(`No target provided. Using 'chatgpt' by default`));
                         result = genAsset_ChatGPT(snippetRef,map).toString()
                         break;
                     }
                     default: {
-                        console.log(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+                        console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
                         result=""
                     }
                 }
@@ -418,12 +418,12 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                 
             }
             else{
-                console.log(chalk.red(`An AssetReuse should have the structure: <name>(<parameters>)`));
+                console.error(chalk.red(`An AssetReuse should have the structure: <name>(<parameters>)`));
                 return "";
             }
         }
         else{
-            console.log(chalk.red(`The snippet is not referencing an asset`));
+            console.error(chalk.red(`The snippet is not referencing an asset`));
             return '';
         }
 }

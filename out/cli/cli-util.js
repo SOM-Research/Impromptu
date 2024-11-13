@@ -135,6 +135,7 @@ function check_loops(model) {
 }
 exports.check_loops = check_loops;
 function check_loops_asset(asset, og_asset) {
+    // In case we alredy be in the same asset in the buffer, we have a loop 
     if (og_asset === null || og_asset === void 0 ? void 0 : og_asset.includes(asset)) {
         let line = get_line_node(asset);
         let fileName = get_file_from(asset);
@@ -167,9 +168,16 @@ function check_loops_asset(asset, og_asset) {
         }
     }
 }
+/**
+ * Resolves a recursion loop in a set of snippets.
+ * @param snippets array of Snippets to analyze
+ * @param og_asset Buffer of the aasets that were already paased
+ * @returns ´og_asset´
+ */
 function check_loops_snippets(snippets, og_asset) {
     snippets.forEach(snippet => {
         if ((0, ast_1.isAssetReuse)(snippet.content)) {
+            // An AssetReuse references an Asset, or an Asset import
             if (snippet.content.asset.ref)
                 if ((0, ast_1.isAsset)(snippet.content.asset.ref)) {
                     check_loops_asset(snippet.content.asset.ref, og_asset);
@@ -177,10 +185,14 @@ function check_loops_snippets(snippets, og_asset) {
                 else if ((0, ast_1.isAssetImport)(snippet.content.asset.ref)) {
                     check_loops_asset(get_imported_asset(snippet.content.asset.ref), og_asset);
                 }
+            // The parameters of an AssetReuse are references to another snippet
             if (snippet.content.pars)
-                check_loops_snippets(snippet.content.pars.pars, og_asset);
+                og_asset = check_loops_snippets(snippet.content.pars.pars, og_asset);
+            // When the asset has beeen studied, the last element is remove so that the assest tracked in the first snippet not interfere with the next one 
+            og_asset.pop();
         }
     });
+    return og_asset;
 }
 /**
  * Returns the asset from the library which Impoorted Asset refereces

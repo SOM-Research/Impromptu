@@ -123,7 +123,11 @@ export function extractDestinationAndName(filePath: string, destination: string 
     };
 }
 
-
+/**
+ * Checks that the model does not have any recursive loops. It check both assets and imports.
+ * Throw an error if a loop exists
+ * @param model 
+ */
 export function check_loops(model:Model){
     model.assets.forEach(asset =>{
         check_loops_asset(asset)
@@ -131,7 +135,7 @@ export function check_loops(model:Model){
 }
 
 function check_loops_asset(asset:Asset, og_asset?:Asset[]){
-    
+   // In case we alredy be in the same asset in the buffer, we have a loop 
     if (og_asset?.includes(asset)){
         let line = get_line_node(asset);
         let fileName = get_file_from(asset)
@@ -163,9 +167,16 @@ function check_loops_asset(asset:Asset, og_asset?:Asset[]){
     }
 }
 
-function check_loops_snippets(snippets:Snippet[], og_asset:Asset[]){
+/**
+ * Resolves a recursion loop in a set of snippets. 
+ * @param snippets array of Snippets to analyze
+ * @param og_asset Buffer of the aasets that were already paased
+ * @returns ´og_asset´
+ */
+function check_loops_snippets(snippets:Snippet[], og_asset:Asset[]):Asset[]{
     snippets.forEach(snippet =>{
         if (isAssetReuse(snippet.content)){
+            // An AssetReuse references an Asset, or an Asset import
             if (snippet.content.asset.ref)
                 if (isAsset(snippet.content.asset.ref)){
                     check_loops_asset(snippet.content.asset.ref, og_asset);
@@ -173,10 +184,15 @@ function check_loops_snippets(snippets:Snippet[], og_asset:Asset[]){
                     check_loops_asset(get_imported_asset(snippet.content.asset.ref), og_asset);
                 }
                 
+            // The parameters of an AssetReuse are references to another snippet
             if (snippet.content.pars)
-                check_loops_snippets(snippet.content.pars.pars, og_asset);
+                og_asset =check_loops_snippets(snippet.content.pars.pars, og_asset);
+            
+            // When the asset has beeen studied, the last element is remove so that the assest tracked in the first snippet not interfere with the next one 
+            og_asset.pop()
         }
     })
+    return og_asset
 }
 
 
