@@ -1,0 +1,15 @@
+
+language=English
+
+
+import multi_choice, school_level, paraphrase,duration_exam,goal_content,medium_question,hard_question, 
+answer_format,InitialConditions, DetailedInstructions from libraries.evaluation_questions
+
+prompt main(): text
+    prefix = InitialConditions()
+    core = 
+        multi_choice(), goal_content("Thailand's econimy in the past decade"),
+        school_level("Bachellor's degree","1st Year"), hard_question(),answer_format("JSON") 
+    suffix = DetailedInstructions()
+    separator=". "
+    language=English

@@ -19,7 +19,6 @@ export function activate(context: vscode.ExtensionContext): void {
     //@ts-ignore
     global.VSMODE = true;
     //@ts-ignore
-    console.log("extension activated in 1", global.VSMODE)
     client = startLanguageClient(context);
     
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', async () => {

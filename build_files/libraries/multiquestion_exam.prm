@@ -1,8 +1,8 @@
 
-language =English
+language=English
 
 import question_topic from libraries.evaluation_questions
-import rephrase from libraries.evaluation_questions
+import paraphrase from libraries.evaluation_questions
 
 import number_questions from libraries.evaluation_questions
 
@@ -21,7 +21,7 @@ import DetailedInstructions from libraries.evaluation_questions
 prompt main(): text
     prefix = InitialConditions()
     core = 
-        question_topic("B2-level English"), number_questions("11"),goal_content("job application vocabulary"), multi_format(rephrase(),"4", choose_one_answers(""),"6" )
+        question_topic("B2-level English"), number_questions("11"),goal_content("job application vocabulary"), multi_format(paraphrase(),"4", choose_one_answers(""),"6" )
     suffix = DetailedInstructions()
     separator="."
     language=English

@@ -28,7 +28,7 @@ Use it to indicate that the questions of the exam **are open questions**.
 
 - `@lenght`: Indicate the number of words of the answers at maximum.
 
-#### `rephrase()`
+#### `paraphrase()`
 Use it to indicate that the questions of the exam **are about rephrasing a given sentence** (mainly used for language exams). Example:
 
 ***Original Sentence**: I am interested in the software developer position.*
@@ -107,10 +107,18 @@ Declare the subject of the exam (i.e: `question_topic("geography")`).
 *In Progress*. The question of the exam should be made related to the metadata `@element`
 
 #### `goal_content(@source)`
-Specify **the source** used to generate the questions. It can also be used to specify more the subject of the exam (i.e, the vucabulary topic in an English exam).
+Specify **the source** used to generate the questions, that is, the **learning resources/contents**. It can also be used to specify more the subject of the exam (i.e, the vucabulary topic in an English exam).
 
+--------------
+#### Difficulty of the questions
 
+#### `easy_question()`
+Choose the question so that they are easy/introductory to the prior level chosen.
+#### `medium_question()`
+#### `hard_question()`
+Choose the question so that they are challenging to the prior level chosen.
 
+-------------------------------
 #### `distractor_selection(@example)`
 *In Progress* Give an example of a multiple answer so that similar distractors were chosen
 
@@ -129,6 +137,15 @@ Provide how much time the exam should last (in minutes)
 #### `level(@level)`
 Spicify the difficulty wanted of the questions.
 - `@level`. Knowledge level expected of the students i.e "First-Grade"
+
+#### `school_level(@level,@course)`
+Spicify the educacional level of the students that will be examinated, based of scholarship-level.
+- `@level`. Scholarship level, i.e "Secondary school"
+- `@level`. Study year. i.e "K-12","First-Grade"
+
+#### `language_level(@level)`
+Spicify the educacional level of the students that will be examinated, based on langugae-certification level (for languge exams).
+- `@level`. Language level, i.e "B1"
 
 #### `answer_format(@format)`
 Spicify the format of the response, such as JSON or XML.

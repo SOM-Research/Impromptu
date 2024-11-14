@@ -8,17 +8,18 @@ import { Asset, AssetImport, Composer, ImportedAsset, isAsset, isAssetImport, is
 
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
     const extensions = services.LanguageMetaData.fileExtensions;
-    if (!extensions.includes(path.extname(fileName))) {
+    fileName=fileName
+    if (!extensions.includes(path.extname('build_files/'+fileName))) {
         console.error(chalk.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
         process.exit(1);
     }
 
-    if (!fs.existsSync(fileName)) {
+    if (!fs.existsSync('build_files/'+fileName)) {
         console.error(chalk.red(`File ${fileName} does not exist.`));
         process.exit(1);
     }
 
-    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(fileName)));
+    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName)));
     await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
 
     const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
@@ -115,10 +116,16 @@ interface FilePathData {
     name: string
 }
 
+/**
+ * Obtain the path were the final with the generated prompt will be located, nad the name of it
+ * @param filePath uri of the .prm file
+ * @param destination  route given by the user. If `undefined`, it will be generated in build-files/generated 
+ * @returns { destination path , name }
+ */
 export function extractDestinationAndName(filePath: string, destination: string | undefined): FilePathData {
     filePath = path.basename(filePath, path.extname(filePath)).replace(/[.-]/g, '');
     return {
-        destination: destination ?? path.join(path.dirname(filePath), 'generated'),
+        destination: destination ?? path.join(path.dirname(filePath), 'build_files/generated'),
         name: path.basename(filePath)
     };
 }

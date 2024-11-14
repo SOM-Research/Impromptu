@@ -35,7 +35,7 @@ Prompt:
     AssetSeparator
     AssetLanguage 
     AssetRelationships
-    (ByExpressionOutputTesting)*
+    (ByExpressionOutputTesting)?
     ;
 
 ImportedAsset:
@@ -57,7 +57,7 @@ HyperParam:
 Chain:
     'chain' name=QualifiedName
     AssetRelationships
-    (ByExpressionOutputTesting)*
+    (ByExpressionOutputTesting)?
     ;
 
 Composer:
@@ -196,7 +196,7 @@ ParamInvokation:
     '(' pars+=Snippet (',' pars+=Snippet )*  ')' | '(' ')';
 
 Parameters:
-   (  '('  pars+= Input ( ',' pars+= Input )* ')' )? | '(' ')' ;
+    '('( pars+= Input ( ',' pars+= Input )* )?')' | '(' ')' ;
 
 Input:
     Parameter | Multimodal;
@@ -213,20 +213,20 @@ Relevance returns string: 'min' | 'low' | 'medium' | 'high' | 'max';
 
 // General traits
 Dimension returns string: 'length' | 'duration' | 'width' | 'height' | 'depth' | 'count';
-SizeConstraint returns string: 'exactly' | 'less than' | 'more than' | 'less or equal than' | 'more or equal than' | 'different from';
+SizeConstraint returns string: 'exactly' | 'less\sthan' | 'more\sthan' | 'less\sor\sequal\sthan' | 'more\sor\sequal\sthan' | 'different\sfrom';
 Unit returns string: 'character' | 'word' | 'sentence' | 'line' | 'paragraph' | 'page' | 'second' | 'minute' | 'hour' | 'frame' | 'pixel' | 'point';
 
 // Textual Traits
-LiteraryStyle returns string: 'report' | 'essay' | 'interview' | 'letter' | 'play' | 'poem' | 'song' | 'tale' | 'headline' | 'advertisement' | 'joke' | 'definition' | 'proof' | 'source code';
+LiteraryStyle returns string: 'report' | 'essay' | 'interview' | 'letter' | 'play' | 'poem' | 'song' | 'tale' | 'headline' | 'advertisement' | 'joke' | 'definition' | 'proof' | 'source\scode';
 LanguageRegister returns string: 'bench-level' | 'dialect' | 'facetious' | 'formal' | 'in-house' | 'ironic' | 'neutral' | 'slang' | 'taboo' | 'technical' | 'vulgar';
-PointOfView returns string: 'first person' | 'second person' | 'third person';
+PointOfView returns string: 'first\sperson' | 'second\sperson' | 'third\sperson';
 
 // Image Traits
-Medium returns string: 'photography' | 'drawing' | 'painting' | 'portrait' | 'comic book art' | 'digital art' | '3D art';
-CameraAngle returns string: 'overhead view' | 'low angle' | 'aerial view' | 'tilted frame' |  'over-the-shoulder shot';
-CameraSettings returns string: 'fast shutter';
-Lighting returns string: 'accent' | 'ambient' | 'atmospheric' | 'back' | 'volumetric' | 'diffuse' | 'neon' | 'dark shadows';
-Proximity returns string: 'extreme close-up' | 'close-up' | 'medium shot' | 'long shot' | 'extreme long shot';
+Medium returns string: 'photography' | 'drawing' | 'painting' | 'portrait' | 'comic\sbook\sart' | 'digital\sart' | '3D\sart';
+CameraAngle returns string: 'overhead\sview' | 'low\sangle' | 'aerial\sview' | 'tilted\sframe' |  'over-the-shoulder\sshot';
+CameraSettings returns string: 'fast\sshutter';
+Lighting returns string: 'accent' | 'ambient' | 'atmospheric' | 'back' | 'volumetric' | 'diffuse' | 'neon' | 'dark\sshadows';
+Proximity returns string: 'extreme\sclose-up' | 'close-up' | 'medium\sshot' | 'long\sshot' | 'extreme\slong\sshot';
 Effects returns string: 'blur' | 'reflection' | 'distortion' ;
 
 // ----------------------------------------------------------------------------------------

@@ -8,5 +8,5 @@
             "out": "syntaxes/impromptu.tmLanguage.json"
         }
     }],
-    "out": "src/language-server/generated"
+    "out": "src/language-server/build_files/generated"
 }

@@ -35,6 +35,13 @@ prompt paraphrase():text
         separator="."
     language=English
 
+prompt multi_choice():  text
+    core = 
+        "The questions should be multiple-choice type"
+    separator="."
+    language=English
+
+// Same as before but without option
 prompt choose_one_answers(@option):  text
     core = 
         "The questions should be multiple-choice type",@option
@@ -95,6 +102,22 @@ prompt distractor_selection(@example):text
     core="Select the distractors of the question imitating the following example", @example
     language=English
 
+prompt distractors(@distractors): text
+    core= "Consider the follwing options as ditractors for the question", @distractors
+
+prompt easy_question():text
+    core="The purpose of the question is to ensure the basis of the subject"
+    language=English
+
+prompt medium_question():text
+    core="The question should not be neither easy or very changelling"
+    language=English
+
+prompt hard_question():text
+    core="Choose the question so that it will be challenging to the students"
+    language=English
+
+
 //-------------------------------------Question number----------------------------------------------
 prompt number_questions(@number):  text
     core = 
@@ -109,9 +132,23 @@ prompt level(@level): text
         separator=" "
     language=English
 
+prompt school_level(@level,@course): text
+    core = 
+        "The questions should be selected to challenge", @level ,"in",@course,"course" //@level == "Secondary Student"
+        separator=" "
+    language=English
+
+prompt students_age(@age): text
+    core= "The target students are",@age,"years old"
+    separator=" "
+
+prompt learning_outcome(@outcome): text
+    core= "The learning outcome that will be assessed by the proposed activity is the following:", @outcome
+    separator=" "
+
 prompt example_question(@example):text
     core = 
-        "Takes this question as an example:",@example
+        "Take this question as an example:",@example
         separator=" "
     language=English
 
@@ -120,6 +157,26 @@ prompt duration_exam(@level,@times): text
         "Select the questions so that it can be solved by",@level,"students in",@times,"minutes"
         separator=" "
     language=English
+
+prompt time_question(@times): text
+    core = 
+        "The time limit to solve this question is",@times,"minutes"
+        separator=" "
+    language=English
+
+
+prompt target_audience(@target_audience):text
+    core= 
+        "The activity is intended for the following audience:", @target_audience
+    separator=" "
+
+prompt exam_language(@language):text
+    core= "The exam should be written in", @language
+    separator=" "
+
+prompt prior_knowledge(@topic):text
+    core= "Assume the students have learned about", @topic
+    separator=" "
 
 //--------------------------------------DetailedInstructions-----------------------------------------
 composer InitialConditions()
@@ -136,8 +193,9 @@ composer DetailedInstructions()
 
 //----------------------------------------Misc----------------------------------------------------
 prompt answer_format(@format):text
-core = "Use a", @format ,"format for your response."
-    language=English
+core = "The answer has to follow the format:",@format
+    separator='
+    '
 
 
 prompt simple_test(@number, @level,@topic, @format): text

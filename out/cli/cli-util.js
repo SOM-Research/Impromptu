@@ -22,15 +22,16 @@ function extractDocument(fileName, services) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const extensions = services.LanguageMetaData.fileExtensions;
-        if (!extensions.includes(path_1.default.extname(fileName))) {
+        fileName = fileName;
+        if (!extensions.includes(path_1.default.extname('build_files/' + fileName))) {
             console.error(chalk_1.default.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
             process.exit(1);
         }
-        if (!fs_1.default.existsSync(fileName)) {
+        if (!fs_1.default.existsSync('build_files/' + fileName)) {
             console.error(chalk_1.default.red(`File ${fileName} does not exist.`));
             process.exit(1);
         }
-        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve(fileName)));
+        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName)));
         yield services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
         const validationErrors = ((_a = document.diagnostics) !== null && _a !== void 0 ? _a : []).filter(e => e.severity === 1);
         if (validationErrors.length > 0) {
@@ -120,14 +121,25 @@ function extractAstNode(fileName, services, calls_buffer) {
     });
 }
 exports.extractAstNode = extractAstNode;
+/**
+ * Obtain the path were the final with the generated prompt will be located, nad the name of it
+ * @param filePath uri of the .prm file
+ * @param destination  route given by the user. If `undefined`, it will be generated in build-files/generated
+ * @returns { destination path , name }
+ */
 function extractDestinationAndName(filePath, destination) {
     filePath = path_1.default.basename(filePath, path_1.default.extname(filePath)).replace(/[.-]/g, '');
     return {
-        destination: destination !== null && destination !== void 0 ? destination : path_1.default.join(path_1.default.dirname(filePath), 'generated'),
+        destination: destination !== null && destination !== void 0 ? destination : path_1.default.join(path_1.default.dirname(filePath), 'build_files/generated'),
         name: path_1.default.basename(filePath)
     };
 }
 exports.extractDestinationAndName = extractDestinationAndName;
+/**
+ * Checks that the model does not have any recursive loops. It check both assets and imports.
+ * Throw an error if a loop exists
+ * @param model
+ */
 function check_loops(model) {
     model.assets.forEach(asset => {
         check_loops_asset(asset);

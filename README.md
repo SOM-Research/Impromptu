@@ -35,7 +35,11 @@ and select `"Install VSIX Extension"` at the bottom of the list of options.
 
 The extension offers an editor for Impromptu prompts, with *syntax highlighting*, *syntax validation* and *autocomplete suggestions*. The extension enables users to generate prompts for specific AI systems and, on the other hand, to create code to invoke those AI platforms which have public APIs. Currently, supported target AI systems for generating prompts are [Midjourney](https://www.midjourney.com/), [Stable Diffusion web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and OpenAI's [ChatGPT](https://openai.com/chatgpt/). Users can leverage Impromptu to generate API invoking code for Stable Diffusion and ChatGPT.
  
-To use the editor, first install the Impromptu VS Code extension and then create a file in VS Code with extension `.prm`. The editor will not be available until you create a file with the proper extension.
+To use the editor, first install the Impromptu VS Code extension and then create a file in VS Code with extension `.prm` in the folder `build-files`.
+### `build-files` folder
+The `build-files` folder acts as the workspace for the `.prm` files. In addition to creating your own .prm files, one can import the assets from an already created file, as it is explained in a future section.
+
+The editor will not be available until you create a file with the proper extension.
 
 ### `.prm` files syntax
 
@@ -101,7 +105,13 @@ prompt Mixture(@animal1, @animal2): image
 ```
 
 ### Imported assets
-A special type of asset are the <b>imports</b>. An import allows to use an asset from another file as if it were in the same file, which means that it can be referenced in an AssetReuse, or as a parameter.
+A special type of asset are the <b>imports</b>. An import allows to use an asset from another file as if it were in the same file, which means that it can be referenced in an AssetReuse, or as a parameter. It is important to remark that the route, which it is used to define from where the imported asset is, **always will be defined as a relative route from `build_files` folder**, changing slashes to dots. For example, if one wants to import the prompt `job_statement` from the file `build_files\libraries\ethic_questions.prm`, they have to write in the destination file
+```
+import job_statement from libraries.ethic_questions
+```
+no matter where it is located.
+
+For example:
 
 <i>ethic_questions.prm</i>
 ```
@@ -117,7 +127,7 @@ language=English
 ```
 language=English
 
-import job_statement from ethic_questions
+import job_statement from libraries.ethic_questions
 
 prompt NewMain(): image
 core=job_statement("black person", "doctor")
@@ -219,7 +229,7 @@ but found: ':' [:]
 The editor menu displays two options: `"Generate Stable Diffusion Python code"` and `"Generate ChatGPT Python code"`. When clicking a menu item, you should select which prompt will be sent to the target AI system and validated. Then, a new panel appears with the corresponding Python code generated to invoke that AI platform with the selected prompt and its output validators. For instance, given the following Impromptu code:
 
 ```
-language=Englis
+language=English
 
 prompt
     ValidatorByExpression

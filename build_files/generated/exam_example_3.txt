@@ -1,0 +1,2 @@
+Write an exam. Before writing the question, give a brief explanation of the task. The questions should be multiple-choice type. Base your questions on Thailand's econimy in the past decade. The questions should be selected to challenge Bachellor's degree in 1st Year course. Choose the question so that it will be challenging to the students. The answer has to follow the format:
+    JSON. Questions should be clear .Avoid controversial topics.The questions should be as concise as possible.

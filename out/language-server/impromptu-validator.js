@@ -235,7 +235,7 @@ class ImpromptuValidator {
             workspace_path = process.cwd();
         }
         let uri_array = workspace_path.split("\\");
-        let last = uri_array.pop();
+        let last = 'build_files';
         uri_array.push(last);
         workspace_path = uri_array.join("\\");
         //const uri= uri_array?.join("/")
@@ -243,7 +243,7 @@ class ImpromptuValidator {
             accept('error', `The file ` + library + ` exists, but the file format ".prm" has to be erased.`, { node: imported_asset });
         }
         else if (!fs_1.default.existsSync(workspace_path + '/' + library + '.prm')) {
-            accept('error', `The library ` + workspace_path + ` does not exist.`, { node: imported_asset });
+            accept('error', `The library ` + workspace_path + library + ` does not exist.`, { node: imported_asset });
         }
         else {
             // II- The prompt it tries to import (`imported_asset.name`) exists in the told file.

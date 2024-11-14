@@ -51,7 +51,6 @@ function activate(context) {
     //@ts-ignore
     global.VSMODE = true;
     //@ts-ignore
-    console.log("extension activated in 1", global.VSMODE);
     client = startLanguageClient(context);
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', () => __awaiter(this, void 0, void 0, function* () {
         yield generateCodeService(context, generate_prompt_1.AISystem.ChatGPT);

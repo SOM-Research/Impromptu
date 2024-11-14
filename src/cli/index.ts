@@ -19,7 +19,7 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
 
 export const generatePromptAction = async (fileName: string, opts: GenPromptOptions): Promise<void> => {
    
-    
+    fileName=fileName
 
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     try{
@@ -37,7 +37,7 @@ export const generatePromptAction = async (fileName: string, opts: GenPromptOpti
 
         if(validPrompt){  
             try{
-                const generatedFilePath = generatePrompt(model, fileName, opts.destination, opts.target, opts.variables, opts.prompt);
+                const generatedFilePath = generatePrompt(model, `${fileName}`, opts.destination, opts.target, opts.variables, opts.prompt);
                 console.log(chalk.green(`Prompt generated successfully: ${generatedFilePath}`));
             } 
             catch(e){}

@@ -30,6 +30,7 @@ const generateAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, fun
 });
 exports.generateAction = generateAction;
 const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
+    fileName = fileName;
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     try {
         const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
@@ -44,7 +45,7 @@ const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 
         }
         if (validPrompt) {
             try {
-                const generatedFilePath = (0, generate_prompt_1.generatePrompt)(model, fileName, opts.destination, opts.target, opts.variables, opts.prompt);
+                const generatedFilePath = (0, generate_prompt_1.generatePrompt)(model, `${fileName}`, opts.destination, opts.target, opts.variables, opts.prompt);
                 console.log(chalk_1.default.green(`Prompt generated successfully: ${generatedFilePath}`));
             }
             catch (e) { }
