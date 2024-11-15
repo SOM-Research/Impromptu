@@ -21,7 +21,7 @@ There are different types of assets. Each one have a different syntax:
     ```
 
 
-    - **Chain** *to be developed*
+    - **Chain** (*to be developed*)
     ```
     chain <name>
     ```
@@ -37,7 +37,8 @@ Elements that are transmitted to the snippets of the asset. It can be a paramete
 #### Media
  Indicates how the answer of the LLM would be (irrelevant right now).
  `Media` possible values:
- 'text' | 'image' | 'audio' | 'video' | '3dobject'
+
+ `text` | `image` | `audio` | `video` | `3dobject`
 
 #### Snippets
  A snippet is a subdivision of an asset and it can be

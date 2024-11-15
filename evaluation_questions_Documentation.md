@@ -10,7 +10,7 @@ Here it will be explanied all those functions plus some examples of their usage
 
 Use it to indicate that the questions of the exam **should be true/false question**
 
-- `@option`: Indicates any addition option related to these questions. Ususally it should be one of the question of the category Option Assets . In case you do not want to add any additional task, add an empty string (i.e " ").
+- `@option`: Indicates any addition option related to these questions. Ususally it should be one of the question of the category Option Assets . In case you do not want to add any additional task, add an empty string ( `true_false_answers("")`).
 
 
 
@@ -34,8 +34,12 @@ Use it to indicate that the questions of the exam **are about rephrasing a given
 ***Original Sentence**: I am interested in the software developer position.*
 ***Words to Use**: apply, position, keen*
 ***Rephrased Sentence**: _______________________________________________________*
-#### `choose_one_answers(@option)`
+
+#### `multi_choice()`
 Use it to indicate that the questions of the exam **are multiple-choice type questions**. 
+
+#### `choose_one_answers(@option)`
+Use it to indicate that the questions of the exam **are multiple-choice type questions** (with versatility to additional options). 
 
 - `@option`: Indicates any addition option related to these questions. Ususally it should be one of the question of the category Option Assets . In case you do not want to add any additional task, add an empty string (i.e " ").
 
@@ -109,6 +113,15 @@ Declare the subject of the exam (i.e: `question_topic("geography")`).
 #### `goal_content(@source)`
 Specify **the source** used to generate the questions, that is, the **learning resources/contents**. It can also be used to specify more the subject of the exam (i.e, the vucabulary topic in an English exam).
 
+
+#### `distractors(@distractors)`
+*For a <b> multi-choice</b> question*. Tell a list of the desirable distractors (`distractors("notA, notB, notC")`).
+
+#### `distractor_selection(@example)`
+*For <b> multi-choice</b> questions*. Give an example of a question so that the LLM imitates it to generate the test.
+
+#### `answer_options(@number,@answers, @distractors)`
+*For <b> multi-choice</b> questions*. Tell the answers (`@answers`) and distractors(`@distractors`) desired for a set of multi-choice questions. In addition, the number of questions (`@number`) is requiered. LLMs tend to related the correct distractor to the correct answer, and discard *bad* distractors (the ones that are obvious).
 --------------
 #### Difficulty of the questions
 
@@ -147,6 +160,12 @@ Spicify the educacional level of the students that will be examinated, based of 
 Spicify the educacional level of the students that will be examinated, based on langugae-certification level (for languge exams).
 - `@level`. Language level, i.e "B1"
 
+#### `students_age(@age)`
+Specify the age of the students.
+
+#### `learning_outcome(@outcome)`
+Specify what it the learning goal of the exam.
+
 #### `answer_format(@format)`
 Spicify the format of the response, such as JSON or XML.
 
@@ -154,9 +173,15 @@ Spicify the format of the response, such as JSON or XML.
 #### `give_answers()`
 Specify that the answers of the question has to be provided as well.
 
+#### ` target_audience(@target_audience)`
+Specify if the students are from a certain audience, whcih may vary the questions/topic selected
+
+#### `prior_knowledge(@topic)`
+Concept that can be used in order to generate the questions(, although it was not specifically mentioned in the questions topic).
 
 #### `DetailedInstructions()`
-Suffix of the exam prompt so that the answer is more concise and clean. It is recommended to add it in the suffix.
+**Suffix** of the exam prompt so that the answer is more concise and clean. It is recommended to add it in the suffix.
+
 
 
 ## Examples
