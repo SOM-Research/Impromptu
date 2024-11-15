@@ -103,7 +103,7 @@ prompt distractor_selection(@example):text
     language=English
 
 prompt distractors(@distractors): text
-    core= "Consider the follwing options as ditractors for the question", @distractors
+    core= "Consider the follwing options as distractors for the question:", @distractors
 
 prompt easy_question():text
     core="The purpose of the question is to ensure the basis of the subject"
@@ -167,7 +167,7 @@ prompt time_question(@times): text
 
 prompt target_audience(@target_audience):text
     core= 
-        "The activity is intended for the following audience:", @target_audience
+        audience(@target_audience)
     separator=" "
 
 prompt exam_language(@language):text

@@ -13,7 +13,6 @@ export async function extractDocument(fileName: string, services: LangiumService
         console.error(chalk.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
         process.exit(1);
     }
-    console.log(fileName)
         if (!fs.existsSync('build_files/'+fileName)) {
             console.error(chalk.red(`File ${fileName} does not exist.`));
             process.exit(1);
