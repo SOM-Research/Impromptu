@@ -155,8 +155,9 @@ export function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet, variables?: Map
     }
     // } else if (Ast.isCombinationTrait(snippet)) {
     //     return "";
-    // } else if (Ast.isAudienceTrait(snippet)) {
-    //     return "";
+    else if (Ast.isAudienceTrait(snippet)) {
+        return genAudienceTrait(snippet, variables);
+    }
     // } else if (Ast.isMediumTrait(snippet)) {
     //     return "";
     // }
@@ -196,4 +197,8 @@ function genNegativeTait(snippet:Ast.NegativeTrait, variables?: Map<string,strin
 
 function genComparisonTrait(snippet:Ast.ComparisonTrait,variables?: Map<string,string>){
     return genSnippet_ChatGPT(snippet.content1, variables) + " is more " + genSnippet_ChatGPT(snippet.comparison, variables) + " than " +genSnippet_ChatGPT(snippet.content2, variables)
+}
+
+function genAudienceTrait(snippet:Ast.AudienceTrait,variables?: Map<string,string>){
+    return "The activity is intended for the following audience: " + genSnippet_ChatGPT(snippet.content, variables)
 }

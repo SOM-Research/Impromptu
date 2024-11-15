@@ -1,9 +1,9 @@
 ## Traits Cheat Sheet
 | Trait | ChatGPT | MidJourney | StableDiffusion | Possible values |
 | ----- |:----------:| :----------------:|:-------:| :--------------: |
-|Negative Trait         | No*   | Yes   | Yes   | \<snippet> |
+|Negative Trait         | Yes   | Yes   | Yes   | \<snippet> |
 |Combination Trait      | No*   | Yes   | Yes   | +2 \<snippet> |
-|Audience Trait         | No    | Yes   | Yes   | \<snippet> |
+|Audience Trait         | Yes   | Yes   | Yes   | \<snippet>, i.e `"children"` |
 |Medium Trait           | No    | Yes   | Yes   | `photography`, `drawing`, `painting`,`portrait`, `comic book art`, `digital art`, `3D art`  |
 |Language Register Trait| Yes   | No    | No    | `bench-level`, `dialect`, `facetious`, `formal`, `in-house`, `ironic`, `neutral`, `slang`, `taboo`, `technical`, `vulgar` |
 |Literary Register Trait| Yes   | No    | No    | `report`, `essay`, `interview`, `letter`, `play`, `poem`, `song`, `tale`, `headline`, `advertisment`, `joke`, `definition`. `proof`, `source code` |
