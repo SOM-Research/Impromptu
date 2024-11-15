@@ -187,7 +187,7 @@ test('validation_recursion_loop', async() => {
    */
   async function prepare_model(){
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
-    const fileName= '__test__/test/testPromptMode.prm';
+    const fileName= 'test/testPromptMode.prm';
     const model = await extractAstNode<Model>(fileName, services);
     return model;
   }
@@ -269,7 +269,7 @@ test('one_prompt_only_empty_varaibles', async() => {
 
 test('test_heritage', async() => {
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/testHeritage.prm';
+  const fileName= 'test/testHeritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const result = generatePromptCode(model,AISystem.Midjourney,undefined);
   expect(result?.join('')).toContain("Draw a , var 2"); // Test that the parameter has been used
@@ -278,7 +278,7 @@ test('test_heritage', async() => {
 test('test_heritage_in_prompt_mode', async() => {
   // Checks that using prompt mode the reuse of Asset still works, without writing the prompt of the declared Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/exampleHeritage.prm';
+  const fileName= 'test/exampleHeritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
   expect(model.assets[2].name).toBe("NewMain"); 
   const prompt = model.assets[2];
@@ -291,7 +291,7 @@ test('test_heritage_in_prompt_mode', async() => {
 test('not_general parameters' , async() => {
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/not_global_heritage.prm';
+  const fileName= 'test/not_global_heritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt, ["mock_var_1", "mock_var_2"]);
@@ -306,7 +306,7 @@ test('Check_import' , async() => {
 
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/basic_import.prm';
+  const fileName= 'test/basic_import.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
@@ -318,7 +318,7 @@ test('Check_import_varaibles' , async() => {
 
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/import_with_variables.prm';
+  const fileName= 'test/import_with_variables.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
@@ -330,7 +330,7 @@ test('Check_multiimport' , async() => {
 
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/test/multi_import.prm';
+  const fileName= 'test/multi_import.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt);

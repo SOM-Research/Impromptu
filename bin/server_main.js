@@ -19,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // call it using http://127.0.0.1:3000/generateprompt. 
 app.post("/generateprompt", async (req, res) => { 
 
+	console.log("hello")
 	var services = imp_mod.createImpromptuServices(node.NodeFileSystem).Impromptu;
 
 	var content = req.body.content;
@@ -27,8 +28,8 @@ app.post("/generateprompt", async (req, res) => {
 	var prompt_name = req.body.prompt;
 
 	if (content) {
-		const fileName = 'generated/temp.prm';
-		fs.writeFileSync(fileName,content);
+		const fileName = 'temp.prm';
+		fs.writeFileSync('build_files/'+fileName,content);
 
 		var validPrompt= true;
 		try{

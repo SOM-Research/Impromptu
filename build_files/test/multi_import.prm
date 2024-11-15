@@ -1,6 +1,6 @@
 language=English
 
-import job_statement,roling_prompt from libraries.ethic_questions
+import job_statement, roling_prompt from libraries.ethic_questions
 
 prompt NewMain(): image
 core=job_statement("black person", "doctor"),roling_prompt()

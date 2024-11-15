@@ -8,16 +8,16 @@ import { Asset, AssetImport, Composer, ImportedAsset, isAsset, isAssetImport, is
 
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
     const extensions = services.LanguageMetaData.fileExtensions;
-    fileName=fileName
+   
     if (!extensions.includes(path.extname('build_files/'+fileName))) {
         console.error(chalk.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
         process.exit(1);
     }
-
-    if (!fs.existsSync('build_files/'+fileName)) {
-        console.error(chalk.red(`File ${fileName} does not exist.`));
-        process.exit(1);
-    }
+    console.log(fileName)
+        if (!fs.existsSync('build_files/'+fileName)) {
+            console.error(chalk.red(`File ${fileName} does not exist.`));
+            process.exit(1);
+        }
 
     const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName)));
     await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });

@@ -445,7 +445,7 @@ test('reference_in_combination_trait', async() => {
 
 
 test('reference_in_audience_trait', async() => {
-  expect(genBaseSnippet_ChatGPT(mock_audience_trait)).toBe(""); // Trait not available in ChatGPT
+  expect(genBaseSnippet_ChatGPT(mock_audience_trait)).toBe("The activity is intended for the following audience: @elemento"); 
 })
  
 
