@@ -19,27 +19,30 @@ This repository is the companion to the research paper providing a description o
 
 Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. In order to run Impromptu you need [Node.js](https://nodejs.org/) and [Visual Studio Code](https://code.visualstudio.com/) in your system.
 
-In addition, the Node module `csv-parser` has to be installed. Write in the CLI ```npm install csv-parser```
+In addition, the Node module `csv-parser` has to be installed. Write in the CLI ```npm install csv-parser``` in the VSCode command line (CLI).
 
 ## Installing
 
-Impromptu is offered as a Visual Studio Code extension. You can install the extension by downloading the `.vsix` file and running:
+1) Open Visual Studio Code, and open the **Impromptu** folder. 
 
+
+2) Impromptu is offered as a Visual Studio Code extension. You can install the extension by downloading the `.vsix` file and running:
+```
     code --install-extension impromptu-1.0.0.vsix
-    
-Alternatively, if you open Visual Studio Code and search the extension file, you can right-click on it 
-and select `"Install VSIX Extension"` at the bottom of the list of options.
+```  
+Alternatively, if you open Visual Studio Code and search the extension file (`impromptu-1.0.0.vsix`), you can right-click on it and select `"Install VSIX Extension"` at the bottom of the list of options.
+
+3) Make use of Impromptu by one of its possible modes/features:
+    - **VS Extension**: The extension offers an editor for Impromptu prompts, with *syntax highlighting*, *syntax validation* and *autocomplete suggestions*. The extension enables users to generate prompts for specific AI systems and, on the other hand, to create code to invoke those AI platforms which have public APIs. Currently, supported target AI systems for generating prompts are [Midjourney](https://www.midjourney.com/), [Stable Diffusion web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and OpenAI's [ChatGPT](https://openai.com/chatgpt/). Users can leverage Impromptu to generate API invoking code for Stable Diffusion and ChatGPT. These files (that can be created by the user) are located in the `build-files`, which is the wrokspace of the extension.
+    Even when the aim of the user is to make use of another mode, it is **highly recommended to activate the extension** so that the user makes use of the syntax valid and therefore the Imprompt files become easier to write correctely.
+
+    - **CLI mode**: Generate a prompt using a .prm file, by writing a CLI command in the VSCode UI. It generates a `.txt` file with the generated prompt. Further explained in [CLI mode and Prompt customization](#cli-mode-and-prompt-customization) section.
+    - **Server mode**: Open the Impromptu server and send it a request to get the generated prompt  as a HTTP response.
+
 
 
 ## Features 
 
-The extension offers an editor for Impromptu prompts, with *syntax highlighting*, *syntax validation* and *autocomplete suggestions*. The extension enables users to generate prompts for specific AI systems and, on the other hand, to create code to invoke those AI platforms which have public APIs. Currently, supported target AI systems for generating prompts are [Midjourney](https://www.midjourney.com/), [Stable Diffusion web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) and OpenAI's [ChatGPT](https://openai.com/chatgpt/). Users can leverage Impromptu to generate API invoking code for Stable Diffusion and ChatGPT.
- 
-To use the editor, first install the Impromptu VS Code extension and then create a file in VS Code with extension `.prm` in the folder `build-files`.
-### `build-files` folder
-The `build-files` folder acts as the workspace for the `.prm` files. In addition to creating your own .prm files, one can import the assets from an already created file, as it is explained in a future section.
-
-The editor will not be available until you create a file with the proper extension.
 
 ### `.prm` files syntax
 
@@ -149,11 +152,13 @@ language=English
 
 
 
-### Prompt customization
+### CLI mode and Prompt customization
 
-The tool features a command-line interface to generate platform-specific prompts from a `.prm` file containing Impromptu assets. To invoke the command-line interface, simply run the following command: 
+The tool features a command-line interface to generate platform-specific prompts from a `.prm` file containing Impromptu assets. To invoke the command-line interface, simply run the following command (sataying at the `Impromptu` folder): 
 
-    ./bin/cli genprompt examples/example.prm -d <output-dir> -t <target-ai-system>
+    ./bin/cli genprompt <.prm-file-path> -d <output-dir> -t <target-ai-system>
+
+> `<.prm-file-path>` is the **relative path of the file from the folder `build_files`**. for example,`examples/example.prm` would run the file located in `build_files/examples/example.prm`.
 
 You can specify the output directory and the target AI system that will execute the prompt (currently, `midjourney`, `stable-diffusion` and `chatgpt`).
 
