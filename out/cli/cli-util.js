@@ -22,7 +22,6 @@ function extractDocument(fileName, services) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const extensions = services.LanguageMetaData.fileExtensions;
-        fileName = fileName;
         if (!extensions.includes(path_1.default.extname('build_files/' + fileName))) {
             console.error(chalk_1.default.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
             process.exit(1);

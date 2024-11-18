@@ -56,7 +56,7 @@ app.post("/generateprompt", async (req, res) => {
 			else console.log(`Incorrect command. Prompt ${prompt_name} does not exist in that document.`)
 
 			//console.log(chalk.green(`Prompt generated successfully: ${generatedFilePath}`));
-			await fs.promises.unlink('generated/temp.prm')
+			await fs.promises.unlink('build_files/temp.prm')
 			
 			// Return json response 
 			res.json({ result: result_prompt }); 
