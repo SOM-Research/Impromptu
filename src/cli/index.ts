@@ -19,13 +19,12 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
 
 export const generatePromptAction = async (fileName: string, opts: GenPromptOptions): Promise<void> => {
    
-    fileName=fileName
-
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     try{
         const model = await extractAstNode<Model>(fileName, services);
-        check_loops(model) // Ckecks thet any recursion loop happens
-
+        
+        check_loops(model) // Ckecks that any recursion loop happens
+        
         var validPrompt= true;
         if(opts.prompt){
             // In case a certain prompt is sent, we have to check that the prompt exists
@@ -47,7 +46,8 @@ export const generatePromptAction = async (fileName: string, opts: GenPromptOpti
             console.log(chalk.red(`Incorrect command. Prompt ${opts.prompt} does not exist in that document.`))
             throw new Error(`Incorrect command. Prompt ${opts.prompt} does not exist in that document.`)
         }     
-    }catch(e){}
+    }catch(e){
+    }
     
 };
 

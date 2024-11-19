@@ -13,12 +13,11 @@ export async function extractDocument(fileName: string, services: LangiumService
         console.error(chalk.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
         process.exit(1);
     }
-        if (!fs.existsSync('build_files/'+fileName)) {
-            console.error(chalk.red(`File ${fileName} does not exist.`));
-            process.exit(1);
-        }
-
-    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName)));
+    if (!fs.existsSync('build_files/'+fileName)) {
+        console.error(chalk.red(`File ${fileName} does not exist.`));
+        process.exit(1);
+    }
+    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); // Here is the problem
     await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
 
     const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
@@ -49,6 +48,7 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
         
     if (calls_buffer){
         const model = (await extractDocument(fileName, services)).parseResult?.value as T;
+        
         if (isModel(model)){
             // get all the imports of the file
             model.imports.forEach( import_line => {

@@ -10,17 +10,27 @@
     },
     {
       "name": "keyword.control.impromptu",
-      "match": "\\b(3D\\\\sart|3dobject|accent|advertisement|aerial\\\\sview|alternative|ambient|atmospheric|audience|audio|author|back|bench-level|between|blur|camera-angle|camera-settings|chain|character|close-up|comic\\\\sbook\\\\sart|compare|composer|core|count|dark\\\\sshadows|definition|depth|dialect|different\\\\sfrom|diffuse|digital\\\\sart|distortion|drawing|duration|effects|equivalency|essay|exactly|extreme\\\\sclose-up|extreme\\\\slong\\\\sshot|facetious|fast\\\\sshutter|first\\\\sperson|formal|frame|from|headline|height|high|hour|hyper|image|import|in-house|includes|interview|ironic|joke|language-register|length|less\\\\sor\\\\sequal\\\\sthan|less\\\\sthan|letter|lighting|like|line|literary-style|long\\\\sshot|low|low\\\\sangle|max|medium|medium\\\\sshot|min|minute|more\\\\sor\\\\sequal\\\\sthan|more\\\\sthan|neon|neutral|no|over-the-shoulder\\\\sshot|overhead\\\\sview|page|painting|paragraph|photography|pixel|play|poem|point|point-of-view|portrait|prefix|promixity|prompt|proof|reflection|report|second|second\\\\sperson|sentence|size|slang|song|source\\\\scode|suffix|taboo|tale|technical|text|third\\\\sperson|tilted\\\\sframe|video|volumetric|vulgar|weight|width|word)\\b|\\b(assets=|language=|priorVersion=|refines=|region=|separator=|validator=\\[)\\B|\\B(\\[reinforced\\])\\B"
+      "match": "\\b(3Dsart|3dobject|accent|advertisement|aerialsview|alternative|ambient|atmospheric|audience|audio|author|back|bench-level|between|blur|camera-angle|camera-settings|chain|character|close-up|comicsbooksart|compare|composer|core|count|darksshadows|definition|depth|dialect|differentsfrom|diffuse|digitalsart|distortion|drawing|duration|effects|equivalency|essay|exactly|extremesclose-up|extremeslongsshot|facetious|fastsshutter|firstsperson|formal|frame|from|headline|height|high|hour|hyper|image|import|in-house|includes|interview|ironic|joke|language-register|length|lesssorsequalsthan|lesssthan|letter|lighting|like|line|literary-style|longsshot|low|lowsangle|max|medium|mediumsshot|min|minute|moresorsequalsthan|moresthan|neon|neutral|no|over-the-shouldersshot|overheadsview|page|painting|paragraph|photography|pixel|play|poem|point|point-of-view|portrait|prefix|promixity|prompt|proof|reflection|report|second|secondsperson|sentence|size|slang|song|sourcescode|suffix|taboo|tale|technical|text|thirdsperson|tiltedsframe|video|volumetric|vulgar|weight|width|word)\\b|\\b(assets=|language=|priorVersion=|refines=|region=|separator=|validator=\\[)\\B|\\B(\\[reinforced\\])\\B"
     },
     {
       "name": "string.quoted.double.impromptu",
       "begin": "\"",
-      "end": "\""
+      "end": "\"",
+      "patterns": [
+        {
+          "include": "#string-character-escape"
+        }
+      ]
     },
     {
       "name": "string.quoted.single.impromptu",
       "begin": "'",
-      "end": "'"
+      "end": "'",
+      "patterns": [
+        {
+          "include": "#string-character-escape"
+        }
+      ]
     }
   ],
   "repository": {
@@ -52,6 +62,10 @@
           "name": "comment.line.impromptu"
         }
       ]
+    },
+    "string-character-escape": {
+      "name": "constant.character.escape.impromptu",
+      "match": "\\\\(x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|u\\{[0-9A-Fa-f]+\\}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)"
     }
   }
 }

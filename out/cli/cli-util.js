@@ -30,7 +30,7 @@ function extractDocument(fileName, services) {
             console.error(chalk_1.default.red(`File ${fileName} does not exist.`));
             process.exit(1);
         }
-        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName)));
+        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName))); // Here is the problem
         yield services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
         const validationErrors = ((_a = document.diagnostics) !== null && _a !== void 0 ? _a : []).filter(e => e.severity === 1);
         if (validationErrors.length > 0) {
