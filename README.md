@@ -156,11 +156,16 @@ language=English
 
 The tool features a command-line interface to generate platform-specific prompts from a `.prm` file containing Impromptu assets. To invoke the command-line interface, simply run the following command (sataying at the `Impromptu` folder): 
 
-    ./bin/cli genprompt <.prm-file-path> -d <output-dir> -t <target-ai-system>
+    ./bin/cli genprompt <.prm-file-path> -d <output-dir> -t <target-aisystem>
 
 > `<.prm-file-path>` is the **relative path of the file from the folder `build_files`**. for example,`examples/example.prm` would run the file located in `build_files/examples/example.prm`.
 
-You can specify the output directory and the target AI system that will execute the prompt (currently, `midjourney`, `stable-diffusion` and `chatgpt`).
+You can **specify the output directory** in `<.prm-file-path>`. If that parameter is not given, a `.txt` file (with the same name) with **the result will be created in the folder `build_files\generated`**.
+
+ The target LLM whre the generated prompt will be used can be selected in `<target-aisystem>`. Currently, the LLM systems available are:
+- **Midjourney**; writing `midjourney`
+- **StableDiffusion**; writing `stable-diffusion`
+- **ChatGPT**; writing `chatgpt`.
 
 For instance, provided that the following assets are in a file named `example.prm`:
 
@@ -336,11 +341,13 @@ constructor(context: ExtensionContext) {
 
 ## Impromptu as server
 
-By the command `node .bin/server_main.js`, one starts a node http server so that, given a text that follows the `.prm` file format, it returns a generated prompt. It is done by sending to the server a POST request to the server as `generateprompt` (http://127.0.0.1:3000/generateprompt). That text, together with the atributes (`aiSystem`, `prompt`),are transmitted to the server in the body of a POST call, where
+By the command `node .bin/server_main.js`, one starts a node http server so that, given a text that follows the `.prm` file format, and it returns a generated prompt to the client.
+ It is done by sending to the server a POST request to the server as `generateprompt` (http://127.0.0.1:3000/generateprompt). That text, together with the atributes (`aiSystem`, `prompt`),are transmitted to the server in the body of a POST call, where
     - `content`. Text acting as a `.prm`file.
-    - `aiSystem`. AI that where the prompt will be used.
+    - `aiSystem`. LLM that where the prompt will be used. They are the same ones that are available in the CLI mode (`midjourney` for MD, `stable-diffusion` for SD and `chatgpt` for ChatGPT).
     - `prompt`. In case is transmitted, tells which prompt defined in `content` has to be created. If any, all the prompts will be generated.
-The generated prompt is sent in the body of the response in the concept `result` if no errors were happen. In the other case, the erros are shared with the client in the body inside the concept `errors`.
+The generated prompt is sent in the body of the response in the concept `result` if no errors were happen. In the other case, the erros are shared with the client in the body inside the concept `errors`. 
+It is built adove the structure of the CLI mode, so **no other adjustments are needed**.
 
 ## Testing
 

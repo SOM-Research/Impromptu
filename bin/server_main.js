@@ -19,7 +19,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // call it using http://127.0.0.1:3000/generateprompt. 
 app.post("/generateprompt", async (req, res) => { 
 
-	console.log("hello")
 	var services = imp_mod.createImpromptuServices(node.NodeFileSystem).Impromptu;
 
 	var content = req.body.content;
