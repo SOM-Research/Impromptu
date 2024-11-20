@@ -22,7 +22,7 @@ export function isBaseSnippet(item: unknown): item is BaseSnippet {
     return reflection.isInstance(item, BaseSnippet);
 }
 
-export type CameraAngle = 'aerial view' | 'low angle' | 'over-the-shoulder shot' | 'overhead view' | 'tilted frame';
+export type CameraAngle = 'aerial\sview' | 'low\sangle' | 'over-the-shoulder\sshot' | 'overhead\sview' | 'tilted\sframe';
 
 export type CameraSettings = string;
 
@@ -66,13 +66,13 @@ export function isInputRef(item: unknown): item is InputRef {
 
 export type LanguageRegister = 'bench-level' | 'dialect' | 'facetious' | 'formal' | 'in-house' | 'ironic' | 'neutral' | 'slang' | 'taboo' | 'technical' | 'vulgar';
 
-export type Lighting = 'accent' | 'ambient' | 'atmospheric' | 'back' | 'dark shadows' | 'diffuse' | 'neon' | 'volumetric';
+export type Lighting = 'accent' | 'ambient' | 'atmospheric' | 'back' | 'dark\sshadows' | 'diffuse' | 'neon' | 'volumetric';
 
-export type LiteraryStyle = 'advertisement' | 'definition' | 'essay' | 'headline' | 'interview' | 'joke' | 'letter' | 'play' | 'poem' | 'proof' | 'report' | 'song' | 'source code' | 'tale';
+export type LiteraryStyle = 'advertisement' | 'definition' | 'essay' | 'headline' | 'interview' | 'joke' | 'letter' | 'play' | 'poem' | 'proof' | 'report' | 'song' | 'source\scode' | 'tale';
 
 export type Media = '3dobject' | 'audio' | 'image' | 'text' | 'video';
 
-export type Medium = '3D art' | 'comic book art' | 'digital art' | 'drawing' | 'painting' | 'photography' | 'portrait';
+export type Medium = '3D\sart' | 'comic\sbook\sart' | 'digital\sart' | 'drawing' | 'painting' | 'photography' | 'portrait';
 
 export type MediumIndependentTrait = AudienceTrait | ByAuthorTrait | ComparisonTrait | IncludesTrait | RelativeTrait | SimilarToTrait | TargetSizeTrait;
 
@@ -84,9 +84,9 @@ export function isMediumIndependentTrait(item: unknown): item is MediumIndepende
 
 export type ParamId = string;
 
-export type PointOfView = 'first person' | 'second person' | 'third person';
+export type PointOfView = 'first\sperson' | 'second\sperson' | 'third\sperson';
 
-export type Proximity = 'close-up' | 'extreme close-up' | 'extreme long shot' | 'long shot' | 'medium shot';
+export type Proximity = 'close-up' | 'extreme\sclose-up' | 'extreme\slong\sshot' | 'long\sshot' | 'medium\sshot';
 
 export type QualifiedName = string;
 
@@ -108,7 +108,7 @@ export function isRelativeTrait(item: unknown): item is RelativeTrait {
 
 export type Relevance = 'high' | 'low' | 'max' | 'medium' | 'min';
 
-export type SizeConstraint = 'different from' | 'exactly' | 'less or equal than' | 'less than' | 'more or equal than' | 'more than';
+export type SizeConstraint = 'different\sfrom' | 'exactly' | 'less\sor\sequal\sthan' | 'less\sthan' | 'more\sor\sequal\sthan' | 'more\sthan';
 
 export type TextTrait = LanguageRegisterTrait | LiteraryStyleTrait | PointOfViewTrait;
 

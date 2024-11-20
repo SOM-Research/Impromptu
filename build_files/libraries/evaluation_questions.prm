@@ -96,8 +96,6 @@ prompt answer_options(@number,@answers, @distractors): text
     separator=" "
     language= English
 
-
-
 prompt distractor_selection(@example):text
     core="Select the distractors of the question imitating the following example", @example
     language=English
@@ -117,7 +115,6 @@ prompt hard_question():text
     core="Choose the question so that it will be challenging to the students"
     language=English
 
-
 //-------------------------------------Question number----------------------------------------------
 prompt number_questions(@number):  text
     core = 
@@ -135,6 +132,12 @@ prompt level(@level): text
 prompt school_level(@level,@course): text
     core = 
         "The questions should be selected to challenge", @level ,"in",@course,"course" //@level == "Secondary Student"
+        separator=" "
+    language=English
+
+prompt language_level(@level): text
+    core = 
+        level(@level)
         separator=" "
     language=English
 
@@ -216,6 +219,10 @@ core = "Write an exam", question_topic(@topic), number_questions(@number), level
 
 prompt give_answers():text
 core = "Provide the answers of the questions as well"
+language=English
+
+prompt give_no_answers():text
+core = "Include only the problem statement, without the solution"
 language=English
 
 prompt example(): text

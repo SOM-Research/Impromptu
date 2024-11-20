@@ -250,12 +250,12 @@ export class ImpromptuValidator {
             workspace_path= process.cwd()
         }
 
-        let uri_array = workspace_path.split("\\")
+        let uri_array = workspace_path.split("/")
         let last='build_files'
          
         
         uri_array.push(last as string);
-        workspace_path= uri_array.join("\\");
+        workspace_path= uri_array.join("/");
 
         //const uri= uri_array?.join("/")
         if (fs.existsSync(workspace_path+'/'+library)){

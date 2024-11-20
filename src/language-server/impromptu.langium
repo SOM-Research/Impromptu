@@ -234,27 +234,27 @@ Effects returns string: 'blur' | 'reflection' | 'distortion' ;
 // ----------------------------------------------------------------------------------------
 
 Language: // Change: Language should be the same for all the file -> Does not make sense
-    'language=' name=(ID|STRING)
+    'language''=' name=(ID|STRING)
     //('code=' code=STRING)?
-    ('region=' region=STRING)? //CHANGED
+    ('region''=' region=STRING)? //CHANGED
     ;
 
 fragment AssetLanguage:
-    ('language=' language=ID)?
+    ('language''=' language=ID)?
     ;
 
 fragment AssetSeparator:
-    ('separator=' separator=STRING)?
+    ('separator''=' separator=STRING)?
     ;
 
 fragment AssetRelationships:
-    ('priorVersion=' priorVersion=[Asset:ID])?
-    ('refines=' refines=[Asset:ID])?
+    ('priorVersion''=' priorVersion=[Asset:ID])?
+    ('refines''=' refines=[Asset:ID])?
     ;
 
 Equivalency:
     'equivalency'
-    'assets=' ('(' (assets+=[Asset:ID])
+    'assets''=' ('(' (assets+=[Asset:ID])
         ((','assets+=[Asset:ID])*')'))?;
 
 // ----------------------------------------------------------------------------------------
