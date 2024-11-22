@@ -1,15 +1,15 @@
 language=English
 import question_topic from libraries.evaluation_questions
-language=English
+
 
 import choose_one_answers from libraries.evaluation_questions
-language=English
+
 
 import duration_exam from libraries.evaluation_questions
-language=English
+
 
 import goal_content from libraries.evaluation_questions
-language=English
+
 
 
 prompt main(): text

@@ -346,7 +346,7 @@ By the command `node .bin/server_main.js`, one starts a node http server so that
     - `content`. Text acting as a `.prm`file.
     - `aiSystem`. LLM that where the prompt will be used. They are the same ones that are available in the CLI mode (`midjourney` for MD, `stable-diffusion` for SD and `chatgpt` for ChatGPT).
     - `prompt`. In case is transmitted, tells which prompt defined in `content` has to be created. If any, all the prompts will be generated.
-The generated prompt is sent in the body of the response in the concept `result` if no errors were happen. In the other case, the erros are shared with the client in the body inside the concept `errors`. 
+The generated prompt is sent in the body of the response in the concept `result` if no errors were happen. In the other case, the erros are shared with the client in the body inside the concept `errors`.
 It is built adove the structure of the CLI mode, so **no other adjustments are needed**.
 
 ## Testing

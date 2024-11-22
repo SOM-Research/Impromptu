@@ -1,4 +1,4 @@
-## Instalation for dummies
+## Installation
 #### Requirements
 As requirements to a proper setup of Impromptu in your systems, one needs to meet the follwing requirements:
 - Have **internet conection** to be able to upload several packages
@@ -13,7 +13,6 @@ As requirements to a proper setup of Impromptu in your systems, one needs to mee
 #### 3- Install `vscode`
 
 - Go to https://code.visualstudio.com/download, and dowload the version that is for your system.
-
 
 
 - Open `vscode`.
@@ -127,8 +126,16 @@ The snippets are the core of Impromptu. They are the "parts" that represent the 
 ### Composer
 A Composer is a structure that allows to merge several snippets together. The difference with a Prompt is that not media is declared because each part of the composer is considered as an independent prompt (*There is not any functional difference yet*).
 
-### Chain
+```
+composer <name> ([<inputs>]): 
+<snippets>
+[separator = <string>]
+[language = <language>]
 
+```
+
+### Chain
+*Not real utility right now*
 
 ### Imports
 

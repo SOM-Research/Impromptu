@@ -61,7 +61,7 @@ Chain:
     ;
 
 Composer:
-    'composer' name=QualifiedName  pars=Parameters contents=Contents (separator=STRING)?
+    'composer' name=QualifiedName  pars=Parameters ':' contents=Contents (separator=STRING)?
     AssetSeparator
     AssetLanguage
     AssetRelationships

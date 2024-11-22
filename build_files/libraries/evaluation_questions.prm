@@ -1,6 +1,8 @@
 language= English
 
 //-------------------------------------Question formats----------------------------------------------
+// Provide that the mentioned question is true-false type
+//      @option: "" if none; correct_answers_option() if the false one are wanted to be corrected
 prompt true_false_answers(@option):  text
     core = 
         "The possible answers of the questions should be true or false",@option
@@ -12,6 +14,8 @@ prompt correct_answers_option():  text
         separator="."
     language=English
 
+// Provide that the mentioned question is complete-the-gaps type
+//      @option: "" if none; only_one_text_option() the gaps belong to the same tex
 prompt complete_gaps_questions(@option):  text
     core = 
         "The questions consist of filling the gaps", @option
@@ -23,25 +27,32 @@ prompt only_one_text_option():  text
         "Use a common text for all questions"
         separator=" "
 
+// Provide that the mentioned question is an open question
+//      @lenght max number of words the answer should have
 prompt open_answer_question(@lenght):  text
     core = 
         "The questions should be open-answer"
         separator="."
     language=English
 
+// Provide that the mentioned question is about paraphrase a sentence (typical in exam about foreign languages)
+// e.g.
+// Can you pass me an apple?
+// Using may: ___________ an apple?
 prompt paraphrase():text
     core = 
         "The exercise should require students to rephrase a given sentence using new vocabulary"
         separator="."
     language=English
 
+// Provide that the mentioned question are multiple choice (A), B), C), D) - like questions)
 prompt multi_choice():  text
     core = 
         "The questions should be multiple-choice type"
     separator="."
     language=English
 
-// Same as before but without option
+// Same as before but with the possiblity of adding options
 prompt choose_one_answers(@option):  text
     core = 
         "The questions should be multiple-choice type",@option
@@ -54,21 +65,27 @@ prompt multiple_answers_option():  text
     separator="."
     language=English
 
+// Provide that the mentioned question is about linking pairs from two columns
 prompt match_format():  text
     core = 
         "The questions are matching questions"
-    language=English
-
-prompt multi_format(@formatA,@numberA,@formatB,@numberB):  text
-    core = 
-        "For",@numberA,"questions",@formatA,"and for",@numberB,"questions",@formatB
-    separator=" "
     language=English
 
 prompt search_errors(@text_topic ): text 
     core= "The questions should be about searching for grammar and spelling errors in a text about", @text_topic
     language=English
     
+
+// Allows to divide the quesion in two types of questions, indicating te number of question of each type
+// @formatA, @formatB : each of the previous prompts such as multi_choice()
+// @numberA,@numberB : number
+prompt multi_format(@formatA,@numberA,@formatB,@numberB):  text
+    core = 
+        "For",@numberA,"questions",@formatA,"and for",@numberB,"questions",@formatB
+    separator=" "
+    language=English
+
+
 //-------------------------------------Question topic----------------------------------------------
 prompt question_topic(@topic):  text
     core = 
@@ -82,11 +99,13 @@ prompt question_from_picture (@element ): text
     separator=" "
     language= English
 
+// Specify the contents that has to be cover by the question/s
 prompt goal_content(@source):  text
     core = 
-        "Base your questions on", @source
+        "The activity should be based on the following contents: ...", @source
         separator=" "
     language=English
+
 
 prompt answer_options(@number,@answers, @distractors): text
     prefix= number_questions(@number)
@@ -96,21 +115,32 @@ prompt answer_options(@number,@answers, @distractors): text
     separator=" "
     language= English
 
+
+// Give an example of how to choose the distractors for the questions
 prompt distractor_selection(@example):text
     core="Select the distractors of the question imitating the following example", @example
     language=English
 
+// Tells the distractors wanted for the question (has to be a multi_mtach() question)
 prompt distractors(@distractors): text
     core= "Consider the follwing options as distractors for the question:", @distractors
+    separator = " "
 
+// Tells th correct answer of the question
+prompt correct_answer(@answer): text
+    core= "The correct answer of the question should be:", @answer
+    separator = " "
+
+// The realted question has to be simple 
 prompt easy_question():text
     core="The purpose of the question is to ensure the basis of the subject"
     language=English
 
+// The realted question has to be normal
 prompt medium_question():text
     core="The question should not be neither easy or very changelling"
     language=English
-
+// The realted question has to be challenging
 prompt hard_question():text
     core="Choose the question so that it will be challenging to the students"
     language=English
@@ -129,60 +159,72 @@ prompt level(@level): text
         separator=" "
     language=English
 
+// Tells the educational level of the students (school environment)
 prompt school_level(@level,@course): text
     core = 
         "The questions should be selected to challenge", @level ,"in",@course,"course" //@level == "Secondary Student"
         separator=" "
     language=English
 
+// Tells the educational level of the students (foreign language environment)
 prompt language_level(@level): text
     core = 
         level(@level)
         separator=" "
     language=English
 
+// Average age of the student (relevant to adult students, for example)
 prompt students_age(@age): text
     core= "The target students are",@age,"years old"
     separator=" "
 
+// Knwoledge that has to be proven by passing the exam. For example:
+// "learning outcome("Solve linear equations")"
 prompt learning_outcome(@outcome): text
-    core= "The learning outcome that will be assessed by the proposed activity is the following:", @outcome
+    core= "The learning outcome that will be assessed by the proposed activity is the following:
+    Being able to", @outcome
     separator=" "
 
+// Give an example of a question that is wanted in the exam
 prompt example_question(@example):text
     core = 
         "Take this question as an example:",@example
         separator=" "
     language=English
 
+// Time for solving the questions, in minutes
 prompt duration_exam(@level,@times): text
     core = 
         "Select the questions so that it can be solved by",@level,"students in",@times,"minutes"
         separator=" "
     language=English
 
+// Time for solving the question, in minutes
 prompt time_question(@times): text
     core = 
         "The time limit to solve this question is",@times,"minutes"
         separator=" "
     language=English
 
-
+// Adapt the exam to an specific demographic
 prompt target_audience(@target_audience):text
     core= 
         audience(@target_audience)
     separator=" "
 
-prompt exam_language(@language):text
-    core= "The exam should be written in", @language
+// Exam in which the exam will be written
+prompt exam_language(@lang):text
+    core= "The exam should be written in", @lang
     separator=" "
 
+// Prior concepts the students should know & use to pass the exam
 prompt prior_knowledge(@topic):text
     core= "Assume the students have learned about", @topic
     separator=" "
 
 //--------------------------------------DetailedInstructions-----------------------------------------
-composer InitialConditions()
+// Prefix of the prompt
+composer InitialConditions():
     Personification(), ExamInstruction(), Context()
     language=English
 
@@ -196,8 +238,8 @@ prompt Personification(): text
 core = "You are an exam-generator machine that creates original exam question following the instructions given in the prompt"
 
 
-
-composer DetailedInstructions()
+// Suffix of the prompt
+composer DetailedInstructions():
     "Questions should be clear ", 
     no("controversial topics"), 
     "The questions should be as concise as possible."
@@ -206,28 +248,25 @@ composer DetailedInstructions()
 
 
 //----------------------------------------Misc----------------------------------------------------
+// Format of the answer i.e JSON
 prompt answer_format(@format):text
 core = "The answer has to follow the format:",@format
     separator='
     '
 
 
-prompt simple_test(@number, @level,@topic, @format): text
-core = "Write an exam", question_topic(@topic), number_questions(@number), level(@level), @format
-        separator="."
-    language=English
-
+// The LLM provide the answers of the questions. It may limit the variaty of the questions generated
 prompt give_answers():text
 core = "Provide the answers of the questions as well"
 language=English
 
+// Forbid the LLM to provide the answers of the questions
 prompt give_no_answers():text
 core = "Include only the problem statement, without the solution"
 language=English
 
-prompt example(): text
-    core = 
-        "Write an exam", question_topic("geography"), number_questions("50"), level("university"), true_false_answers("")
-    suffix = DetailedInstructions()
-    separator="."
+// Example of a prompt
+prompt simple_test(@number, @level,@topic, @format): text
+core = "Write an exam", question_topic(@topic), number_questions(@number), level(@level), @format
+        separator="."
     language=English

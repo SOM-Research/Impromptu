@@ -2,18 +2,18 @@
 language=English
 
 import question_topic from libraries.evaluation_questions
-language=English
+
 
 import choose_one_answers from libraries.evaluation_questions
-language=English
+
 
 import answer_options from libraries.evaluation_questions
-language=English
+
 
 import InitialConditions from libraries.evaluation_questions
-language=English
+
 import DetailedInstructions from libraries.evaluation_questions
-language=English
+
 
 prompt main(): text
     prefix = InitialConditions()
