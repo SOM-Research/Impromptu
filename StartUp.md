@@ -7,8 +7,39 @@ As requirements to a proper setup of Impromptu in your systems, one needs to mee
 #### 1- Extract Impromptu's `.zip` folder in your PC
 
 #### 2- Install `node` in your PC
+There are two posssible paths: Installing `node` or using `nvm`
+##### node
 -  Go to https://nodejs.org/en/download/prebuilt-installer, and install `Node v22.11.00` and choose the installer that correspond to your system. 
 - Yo can check that can it was succesfully installed by open the med and write `node --version`. Maybe you should restart the computer before the system detetcs it installed.
+
+##### nvm
+- Download `nvm` your OS .For Windows, you need to download the `.exe` form this [url](https://github.com/coreybutler/nvm-windows/releases) while Linux and iOS users cand do it from the command line:
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash 
+
+# or
+
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+```
+respectively.
+
+In case of choosing using `nvm`, there are additional steps the used should follow:
+ - Install `node` using `nvm` (v. 23.3.0 recommended)
+ ```
+ nvm install v23.3.0
+ ```
+
+- Choose it as the version to use
+ ```
+ nvm use 23.3.0
+ ```
+
+- Start `node` using `nvm` (requires administrator permits)
+ ```
+ nvm on
+ ```
+
+> To close node, write the command: `nvm off`.
 
 #### 3- Install `vscode`
 
@@ -20,6 +51,8 @@ As requirements to a proper setup of Impromptu in your systems, one needs to mee
 - Once in the Impromptu workspace, open a new Terminal (`Terminal`-> `New Terminal`)
 
 #### 4- Change the Execution Policy of the system (Windows).
+This step is only necessary if you have downloaded `node ` directtely instead of using `nvm`.
+
 - Open PowerShell as Administrator (press `Ctrl+X`->`Terminal(Administrator)`)
 
 - Change the `Execution Policy` to `Remote Signed`. This policy allows scripts created on your local computer to run, but requires that scripts downloaded from the internet be signed by a trusted publisher.:
@@ -32,6 +65,7 @@ Set-ExecutionPolicy RemoteSigned
 ExecutionPolicy
 ```
 For further details, visit [this post](https://medium.com/@devnurai/how-to-fix-the-npm-file-c-program-files-nodejs-npm-ps1-69515d0fb02b).
+
 
 > Changing the Execution Policy may open vulnerability to your system. A more secure option is done by the command `Set-ExecutionPolicy RemoteSigned –Scope Process`, which only affects the current session.
 
@@ -67,7 +101,7 @@ npm run build
 
 ### DSL Syntaxis
 
-A `.prm` file contains a **Language** (optional), and a set of **prompts**, **chain** and **composer** (Assets). It may also contain one or more **iports**
+A `.prm` file contains a **Language** (optional), and a set of **prompts**, **chain** and **composer** (Assets). It may also contain one or more **imports**.
 #### Language
 
 Every `.prm` starts by declaring the language of the prompt that will generate. The grammar of it is:
