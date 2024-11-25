@@ -1,19 +1,30 @@
-language=English
-import question_topic from libraries.evaluation_questions
+language= English
 
 
-import choose_one_answers from libraries.evaluation_questions
+import InitialConditions, DetailedInstructions, multi_choice, give_answers,
+
+    medium_question, exam_language from libraries.evaluation_questions
 
 
-import duration_exam from libraries.evaluation_questions
+composer CompletePrompt():
+
+    multi_choice(),
+
+    give_answers(),
+
+    medium_question(),
+
+    exam_language("English")
+
+    separator=". "
 
 
-import goal_content from libraries.evaluation_questions
+prompt EvaluationQuestionsModel(): text
 
+    prefix= InitialConditions()
 
+    core= CompletePrompt()
 
-prompt main(): text
-    core = 
-        question_topic("B2-level English"), choose_one_answers(), duration_exam("B2 English","10"), goal_content("last article")
-    separator="."
-    language=English
+    suffix= DetailedInstructions()
+
+    separator= ". "

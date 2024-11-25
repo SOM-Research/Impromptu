@@ -123,27 +123,28 @@
         "test": "vitest"
     },
     "dependencies": {
-        "chalk": "^4.1.2",
-        "chevrotain": "^10.4.1",
-        "commander": "^8.0.0",
-        "csv-parser": "^3.0.0",
+        "chalk": "~4.1.2",
+        "chevrotain": "~10.4.2",
+        "commander": "~8.3.0",
+        "csv-parser": "~3.0.0",
+        "express": "~4.21.1",
         "langium": "~1.0.0",
-        "vscode-languageclient": "^8.0.2",
-        "vscode-languageserver": "^8.0.2",
-        "vscode-uri": "^3.0.2"
+        "vscode-languageclient": "~8.1.0",
+        "vscode-languageserver": "~8.1.0",
+        "vscode-uri": "~3.0.2"
     },
     "devDependencies": {
-        "@types/node": "^18.0.0",
-        "@types/vscode": "^1.56.0",
-        "@typescript-eslint/eslint-plugin": "^5.28.0",
-        "@typescript-eslint/parser": "^5.28.0",
-        "esbuild": "^0.17.16",
-        "eslint": "^8.17.0",
+        "@types/node": "~18.0.0",
+        "@types/vscode": "~1.56.0",
+        "@typescript-eslint/eslint-plugin": "~5.28.0",
+        "@typescript-eslint/parser": "~5.28.0",
+        "esbuild": "~0.17.19",
+        "eslint": "~8.17.0",
         "langium-cli": "~1.0.0",
-        "save": "^2.9.0",
-        "typescript": "^4.9.4",
-        "vitest": "^2.1.1",
-        "webpack": "^5.78.0",
-        "webpack-cli": "^5.0.1"
+        "save": "~2.9.0",
+        "typescript": "~4.9.5",
+        "vitest": "~2.1.1",
+        "webpack": "~5.96.1",
+        "webpack-cli": "~5.0.1"
     }
 }
