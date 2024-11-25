@@ -16,10 +16,24 @@ This repository is the companion to the research paper providing a description o
 > Robert Clarisó, Jordi Cabot (2023). "Model-driven prompt engineering". ACM/IEEE 26th International Conference on Model-Driven Engineering Languages and Systems (MODELS), IEEE, to appear.
 
 ## Requirements
+ Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. For that reason, in addition to install the software it self, the user must install additional software.
 
-Impromptu is implemented in TypeScript using the [Langium](https://langium.org) open-source language engineering toolkit. In order to run Impromptu you need [Node.js](https://nodejs.org/) and [Visual Studio Code](https://code.visualstudio.com/) in your system.
 
-In addition, the Node module `csv-parser` has to be installed. Write in the CLI ```npm install csv-parser``` in the VSCode command line (CLI).
+#### Requirements
+As requirements to a proper setup of Impromptu in your systems, one needs to meet the follwing requirements:
+- Have **internet conection** to be able to upload several packages
+- Being able to **run the system as an Administrator**.
+
+1. Extract Impromptu's `.zip` folder in your PC
+2. Install `node` in your PC
+3. Install `vscode` and open `Impromptu` folder
+4. Change the Execution Policy of the system (Windows).
+5. Run `npm install` 
+6. Install `Langium` and `Impromptu` vscode's Extension
+7. Run `npm run langium:generate` and `npm run build`
+
+For a further detail of those step check out the [detailed guide](StartUp.md). 
+
 
 ## Installing
 
@@ -41,7 +55,96 @@ Alternatively, if you open Visual Studio Code and search the extension file (`im
 
 
 
-## Features 
+## User's Manual
+
+In this section will be explained the Sytanxis of Impromptu's DSl plus the different modes on have to use Impromptu
+
+
+
+### Sytaxis
+The core of Impromptu is its semantics that allow to wirte a propt as a programming fuction using variables and calls to another prompts.
+
+
+A `.prm` file contains a **Language**, and a set of **prompts**, **chain** and **composer** (Assets). It may also contain one or more **imports**.
+#### Language
+
+Every `.prm` starts by declaring the language of the prompt that will generate. The grammar of it is:
+```
+language = <language>
+```
+
+Until now, the two possible languages are Spanish and English (i.e `language=English`).
+This **element is optional**. If it was not declared, **it is assumed that the language is English**.
+> *In the future, it will be used to ensure the compatibility between an asset and its imports/references*.
+
+#### Prompt
+
+`Prompt` is the basic function that generates a prompt. Its grammar is:
+
+```
+prompt <name> ([<inputs>]): <media>
+[prefix = <snippets>]
+core = <snippets>
+[suffix = <snippets>]
+[separator = <string>]
+[language = <language>]
+
+```
+**name**: name that we give to the prompt. It has to be unique, and serves to reference the prompt in other places
+
+**inputs**: Parameters and another inputs that are used to generate the prompt. There are two types of inputs:
+- **parameter**: Transmit a `snippet` (explained HERE) inside the `prompt` as a variable. They should start by an `@` symbol.
+- **metadata**: *to be developed*
+
+**media**: Indicate the types of exit the prompt will generate when used in the LLM.
+
+**prefix**, **core** & **suffix**: They are where what will truly generate the prompt is located. They are composed by a set of commands (called `snippets`) that induces that statemnt in the prompt. `snippets` will be explained in the next section. 
+
+> The difference betweeen prefix, core and suffix is merely concptual. The snippets in the core are supposed to be related with the intructions of the prompt related to generate the answer, while in suffix and prefix appear instructions to guide the LLM to a correct answer.
+
+**separator**: Tells how the different `snippets` are linked to each other. It was assigned a default separator for each LLM. For example, for ChatGPT, the default separator is `". "`.
+
+**language**: A prompt can declare its language indivially of the language of the `.prm` is in.
+
+
+
+#### Snippets
+
+The snippets are the core of Impromptu. They are the "parts" that represent the different ideas that the generated prompt is wanted to have. There are 4 types of snippets:
+
+1. **Text plain.** Just write a text that you want to be in the prompt
+
+2. **Input.** Obviously, the inputs transmitted to the prompt can be referenced and be used it.
+
+3. **Another asset**. You can use another asset from the same file (or that it were imported). For example, if you want to create a prompt to generate a poem about friendship, you may add a provious asset `generate_poem()` that generates a promptthat will create a poem.
+
+4. **Traits**. The most useful type of snippet are the traits. They work as reference to assets, but about general topics that usually appear in a well-formed prompt. For example, if in the previous example we want to ensure that the generated poem in the previos example is for children, we should add `audience("children")`. The whole list of the implemented traits, plus their options are documented in [this document](traits_cheat_sheet.md).
+
+
+### Composer
+A Composer is a structure that allows to merge several snippets together. The difference with a Prompt is that not media is declared because each part of the composer is considered as an independent prompt (*There is not any functional difference yet*).
+
+```
+composer <name> ([<inputs>]): 
+<snippets>
+[separator = <string>]
+[language = <language>]
+
+```
+
+### Chain
+*Not real utility right now*
+
+### Imports
+
+In addition to prompts, composer and chains, a `.prm`can also contain imports. Similary to programming language such as java, the user can use other  elements **from a file located in `build_files`** by writing
+```
+import <name_1>,<name_2>,...,<name_n> from <file_location>
+```
+where `<name_i>` are the names of the asset imported, and `<file location>` is the relative path to the file from `build_files` (but without the `.prm` ending). For example, if the imported prompt is located in in the file `build_files/libraries/evaluation_questions.prm`, `<file location>` is `libraries.evaluation_questions`.
+
+
+
 
 
 ### `.prm` files syntax
@@ -347,7 +450,52 @@ By the command `node .bin/server_main.js`, one starts a node http server so that
     - `aiSystem`. LLM that where the prompt will be used. They are the same ones that are available in the CLI mode (`midjourney` for MD, `stable-diffusion` for SD and `chatgpt` for ChatGPT).
     - `prompt`. In case is transmitted, tells which prompt defined in `content` has to be created. If any, all the prompts will be generated.
 The generated prompt is sent in the body of the response in the concept `result` if no errors were happen. In the other case, the erros are shared with the client in the body inside the concept `errors`.
-It is built adove the structure of the CLI mode, so **no other adjustments are needed**.
+
+This has the problem that the server has to be open from Impromptu workspace itself to work. Therefore, it is recommended to use a proccess manager such as **pm2** to configure the closing and opening of the server. 
+
+### PM2 instalation
+
+Use **npm** to install pm2:
+``` 
+npm install -g pm2
+```
+
+One can check that the installation was succesful by checking the version:
+```
+pm2 -v
+```
+
+In order to get access eficiently to all your proccess from your project file, PM2 employs an ecosystem configuration file. You can generate these file by the command:
+
+```
+pm2 init simple
+```
+This command would create the file `ecosystem.config.js` in the workplace, where you can write the configuration of the servers the application would need.
+
+
+### Launching the server
+
+The server entrance is located in the folder `bin/server_main.js` of Impromptu. Therefore, in order to start Impromptu's server, it is important to **change the current directory**, since some validations depend on it. That means that you have to write where the script of the server is inside that directory (`bin/server_main.js` in Impromptu's case), and you can write a name to identify the service.
+
+For example, if we add Impromptu inside the `opt` folder of our project, where we have created the file `ecosystem.config.js`, we should add in it:
+
+
+```
+module.exports = {
+    "apps": [
+        {
+           "name": "impromptu",
+           "cwd": "/opt/Impromptu",
+           "script": "bin/server_main.js",
+           "env": {
+              "NODE_ENV": "production"
+           }
+        }
+    ...
+    ]
+}
+```
+
 
 ## Testing
 

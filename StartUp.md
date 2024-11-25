@@ -1,8 +1,5 @@
 ## Installation
-#### Requirements
-As requirements to a proper setup of Impromptu in your systems, one needs to meet the follwing requirements:
-- Have **internet conection** to be able to upload several packages
-- Being able to **run the system as an Administrator**.
+
 
 #### 1- Extract Impromptu's `.zip` folder in your PC
 
@@ -71,9 +68,6 @@ For further details, visit [this post](https://medium.com/@devnurai/how-to-fix-t
 
 #### 5- Install the expansions
 - Install the Impromptu service by writing in the terminal `npm install`
-    - At the moment, you also need to install `csv-parser`.
-
-
 - Install Langium from the Extension marketplace (Go to `Extension` icon in the lateral scroll, and write `Langium` in the serch bar. Click on the result and install it).
 
 - In order to make use of Impromptu as a expansion, one should also install. You can install the extension by (downloading the `.vsix` file and) running:

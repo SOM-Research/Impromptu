@@ -746,6 +746,10 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             }
           },
           {
+            "$type": "Keyword",
+            "value": ":"
+          },
+          {
             "$type": "Assignment",
             "feature": "contents",
             "operator": "=",

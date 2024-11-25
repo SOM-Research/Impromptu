@@ -196,7 +196,7 @@ ParamInvokation:
     '(' pars+=Snippet (',' pars+=Snippet )*  ')' | '(' ')';
 
 Parameters:
-    '('( pars+= Input ( ',' pars+= Input )* )?')' ;
+    '('( pars+= Input ( ',' pars+= Input )* )?')'| '(' ')' ;
 
 Input:
     Parameter | Multimodal;

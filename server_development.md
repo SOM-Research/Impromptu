@@ -1,4 +1,4 @@
-In order to the start-up of the server mode, it is recommend tu use a proccess manager such as **pm2**. 
+In order to the start-up of the server mode, it is recommended to use a proccess manager such as **pm2**. 
 
 ### PM2 instalation
 
