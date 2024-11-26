@@ -76,13 +76,15 @@ test('asset_reference', async() => {
 
 })
 
-
+/**
+ * Check the validator recognizes error of the number of imputs of a reference of an asset does not match with the orginal's
+ */
 test('validation_checks_active', async() => {
-  // Check that the validations erros are considered correctly
 
   const services = createImpromptuServices(EmptyFileSystem);
   const parse = parseHelper<Model>(services.Impromptu);
   
+  // Example of document that does have that error
   const document = await parse(`
     language=English
 
@@ -107,15 +109,19 @@ test('validation_checks_active', async() => {
   await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
 
   const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
-  expect(validationErrors).toHaveLength(1) // Test that the prompt is incorrect indeed
+  expect(validationErrors).toHaveLength(1) // Test that the prompt has an error
   })
 
+
+/**
+ * Check that a recursivity loop is detected by the validator
+ */
 test('validation_recursion_loop', async() => {
-  // Check that a recursivity loop is detected
 
   const services = createImpromptuServices(EmptyFileSystem);
   const parse = parseHelper<Model>(services.Impromptu);
-  
+
+  // Example of document that does have that error
   const document = await parse(`
     language=English
 
@@ -135,17 +141,21 @@ test('validation_recursion_loop', async() => {
   expect(validationErrors[0].message).toBe("There is a recursive loop"); // Meassage of the recursion loop 
   })
 
+
+/**
+ * Check that a recursivity loop is detected by the validator: self-recursion case
+ */
   test('validation_recursion_loop_different', async() => {
-    // Check that a recursivity loop is detected
   
     const services = createImpromptuServices(EmptyFileSystem);
     const parse = parseHelper<Model>(services.Impromptu);
     
+    // Example of document that does have that error
     const document = await parse(`
       language=English
   
       prompt functionA(): image
-      core = "You are in A", functionB()
+      core = "You are in A", functionA()
       language=English
   
       prompt functionB(): image
@@ -161,13 +171,15 @@ test('validation_recursion_loop', async() => {
     })
   
 
-
+  /**
+   * Checks that entering an incorrect language turns out in an error
+   */
   test('validation_incorrect_language', async() => {
     // Check that a recursivity loop is detected
   
     const services = createImpromptuServices(EmptyFileSystem);
     const parse = parseHelper<Model>(services.Impromptu);
-    
+    // Example of document that does have that error
     const document = await parse(`
       language=Anglish
   
@@ -182,12 +194,13 @@ test('validation_recursion_loop', async() => {
     expect(validationErrors[0].message).toBe("Language is not supported."); // Meassage of the recursion loop 
     })
 
+
   /**
-   * Returns the model of the file ` '__test__/test/testPromptMode.prm'`
+   * Returns the model of the file ` '__test__/testPromptMode.prm'`
    */
   async function prepare_model(){
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
-    const fileName= 'test/testPromptMode.prm';
+    const fileName= '__test__/testPromptMode.prm';
     const model = await extractAstNode<Model>(fileName, services);
     return model;
   }
@@ -203,6 +216,9 @@ test('validation_recursion_loop', async() => {
     }
   })
 
+  /**
+   * Test the script mode in MidJourney
+   */
   test('script_mode_MD', async() => {
     // Test the script mode (no prompt sent)
    
@@ -212,14 +228,18 @@ test('validation_recursion_loop', async() => {
     expect(result?.join()).toContain("promptC"); // Last asset is in the final prompt
   })
 
+  /**
+   * Test the prompt mode in MidJourney
+   */
   test('prompt_mode_MD', async() => {
     // Test the prompt mode in Midjourney-> Only the first prompt has to be considered
-    const model = await prepare_model();
-    const prompt = model.assets[0];
-    const result = generatePromptCode(model,AISystem.Midjourney, prompt );
+    const model = await prepare_model(); // Connection to the file
+    const prompt = model.assets[0]; // Get the first asset to the model so we are able to transmit it as variable
+    const result = generatePromptCode(model,AISystem.Midjourney, prompt ); 
     expect(result?.join()).toContain("promptA"); // First asset is in the final prompt
     expect(result?.join()).not.toContain("promptB"); // Second asset is NOT in the final prompt
   })
+  // Same to Satble Diffusion
   test('prompt_mode_SD', async() => {
     // Test the prompt mode in Stable-Diffusion -> Only the first prompt has to be considered
     const model = await prepare_model();
@@ -228,7 +248,7 @@ test('validation_recursion_loop', async() => {
     expect(result?.join()).toContain("promptA"); // First asset is in the final prompt
     expect(result?.join()).not.toContain("promptB"); // Second asset is NOT in the final prompt
   })
-  
+  // Same to ChatGPT
   test('prompt_mode_ChatGPT', async() => {
     // Test th prompt mode in ChatGPT -> Only the first prompt has to be considered
     const model = await prepare_model();
@@ -238,6 +258,10 @@ test('validation_recursion_loop', async() => {
     expect(result?.join()).not.toContain("promptB"); // Second asset is NOT in the final prompt
   })
 
+
+/**
+ * Checks prompt mode passing the values for parameters of the prompt
+ */
 test('prompt_mode_variables', async() => {
   // Test the prompt mode with several varaibles
   const model = await prepare_model();
@@ -269,7 +293,7 @@ test('one_prompt_only_empty_varaibles', async() => {
 
 test('test_heritage', async() => {
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= 'test/testHeritage.prm';
+  const fileName= '__test__/testHeritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const result = generatePromptCode(model,AISystem.Midjourney,undefined);
   expect(result?.join('')).toContain("Draw a , var 2"); // Test that the parameter has been used
@@ -278,7 +302,7 @@ test('test_heritage', async() => {
 test('test_heritage_in_prompt_mode', async() => {
   // Checks that using prompt mode the reuse of Asset still works, without writing the prompt of the declared Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= 'test/exampleHeritage.prm';
+  const fileName= '__test__/exampleHeritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
   expect(model.assets[2].name).toBe("NewMain"); 
   const prompt = model.assets[2];
@@ -291,7 +315,7 @@ test('test_heritage_in_prompt_mode', async() => {
 test('not_general parameters' , async() => {
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= 'test/not_global_heritage.prm';
+  const fileName= '__test__/not_global_heritage.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt, ["mock_var_1", "mock_var_2"]);
@@ -306,7 +330,7 @@ test('Check_import' , async() => {
 
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= 'test/basic_import.prm';
+  const fileName= '__test__/basic_import.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
@@ -314,11 +338,11 @@ test('Check_import' , async() => {
   expect(result?.join(' ')).not.toContain("job_statement"); // Check that the content has been changed
 })
 
+/** Checks that one can import an asset from another file, and the parameters are using the value given*/
 test('Check_import_varaibles' , async() => {
 
-  // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= 'test/import_with_variables.prm';
+  const fileName= '__test__/import_with_variables.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
@@ -326,11 +350,14 @@ test('Check_import_varaibles' , async() => {
   expect(result?.join(' ')).not.toContain("job_statement"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
 })
 
-test('Check_multiimport' , async() => {
+/**
+ * Check that two imports (imported in the same line) are imported correctly
+ */
+test('Check_multi_import' , async() => {
 
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= 'test/multi_import.prm';
+  const fileName= '__test__/multi_import.prm';
   const model = await extractAstNode<Model>(fileName, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt);

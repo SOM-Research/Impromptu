@@ -1,5 +1,6 @@
 language=English
 
+//Example of prompts with descriptions
 prompt
     ValidatorByExpression
     'This prompt is intended for validation using a prompt'

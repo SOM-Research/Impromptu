@@ -1,3 +1,5 @@
+// Example of multiple correct asset reuse
+
 language=English
 
 prompt Draw(@animal1): image
@@ -10,7 +12,7 @@ core =
   Draw(between(@animal1, @animal2)),
   audience("children" ) weight high,
   no(@animal1 ), no("scary")
-  language= English  
+language= English  
 
 prompt NewMain(): image
 core=Mixture("lion","snake")

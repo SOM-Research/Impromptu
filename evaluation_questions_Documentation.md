@@ -10,7 +10,7 @@ Here it will be explanied all those functions plus some examples of their usage
 
 Use it to indicate that the questions of the exam **should be true/false question**
 
-- `@option`: Indicates any addition option related to these questions. Ususally it should be one of the question of the category Option Assets . In case you do not want to add any additional task, add an empty string ( `true_false_answers("")`).
+- `@option`: Indicates any addition option related to these questions. Usually it should be one of the question of the category Option Assets . In case you do not want to add any additional task, add an empty string ( `true_false_answers("")`).
 
 
 
@@ -101,7 +101,7 @@ Use it to indicate that questions of the exam are **mulitple option questions**.
 
 In this section are located the assets that helps declaring the general properties of the exam, such as its topic or lenght. **It is highly recommended write the assets in the order that are displaced here** so that the generated prompt make more sense.
 #### `InitialConditions()`
-Prefix of an exam prompt. It is recommended to add it in the prefix.
+Prefix of an exam prompt. It is recommended to add **it in the prefix**.
 
 #### `question_topic(@topic)`
 Declare the subject of the exam (i.e: `question_topic("geography")`).
@@ -123,7 +123,7 @@ Specify **the source** used to generate the questions, that is, the **learning r
 #### `answer_options(@number,@answers, @distractors)`
 *For <b> multi-choice</b> questions*. Tell the answers (`@answers`) and distractors(`@distractors`) desired for a set of multi-choice questions. In addition, the number of questions (`@number`) is requiered. LLMs tend to related the correct distractor to the correct answer, and discard *bad* distractors (the ones that are obvious).
 --------------
-#### Difficulty of the questions
+### Difficulty of the questions
 
 #### `easy_question()`
 Choose the question so that they are easy/introductory to the prior level chosen.
@@ -179,8 +179,13 @@ Specify if the students are from a certain audience, whcih may vary the question
 #### `prior_knowledge(@topic)`
 Concept that can be used in order to generate the questions(, although it was not specifically mentioned in the questions topic).
 
+#### `exam_language()`
+Specify the language in which theexam generated is
+> **Remark:** It may differ with the language of the generated prompt. The prompt can be in English while provide that the generated exam is wanted to be 
+
 #### `DetailedInstructions()`
-**Suffix** of the exam prompt so that the answer is more concise and clean. It is recommended to add it in the suffix.
+**Suffix** of the exam prompt so that the answer is more concise and clean. It is recommended to add it **in the suffix**.
+
 
 
 
@@ -192,8 +197,8 @@ Concept that can be used in order to generate the questions(, although it was no
     core = 
         question_topic("B2-level English"), rephase(), duration_exam("B2 English","10"),goal_content("job application vocabulary"), give_answers()
     suffix = DetailedInstructions()
-    separator="."
-    language=English
+    separator ="."
+    language =English
 ```
 ##### Generated prompt:
 *Write an exam. Before writing the question, give a brief explanation of the task.Write a B2-level English exam.The questions should be rephase phases to use the new grammar/vocabulary.Provide some words to be used in the answer.Select the questions so that it can be solved by B2 English students in 10 minutes.Base your questions on job application vocabulary and related grammar.Provide the answers of the questions as well.Questions should be clear .Avoid controversial topics.The questions should be as concise as possible.*

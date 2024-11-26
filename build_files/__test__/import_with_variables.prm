@@ -1,3 +1,5 @@
+// Example of using imports that needs imputs
+
 language=English
 
 import job_statement from libraries.ethic_questions

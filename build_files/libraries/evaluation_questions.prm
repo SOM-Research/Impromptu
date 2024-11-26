@@ -126,12 +126,12 @@ prompt distractors(@distractors): text
     core= "Consider the follwing options as distractors for the question:", @distractors
     separator = " "
 
-// Tells th correct answer of the question
+// Tells the correct answer of the question
 prompt correct_answer(@answer): text
     core= "The correct answer of the question should be:", @answer
     separator = " "
 
-// The realted question has to be simple 
+// The related question has to be simple 
 prompt easy_question():text
     core="The purpose of the question is to ensure the basis of the subject"
     language=English

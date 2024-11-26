@@ -1,3 +1,5 @@
+// Example that more than one asset can be 8imported in a same line
+
 language=English
 
 import job_statement, roling_prompt from libraries.ethic_questions

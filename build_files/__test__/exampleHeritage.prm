@@ -1,3 +1,5 @@
+// Example of using another asset inside another asset.
+
 language=English
 
 prompt Draw(@element): image

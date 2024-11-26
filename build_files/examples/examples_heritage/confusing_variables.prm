@@ -1,3 +1,4 @@
+// Chcke that the name of the parameters is independent of the prompt, changing the reference name of var1 and var2 between the two prompts
 language=English
 
 prompt independent_function(@var2, @var1): image

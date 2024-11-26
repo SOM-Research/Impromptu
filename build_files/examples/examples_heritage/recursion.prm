@@ -1,3 +1,6 @@
+// Check detction of recursion loops
+// IT SHOULD RETURN ERROR
+
 language=English
 
 prompt functionA(): image

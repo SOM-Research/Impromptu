@@ -7,13 +7,9 @@ import InitialConditions, DetailedInstructions, multi_choice, give_answers,
 
 
 composer CompletePrompt():
-
     multi_choice(),
-
     give_answers(),
-
     medium_question(),
-
     exam_language("English")
 
     separator=". "
