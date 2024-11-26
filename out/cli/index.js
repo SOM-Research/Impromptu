@@ -55,7 +55,6 @@ const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 
         }
     }
     catch (e) {
-        console.log(chalk_1.default.red(`EMERGENCY.`));
     }
 });
 exports.generatePromptAction = generatePromptAction;

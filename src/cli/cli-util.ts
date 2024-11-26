@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import path from 'path';
-import fs from 'fs';
 import { AstNode, LangiumDocument, LangiumServices } from 'langium';
 import { URI } from 'vscode-uri';
 import { Asset, AssetImport, Composer, ImportedAsset, isAsset, isAssetImport, isAssetReuse, isChain, isComposer, isImportedAsset, isModel, isPrompt, Model, Prompt, Snippet } from '../language-server/generated/ast';
+import globby from 'globby';
 
 
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
@@ -13,12 +13,13 @@ export async function extractDocument(fileName: string, services: LangiumService
         console.error(chalk.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
         process.exit(1);
     }
-    if (!fs.existsSync('build_files/'+fileName)) {
-        console.error(chalk.red(`File ${fileName} does not exist.`));
-        process.exit(1);
-    }
+    let documents:LangiumDocument<AstNode>[] = []
     const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); // Here is the problem
-    await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+    const files = await globby("**/*.prm");   // Get all .prm files
+    files.forEach(file => 
+        documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(file))))
+    )
+    await services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
 
     const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
     if (validationErrors.length > 0) {
@@ -56,14 +57,15 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
                     // Checks that it is imported from a different file
                     //if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
                         libraries.push((asset.$container as ImportedAsset).library);
-                        import_names.push(asset.name);
+                        if (asset.name){
+                            import_names.push(asset.name);
+                        }
                         new_calls.push(asset);
                     //}
                 })   
             })
-            // Also
-/// REHACER TODO: Buffer tiene que construirse de otra manera
-            // Load the libraries needed to obtain the imports
+            
+
             var exists_errors=false; //Mark there are errors or not
             for (let i=0; i < new_calls.length; i++){
                 try{

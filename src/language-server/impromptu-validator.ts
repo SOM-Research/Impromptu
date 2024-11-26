@@ -130,9 +130,6 @@ export class ImpromptuValidator {
                 if (reported.has(a.name)) {
                     accept('error', `Asset has non-unique name '${a.name}'.`,  {node: a, property: 'name'});
                 }
-                else if (reported_imports.has(a.name)) {
-                    accept('error', `Two imported assets has non-unique name '${a.name}'.`,  {node: a, property: 'name'});
-                }
                 reported_imports.add(a.name);
             })
         });
@@ -264,17 +261,7 @@ export class ImpromptuValidator {
         else if (!fs.existsSync(workspace_path+'/'+library+'.prm')) {
             accept('error',`The library ` +workspace_path+library+` does not exist.`,{node:imported_asset})
         }
-        else{
-        // II- The prompt it tries to import (`imported_asset.name`) exists in the told file.
-            let buffer=fs.readFileSync(workspace_path+'/'+library+'.prm');
-            imported_asset.asset_name.forEach(asset_import =>{
-                
-                let assetRegex = new RegExp(`.*\\s${asset_import.name}\\s*\\(.*`);
-                if (! assetRegex.test(buffer.toString())){
-                    accept('error',`The prompt `+ asset_import.name +` is not included in `+library,{node:imported_asset})
-                }
-            })
-            
+        else{            
         }
     }
 

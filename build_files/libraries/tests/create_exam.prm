@@ -1,19 +1,18 @@
 language=English
+
 import question_topic from libraries.evaluation_questions
-language=English
+
 
 import choose_one_answers from libraries.evaluation_questions
-language=English
+
 
 import duration_exam from libraries.evaluation_questions
-language=English
+
 
 import goal_content from libraries.evaluation_questions
-language=English
-
 
 prompt main(): text
     core = 
-        question_topic("B2-level English"), choose_one_answers(), duration_exam("B2 English","10"), goal_content("last article")
+        question_topic("B2-level English"), choose_one_answers(""), duration_exam("B2 English","10"), goal_content("last article")
     separator="."
     language=English

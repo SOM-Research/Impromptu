@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getLanguage = exports.get_file_from = exports.get_line_node = exports.get_imported_asset = exports.check_loops = exports.extractDestinationAndName = exports.extractAstNode = exports.extractDocument = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
 const vscode_uri_1 = require("vscode-uri");
 const ast_1 = require("../language-server/generated/ast");
+const globby_1 = __importDefault(require("globby"));
 function extractDocument(fileName, services) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,12 +26,11 @@ function extractDocument(fileName, services) {
             console.error(chalk_1.default.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
             process.exit(1);
         }
-        if (!fs_1.default.existsSync('build_files/' + fileName)) {
-            console.error(chalk_1.default.red(`File ${fileName} does not exist.`));
-            process.exit(1);
-        }
+        let documents = [];
         const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName))); // Here is the problem
-        yield services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+        const files = yield (0, globby_1.default)("**/*.prm"); // Get all .prm files
+        files.forEach(file => documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve(file)))));
+        yield services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
         const validationErrors = ((_a = document.diagnostics) !== null && _a !== void 0 ? _a : []).filter(e => e.severity === 1);
         if (validationErrors.length > 0) {
             console.error(chalk_1.default.red(`There are validation errors in ${fileName}:`));
@@ -65,7 +64,9 @@ function extractAstNode(fileName, services, calls_buffer) {
                         // Checks that it is imported from a different file
                         //if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
                         libraries.push(asset.$container.library);
-                        import_names.push(asset.name);
+                        if (asset.name) {
+                            import_names.push(asset.name);
+                        }
                         new_calls.push(asset);
                         //}
                     });

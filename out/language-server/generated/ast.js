@@ -429,12 +429,7 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
     getReferenceType(refInfo) {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
-            case 'AssetReuse:asset': {
-                return exports.Referenciable;
-            }
-            case 'ByExpressionOutputTesting:validator': {
-                return exports.ExecutableAsset;
-            }
+            case 'AssetImport:asset':
             case 'ByExpressionOutputTesting:priorVersion':
             case 'ByExpressionOutputTesting:refines':
             case 'ByExpressionOutputTesting:priorVersion':
@@ -447,6 +442,12 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
             case 'Prompt:priorVersion':
             case 'Prompt:refines': {
                 return exports.Asset;
+            }
+            case 'AssetReuse:asset': {
+                return exports.Referenciable;
+            }
+            case 'ByExpressionOutputTesting:validator': {
+                return exports.ExecutableAsset;
             }
             case 'MultimodalRef:param': {
                 return exports.Multimodal;

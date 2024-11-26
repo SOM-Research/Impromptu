@@ -88,6 +88,8 @@ prompt goal_content(@source):  text
         separator=" "
     language=English
 
+
+
 prompt answer_options(@number,@answers, @distractors): text
     prefix= number_questions(@number)
     core= "You have to select the correct answers from the list:",@answers,

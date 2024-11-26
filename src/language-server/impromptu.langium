@@ -43,7 +43,7 @@ ImportedAsset:
     ;
 
 AssetImport: 
-    name=QualifiedName;
+    asset = [Asset:QualifiedName]('as' name=QualifiedName )?;
 
 
 HyperParameters:
@@ -234,17 +234,17 @@ Effects returns string: 'blur' | 'reflection' | 'distortion' ;
 // ----------------------------------------------------------------------------------------
 
 Language: // Change: Language should be the same for all the file -> Does not make sense
-    'language=' name=(ID|STRING)
+    'language''=' name=(ID|STRING)
     //('code=' code=STRING)?
     ('region=' region=STRING)? //CHANGED
     ;
 
 fragment AssetLanguage:
-    ('language=' language=ID)?
+    ('language''=' language=ID)?
     ;
 
 fragment AssetSeparator:
-    ('separator=' separator=STRING)?
+    ('separator' '=' separator=STRING)?
     ;
 
 fragment AssetRelationships:
