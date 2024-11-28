@@ -33,7 +33,6 @@ const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     try {
         const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
-        (0, cli_util_1.check_loops)(model); // Ckecks that any recursion loop happens
         var validPrompt = true;
         if (opts.prompt) {
             // In case a certain prompt is sent, we have to check that the prompt exists

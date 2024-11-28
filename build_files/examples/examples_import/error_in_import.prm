@@ -1,10 +1,12 @@
 language=English
 
+import A from libraries.tests.import_testA
+
 
 prompt main(): image
-core="hello"
+core=A()
 language=English
 
 prompt NewMain(): image
-core=main()
+core="hello"
 language=English

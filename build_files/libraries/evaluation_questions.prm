@@ -172,8 +172,8 @@ prompt target_audience(@target_audience):text
         audience(@target_audience)
     separator=" "
 
-prompt exam_language(@language):text
-    core= "The exam should be written in", @language
+prompt exam_language(@lang):text
+    core= "The exam should be written in", @lang
     separator=" "
 
 prompt prior_knowledge(@topic):text

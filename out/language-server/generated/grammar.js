@@ -3446,7 +3446,11 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "elements": [
           {
             "$type": "Keyword",
-            "value": "language="
+            "value": "language"
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
           },
           {
             "$type": "Assignment",
@@ -3512,7 +3516,11 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "elements": [
           {
             "$type": "Keyword",
-            "value": "language="
+            "value": "language"
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
           },
           {
             "$type": "Assignment",
@@ -3544,7 +3552,11 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "elements": [
           {
             "$type": "Keyword",
-            "value": "separator="
+            "value": "separator"
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
           },
           {
             "$type": "Assignment",

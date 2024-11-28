@@ -157,7 +157,7 @@ function genAssetDescription(asset: Ast.Asset) {
 
 
 /**
- * Generate the prompt of an imported Asset
+ * Generate the prompt of an imported Asset. Needed to link the parameters with its respective inputs
  * 
  * @param asset the ImportedAsset
  * @param aiSystem AI used
@@ -313,9 +313,11 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
     let snippetRef= assetReuse.asset.ref
         // In case the Assets had variables we have to change them
         // Check the number of variables is correct
-        
+    if (Ast.isReferenciable(snippetRef)){ 
+        var map = new Map<string,string>() 
         if(Ast.isAssetImport(snippetRef)){
-            var map = new Map<string,string>()
+            // If it is an import, the snippetRef is the reference of the referenciable object
+
             // Get the line where the referenced asset is located (to define the errors)
             let line = get_line_node(assetReuse);
             let file = get_file_from(snippetRef);
@@ -336,7 +338,7 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                 console.log(chalk.red(`[${file}: ${line}] Error: You can't import an import`));
                 throw Error(`[${file}: ${line}] Error: You can't import an import`);
             }
-            if (assetReuse.pars){
+            if (assetReuse.pars && !Ast.isChain(imported_asset)){ // Second condition need to avoid errors
                 let variables = imported_asset.pars.pars;
                 let values = getParamNames(assetReuse.pars?.pars, aiSystem, previousMap)
                 if(variables){
@@ -345,85 +347,56 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                     }
                 }
             }
+            snippetRef=imported_asset
+        } else if (Ast.isAsset(snippetRef)){     
+                
+                if (assetReuse.pars){
+                    // Mapping the value of the variables
+                    let values = getParamNames(assetReuse.pars?.pars, aiSystem, previousMap)
+                    // Create Mapping
+                    let variables
+                    if (!Ast.isImportedAsset(snippetRef)&& !Ast.isChain(snippetRef)){
+                        variables = snippetRef.pars.pars
+                    }
+                    if(variables){
+                        for (let variable in variables){
+                            map.set(variables[variable].name,values[variable])
+                        }
+                    }
+                }  else{
+                    console.error(chalk.red(`An AssetReuse should have the structure: <name>(<parameters>)`));
+                    return "";
+                } 
+            }  
             var result
-                switch(aiSystem) {
-                    case AISystem.Midjourney: {
-                        result = genAsset_MJ(imported_asset,map).toString();
-                        break;
-                    }
-                    case AISystem.StableDiffusion: {   
-                        result = genAsset_SD(imported_asset,map).toString()
-                        break;
-                    }
-                    case AISystem.ChatGPT: {
-                        result = genAsset_ChatGPT(imported_asset,map).toString()
-                        break;
-                    }
-                    case undefined: {
-                        console.error(chalk.red(`No target provided. Using 'chatgpt' by default`));
-                        result = genAsset_ChatGPT(imported_asset,map).toString()
-                        break;
-                    }
-                    default: {
-                        console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
-                        result=""
-                    }
+            switch(aiSystem) {
+                case AISystem.Midjourney: {
+                    result = genAsset_MJ(snippetRef,map).toString();
+                    break;
                 }
-                return result;
-        }
-
-        else if (Ast.isAsset(snippetRef)){     
-            // Variables
-            
-            var map = new Map<string,string>()
-            if (assetReuse.pars){
-                // Mapping the value of the variables
-                let values = getParamNames(assetReuse.pars?.pars, aiSystem, previousMap)
-                // Create Mapping
-                let variables
-                if (!Ast.isImportedAsset(snippetRef)&& !Ast.isChain(snippetRef)){
-                    variables = snippetRef.pars.pars
+                case AISystem.StableDiffusion: {   
+                    result = genAsset_SD(snippetRef,map).toString()
+                    break;
                 }
-                if(variables){
-                    for (let variable in variables){
-                        map.set(variables[variable].name,values[variable])
-                    }
+                case AISystem.ChatGPT: {
+                    result = genAsset_ChatGPT(snippetRef,map).toString()
+                    break;
                 }
-                
-                var result
-                switch(aiSystem) {
-                    case AISystem.Midjourney: {
-                        result = genAsset_MJ(snippetRef,map).toString();
-                        break;
-                    }
-                    case AISystem.StableDiffusion: {   
-                        result = genAsset_SD(snippetRef,map).toString()
-                        break;
-                    }
-                    case AISystem.ChatGPT: {
-                        result = genAsset_ChatGPT(snippetRef,map).toString()
-                        break;
-                    }
-                    case undefined: {
-                        console.error(chalk.red(`No target provided. Using 'chatgpt' by default`));
-                        result = genAsset_ChatGPT(snippetRef,map).toString()
-                        break;
-                    }
-                    default: {
-                        console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
-                        result=""
-                    }
+                case undefined: {
+                    console.error(chalk.red(`No target provided. Using 'chatgpt' by default`));
+                    result = genAsset_ChatGPT(snippetRef,map).toString()
+                    break;
                 }
-                return result;
-                
+                default: {
+                    console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+                    result=""
+                }
             }
-            else{
-                console.error(chalk.red(`An AssetReuse should have the structure: <name>(<parameters>)`));
-                return "";
-            }
+            return result;
+             
         }
         else{
-            console.error(chalk.red(`The snippet is not referencing an asset`));
+            throw new Error(`The snippet is not referencing an asset`);
             return '';
         }
 }
