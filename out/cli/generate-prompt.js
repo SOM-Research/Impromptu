@@ -397,7 +397,7 @@ function genAssetReuse(assetReuse, aiSystem, previousMap) {
                 break;
             }
             case undefined: {
-                console.error(chalk_1.default.red(`No target provided. Using 'chatgpt' by default`));
+                console.error(chalk_1.default.yellow(`No target provided. Using 'chatgpt' by default`));
                 result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(snippetRef, map).toString();
                 break;
             }

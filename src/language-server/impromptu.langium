@@ -16,7 +16,7 @@ hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
 hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
 
 entry Model:
-    (language=Language)+ // Only one language per file
+    (language=Language)+ // Only one language per file. Warning given bcs ut can me empty
     (assets+=Asset|imports+=ImportedAsset)+
     (equivalencies=Equivalency)*;
 
@@ -196,7 +196,7 @@ ParamInvokation:
     '(' pars+=Snippet (',' pars+=Snippet )*  ')' | '(' ')';
 
 Parameters:
-    '('( pars+= Input ( ',' pars+= Input )* )?')'| '(' ')' ;
+    '('( pars+= Input ( ',' pars+= Input )* )?')' ;
 
 Input:
     Parameter | Multimodal;
@@ -241,11 +241,10 @@ Language: // Change: Language should be the same for all the file -> Does not ma
 
 fragment AssetLanguage:
     ('language''=' language=ID)?
-    ('language''=' language=ID)?
     ;
 
 fragment AssetSeparator:
-    ('separator''=' separator=STRING)?
+    ('separator=' separator=STRING)?
     ;
 
 fragment AssetRelationships:
