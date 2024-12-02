@@ -76,7 +76,6 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
 
             var exists_errors=false; //Mark there are errors or not
             for (let i=0; i < new_calls.length; i++){
-                console.log(i)
                 try{
                     if (!calls_buffer.find(element=> libraries[i]==(element.$container as ImportedAsset).library && import_names[i]==element.name )) {
                         // Update the elements that have been called

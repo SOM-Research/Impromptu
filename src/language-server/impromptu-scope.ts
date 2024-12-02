@@ -3,7 +3,8 @@ import { AstNode, AstNodeDescription, AstNodeDescriptionProvider, DefaultScopeCo
 import { Asset, ImpromptuAstType, isAsset,isChain, Model} from './generated/ast.js';
 
 import { LangiumServices} from "langium";
-import { dirname, join } from 'path';
+import { join } from 'path';
+import { URI } from 'vscode-uri';
 
 
 export class ScopeParamProvider extends DefaultScopeProvider {
@@ -63,24 +64,35 @@ export class ScopeParamProvider extends DefaultScopeProvider {
     private getExportedAssetsFromGlobalScope(context: ReferenceInfo): Scope {
         //get document for current reference
         const document = getDocument(context.container);
+        document.uri
         //get model of document
         const model = document.parseResult.value as Model;
         //get URI of current document
         const currentUri = document.uri;
+
+        let workspace_path = process.env.WORKSPACE
+        if (!workspace_path){
+            workspace_path= process.cwd()
+        }
+
         //get folder of current document
-        const currentDir = dirname(currentUri.path);
+        const currentDir = join(currentUri.with({path:workspace_path}).path,'build_files')
         const uris = new Set<string>();
         //for all file imports of the current file
+        
         for (const asset_name of model.imports) {
             //resolve the file name relatively to the current file
-            const filePath = join(currentDir, asset_name.library.split(".").join("\\")+".prm");
-            //create back an URI
-            const uri = currentUri.with({ path: filePath });
-            //add the URI to URI list
+            // Get the absolute path of the file
+            const filePath = join(currentDir,asset_name.library.split('.').join('/')+'.prm');
+            //create an URI withe absolute path
+            const uri=URI.from({scheme:'file',path: filePath.split('\\').join('/')}) 
+           
+            // Exmple of uri.toString(): 'file:///c%3A/Users/......../Impromptu/build_files/examples/example.prm')
             uris.add(uri.toString());
         }
         //get all possible assets from these files
-        const astNodeDescriptions = this.indexManager.allElements(Asset).toArray();
+        //console.log("Document: ",document.uri)
+        const astNodeDescriptions = this.indexManager.allElements(Asset,uris).toArray();
         //convert them to descriptions inside of a scope
         return this.createScope(astNodeDescriptions);
     }

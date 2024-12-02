@@ -141,11 +141,7 @@ export class ImpromptuValidator {
                         accept('error', `Asset has non-unique name '${a.asset.ref?.name}'.`,  {node: duplicate, property: 'name'});
                     }
                     reported.push(a.asset.ref);
-                }
-                else{
-                    accept('error', `Asset not found.`,  {node: a, property: 'name'});
-                }
-                   
+                }  
             })
         });
     }
@@ -279,7 +275,15 @@ export class ImpromptuValidator {
         else if (!fs.existsSync(workspace_path+'/'+library+'.prm')) {
             accept('error',`The library ` +workspace_path+library+` does not exist.`,{node:imported_asset})
         }
-        else{            
+        else{  
+            // II - The asset exists in the imported file
+
+            imported_asset.asset_name.forEach(a =>{
+                if(a.asset.ref?.name== undefined){
+                    accept('error',`Not exists an asset in ${imported_asset.library} with such name.`,{node:a})
+                }
+            })
+            
         }
     }
 

@@ -123,7 +123,7 @@ class ImpromptuValidator {
             let duplicate = reported.find(element => element.name == a.name);
             if (duplicate) {
                 accept('error', `Asset has non-unique name '${a.name}'.`, { node: a, property: 'name' });
-                accept('error', `Asset has non-unique name '${a.name}'.`, { node: duplicate, property: 'name' });
+                accept('error', `Asset has non-unique name '${a.name}'.`, { node: duplicate, property: 'name' }); // The error appears in both assets
             }
             reported.push(a);
         });
@@ -138,9 +138,6 @@ class ImpromptuValidator {
                         accept('error', `Asset has non-unique name '${(_b = a.asset.ref) === null || _b === void 0 ? void 0 : _b.name}'.`, { node: duplicate, property: 'name' });
                     }
                     reported.push(a.asset.ref);
-                }
-                else {
-                    accept('error', `Asset not found.`, { node: a, property: 'name' });
                 }
             });
         });
@@ -262,6 +259,13 @@ class ImpromptuValidator {
             accept('error', `The library ` + workspace_path + library + ` does not exist.`, { node: imported_asset });
         }
         else {
+            // II - The asset exists in the imported file
+            imported_asset.asset_name.forEach(a => {
+                var _a;
+                if (((_a = a.asset.ref) === null || _a === void 0 ? void 0 : _a.name) == undefined) {
+                    accept('error', `Not exists an asset in ${imported_asset.library} with such name.`, { node: a });
+                }
+            });
         }
     }
     //     isDescendant(model: Model, asset: Asset, accept: ValidationAcceptor) {

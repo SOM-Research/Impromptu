@@ -194,11 +194,12 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
         switch(aiSystem) {
             case AISystem.Midjourney: {
                 try{
-                result = genAsset_MJ(imported_asset,new_map);
+                result = genAsset_MJ(imported_asset,new_map); 
+                // try-catch may not be needed
                 }catch(e){
                     let file = get_file_from(asset);
                     let line = get_line_node(asset);
-                    console.error(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -209,7 +210,7 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
                 }catch(e){
                     let file = get_file_from(asset);
                     let line = get_line_node(asset);
-                    console.error(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -220,7 +221,7 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
                 }catch(e){
                     let file = get_file_from(asset);
                     let line = get_line_node(asset);
-                    console.error(chalk.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -234,6 +235,7 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
         return result;
     }
     else {
+        // Tgheorically alrerady checked
         let line = get_line_node(asset);
         let file = get_file_from(asset);
         console.error(chalk.red(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
@@ -383,7 +385,7 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                     break;
                 }
                 case undefined: {
-                    console.error(chalk.red(`No target provided. Using 'chatgpt' by default`));
+                    console.error(chalk.yellow(`No target provided. Using 'chatgpt' by default`));
                     result = genAsset_ChatGPT(snippetRef,map).toString()
                     break;
                 }

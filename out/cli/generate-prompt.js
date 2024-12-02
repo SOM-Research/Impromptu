@@ -206,11 +206,12 @@ function genImportedAsset(asset, aiSystem, variables) {
             case exports.AISystem.Midjourney: {
                 try {
                     result = (0, generate_prompt_MJ_1.genAsset_MJ)(imported_asset, new_map);
+                    // try-catch may not be needed
                 }
                 catch (e) {
                     let file = (0, cli_util_1.get_file_from)(asset);
                     let line = (0, cli_util_1.get_line_node)(asset);
-                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -222,7 +223,7 @@ function genImportedAsset(asset, aiSystem, variables) {
                 catch (e) {
                     let file = (0, cli_util_1.get_file_from)(asset);
                     let line = (0, cli_util_1.get_line_node)(asset);
-                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -234,7 +235,7 @@ function genImportedAsset(asset, aiSystem, variables) {
                 catch (e) {
                     let file = (0, cli_util_1.get_file_from)(asset);
                     let line = (0, cli_util_1.get_line_node)(asset);
-                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -248,6 +249,7 @@ function genImportedAsset(asset, aiSystem, variables) {
         return result;
     }
     else {
+        // Tgheorically alrerady checked
         let line = (0, cli_util_1.get_line_node)(asset);
         let file = (0, cli_util_1.get_file_from)(asset);
         console.error(chalk_1.default.red(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
