@@ -138,7 +138,7 @@ test('validation_recursion_loop', async() => {
 
   const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
   expect(validationErrors).toHaveLength(2) // Test that the prompt is incorrect indeed. Each function should return an error
-  expect(validationErrors[0].message).toBe("There is a recursive loop"); // Meassage of the recursion loop 
+  expect(validationErrors[0].message).toBe(`There is a recursive loop finishing in "functionA": functionA -> functionB -> functionA`); // Meassage of the recursion loop 
   })
 
 
@@ -167,7 +167,7 @@ test('validation_recursion_loop', async() => {
   
     const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
     expect(validationErrors).toHaveLength(2) // Test that the prompt is incorrect indeed. Each function should return an error
-    expect(validationErrors[0].message).toBe("There is a recursive loop"); // Meassage of the recursion loop 
+    expect(validationErrors[0].message).toBe(`There is a recursive loop finishing in "functionA": functionA -> functionB -> functionA`); // Meassage of the recursion loop 
     })
   
 

@@ -30,11 +30,9 @@ const generateAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, fun
 });
 exports.generateAction = generateAction;
 const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
-    fileName = fileName;
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     try {
         const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
-        (0, cli_util_1.check_loops)(model); // Ckecks thet any recursion loop happens
         var validPrompt = true;
         if (opts.prompt) {
             // In case a certain prompt is sent, we have to check that the prompt exists
@@ -55,7 +53,8 @@ const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 
             throw new Error(`Incorrect command. Prompt ${opts.prompt} does not exist in that document.`);
         }
     }
-    catch (e) { }
+    catch (e) {
+    }
 });
 exports.generatePromptAction = generatePromptAction;
 /**

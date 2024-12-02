@@ -459,6 +459,7 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
             },
             "arguments": [],
             "cardinality": "?"
+            "cardinality": "?"
           }
         ]
       },
@@ -542,16 +543,50 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
       "$type": "ParserRule",
       "name": "AssetImport",
       "definition": {
-        "$type": "Assignment",
-        "feature": "name",
-        "operator": "=",
-        "terminal": {
-          "$type": "RuleCall",
-          "rule": {
-            "$ref": "#/rules@0"
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "asset",
+            "operator": "=",
+            "terminal": {
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@10"
+              },
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@0"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false
+            }
           },
-          "arguments": []
-        }
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "as"
+              },
+              {
+                "$type": "Assignment",
+                "feature": "name",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@0"
+                  },
+                  "arguments": []
+                }
+              }
+            ],
+            "cardinality": "?"
+          }
+        ]
       },
       "definesHiddenTokens": false,
       "entry": false,
@@ -699,6 +734,7 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
               "$ref": "#/rules@78"
             },
             "arguments": [],
+            "cardinality": "?"
             "cardinality": "?"
           }
         ]
@@ -3438,6 +3474,11 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
           {
             "$type": "Keyword",
             "value": "="
+            "value": "language"
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
           },
           {
             "$type": "Assignment",
@@ -3543,6 +3584,11 @@ export const ImpromptuGrammar = (): Grammar => loadedImpromptuGrammar ?? (loaded
         "elements": [
           {
             "$type": "Keyword",
+            "value": "separator"
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
             "value": "separator"
           },
           {

@@ -12,13 +12,15 @@ import answer_options from libraries.evaluation_questions
 
 import InitialConditions from libraries.evaluation_questions
 
+
 import DetailedInstructions from libraries.evaluation_questions
+
 
 
 prompt main(): text
     prefix = InitialConditions()
     core = 
-        question_topic("geography"), choose_one_answers(), answer_options("3","Africa, Nile, Himalaya, China ", "USA, Australia, K2, Thames, MontBlanc")
+        question_topic("geography"), choose_one_answers(""), answer_options("3","Africa, Nile, Himalaya, China ", "USA, Australia, K2, Thames, MontBlanc")
     suffix = DetailedInstructions()
     separator="."
     language=English

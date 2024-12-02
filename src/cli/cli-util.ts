@@ -1,9 +1,9 @@
 import chalk from 'chalk';
 import path from 'path';
-import fs from 'fs';
 import { AstNode, LangiumDocument, LangiumServices } from 'langium';
 import { URI } from 'vscode-uri';
-import { Asset, AssetImport, Composer, ImportedAsset, isAsset, isAssetImport, isAssetReuse, isChain, isComposer, isImportedAsset, isModel, isPrompt, Model, Prompt, Snippet } from '../language-server/generated/ast';
+import { Asset, AssetImport, ImportedAsset, isChain, isImportedAsset, isModel, Model } from '../language-server/generated/ast';
+import globby from 'globby';
 
 
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
@@ -13,13 +13,13 @@ export async function extractDocument(fileName: string, services: LangiumService
         console.error(chalk.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
         process.exit(1);
     }
-        if (!fs.existsSync('build_files/'+fileName)) {
-            console.error(chalk.red(`File ${fileName} does not exist.`));
-            process.exit(1);
-        }
-
-    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName)));
-    await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+    let documents:LangiumDocument<AstNode>[] = []
+    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); // Here is the problem
+    const files = await globby("**/*.prm");   // Get all .prm files
+    files.forEach(file => 
+        documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(file))))
+    )
+    await services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
 
     const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
     if (validationErrors.length > 0) {
@@ -38,6 +38,13 @@ export async function extractDocument(fileName: string, services: LangiumService
     return document;
 }
 
+/**
+ * Build the Langium Document that allows to analyze the `.prm` file
+ * @param fileName uri of the file, relative to the folder `build_files`
+ * @param services LangiumService
+ * @param calls_buffer Auxiliar variable with the Assets "visited"
+ * @returns 
+ */
 export async function extractAstNode<T extends AstNode>(fileName: string, services: LangiumServices, calls_buffer?:AssetImport[]): Promise<T> {
     let libraries:string[]=[]
     let import_names: string[]=[]
@@ -46,9 +53,10 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
     if (calls_buffer==undefined)  calls_buffer=[];
     let new_calls:AssetImport[]=[]
 
-        
+    // Checks all the imports. Needed for the CLI mode
     if (calls_buffer){
         const model = (await extractDocument(fileName, services)).parseResult?.value as T;
+        
         if (isModel(model)){
             // get all the imports of the file
             model.imports.forEach( import_line => {
@@ -56,27 +64,20 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
                     // Checks that it is imported from a different file
                     //if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
                         libraries.push((asset.$container as ImportedAsset).library);
-                        import_names.push(asset.name);
+                        if (asset.name){
+                            import_names.push(asset.name);
+                        }
                         new_calls.push(asset);
                     //}
                 })   
             })
-            // Also
-/// REHACER TODO: Buffer tiene que construirse de otra manera
-            // Load the libraries needed to obtain the imports
+            
+            
+
             var exists_errors=false; //Mark there are errors or not
             for (let i=0; i < new_calls.length; i++){
                 try{
-                    if(import_names[i]=='*'){
-                        calls_buffer.push(new_calls[i]);
-                        const import_model = await extractAstNode<Model>(libraries[i].split(".").join("/")+".prm", services,calls_buffer);
-                        let imported_assets: Asset[]=[];
-                        import_model.assets.forEach(asset =>{
-                                imported_assets.push(asset);
-                        });
-                        model.assets=model.assets.concat(imported_assets);
-                    }
-                    else if (!calls_buffer.find(element=> libraries[i]==(element.$container as ImportedAsset).library && import_names[i]==element.name )) {
+                    if (!calls_buffer.find(element=> libraries[i]==(element.$container as ImportedAsset).library && import_names[i]==element.name )) {
                         // Update the elements that have been called
                         calls_buffer.push(new_calls[i]);
                         
@@ -106,7 +107,6 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
     else{
         return (await extractDocument(fileName, services)).parseResult?.value as T;
     }
-
 }
 
 
@@ -129,94 +129,16 @@ export function extractDestinationAndName(filePath: string, destination: string 
     };
 }
 
-/**
- * Checks that the model does not have any recursive loops. It check both assets and imports.
- * Throw an error if a loop exists
- * @param model 
- */
-export function check_loops(model:Model){
-    model.assets.forEach(asset =>{
-        check_loops_asset(asset)
-    });
-}
-
-function check_loops_asset(asset:Asset, og_asset?:Asset[]){
-   // In case we alredy be in the same asset in the buffer, we have a loop 
-    if (og_asset?.includes(asset)){
-        let line = get_line_node(asset);
-        let fileName = get_file_from(asset)
-        console.error(chalk.red(`[${fileName}: ${line}] Error: There is a recursive loop regarding the asset ${asset.name}`));
-        throw new Error("There is a recursive loop regarding the asset "+ asset.name);
-    }else{
-        if (!og_asset){
-            og_asset = [];
-        }
-        if (isPrompt(asset)){
-            // Get all of snippets in a Prompt
-            if (asset.core.snippets != undefined){
-                let elements=asset.core.snippets;
-                if (asset.prefix){
-                    elements = elements.concat(asset.prefix.snippets);
-                }
-                if (asset.suffix){
-                    elements = elements.concat(asset.suffix.snippets);
-                }
-                og_asset.push(asset)
-                check_loops_snippets(elements, og_asset );
-            }
-        }else if(isComposer(asset)){
-            // Get all of snippets in a Composer
-            let elements = asset.contents.snippets;
-            og_asset.push(asset)
-            check_loops_snippets(elements, og_asset)
-        }
-    }
-}
-
-/**
- * Resolves a recursion loop in a set of snippets. 
- * @param snippets array of Snippets to analyze
- * @param og_asset Buffer of the aasets that were already paased
- * @returns ´og_asset´
- */
-function check_loops_snippets(snippets:Snippet[], og_asset:Asset[]):Asset[]{
-    snippets.forEach(snippet =>{
-        if (isAssetReuse(snippet.content)){
-            // An AssetReuse references an Asset, or an Asset import
-            if (snippet.content.asset.ref)
-                if (isAsset(snippet.content.asset.ref)){
-                    check_loops_asset(snippet.content.asset.ref, og_asset);
-                } else if(isAssetImport(snippet.content.asset.ref)){
-                    check_loops_asset(get_imported_asset(snippet.content.asset.ref), og_asset);
-                }
-                
-            // The parameters of an AssetReuse are references to another snippet
-            if (snippet.content.pars)
-                og_asset =check_loops_snippets(snippet.content.pars.pars, og_asset);
-            
-            // When the asset has beeen studied, the last element is remove so that the assest tracked in the first snippet not interfere with the next one 
-            og_asset.pop()
-        }
-    })
-    return og_asset
-}
-
 
 /**
  * Returns the asset from the library which Impoorted Asset refereces
  * @param asset 
  * @returns 
  */
-export function get_imported_asset(asset: AssetImport):Prompt | Composer{
+export function get_imported_asset(asset: AssetImport):Asset{
     if (isImportedAsset(asset.$container)){
-        let model = asset.$container.$container
-        
-        let imported_asset = model.assets.find(element =>{
-            let re = new RegExp(String.raw`${asset.name}`, "g"); 
-            return re.test(element.name) && element.$container.$document?.uri.path.split('/').pop()== (asset.$container as ImportedAsset).library.split('.').pop()+'.prm' // TODO: More rigurous check
-            })
-        if (isPrompt(imported_asset) || isComposer(imported_asset)){ 
-            return imported_asset
+        if (asset.asset.ref){
+            return asset.asset.ref
         }else{
             let file = get_file_from(asset);
             let line = get_line_node(asset);

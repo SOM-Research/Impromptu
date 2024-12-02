@@ -145,7 +145,8 @@ export function isAlternativeTrait(item: unknown): item is AlternativeTrait {
 export interface AssetImport extends AstNode {
     readonly $container: ImportedAsset | Model;
     readonly $type: 'AssetImport';
-    name: QualifiedName
+    asset: Reference<Asset>
+    name?: QualifiedName
 }
 
 export const AssetImport = 'AssetImport';
@@ -264,7 +265,7 @@ export interface Composer extends AstNode {
     readonly $container: ImportedAsset | Model;
     readonly $type: 'Composer';
     contents: Contents
-    language?: string
+    language: string
     name: QualifiedName
     pars: Parameters
     priorVersion?: Reference<Asset>
@@ -580,7 +581,7 @@ export interface Prompt extends AstNode {
     core: Core
     description?: string
     hyper?: HyperParameters
-    language?: string
+    language: string
     name: QualifiedName
     output: Media
     outputDesc?: string
@@ -837,12 +838,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
     getReferenceType(refInfo: ReferenceInfo): string {
         const referenceId = `${refInfo.container.$type}:${refInfo.property}`;
         switch (referenceId) {
-            case 'AssetReuse:asset': {
-                return Referenciable;
-            }
-            case 'ByExpressionOutputTesting:validator': {
-                return ExecutableAsset;
-            }
+            case 'AssetImport:asset':
             case 'ByExpressionOutputTesting:priorVersion':
             case 'ByExpressionOutputTesting:refines':
             case 'ByExpressionOutputTesting:priorVersion':
@@ -855,6 +851,12 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             case 'Prompt:priorVersion':
             case 'Prompt:refines': {
                 return Asset;
+            }
+            case 'AssetReuse:asset': {
+                return Referenciable;
+            }
+            case 'ByExpressionOutputTesting:validator': {
+                return ExecutableAsset;
             }
             case 'MultimodalRef:param': {
                 return Multimodal;

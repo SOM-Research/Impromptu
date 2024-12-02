@@ -15,8 +15,8 @@ exports.ImpromptuModule = {
         ImpromptuValidator: () => new impromptu_validator_1.ImpromptuValidator()
     },
     references: {
-        ScopeProvider: (services) => new impromptu_scope_1.ScopeParamProvider(services),
-        ScopeComputation: (services) => new impromptu_scope_1.ImpromptuScopeComputation(services)
+        ScopeComputation: (services) => new impromptu_scope_1.ImpromptuScopeComputation(services),
+        ScopeProvider: (services) => new impromptu_scope_1.ScopeParamProvider(services)
     }
 };
 /**

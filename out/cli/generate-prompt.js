@@ -174,7 +174,7 @@ function genAssetDescription(asset) {
         return undefined;
 }
 /**
- * Generate the prompt of an imported Asset
+ * Generate the prompt of an imported Asset. Needed to link the parameters with its respective inputs
  *
  * @param asset the ImportedAsset
  * @param aiSystem AI used
@@ -206,11 +206,12 @@ function genImportedAsset(asset, aiSystem, variables) {
             case exports.AISystem.Midjourney: {
                 try {
                     result = (0, generate_prompt_MJ_1.genAsset_MJ)(imported_asset, new_map);
+                    // try-catch may not be needed
                 }
                 catch (e) {
                     let file = (0, cli_util_1.get_file_from)(asset);
                     let line = (0, cli_util_1.get_line_node)(asset);
-                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -222,7 +223,7 @@ function genImportedAsset(asset, aiSystem, variables) {
                 catch (e) {
                     let file = (0, cli_util_1.get_file_from)(asset);
                     let line = (0, cli_util_1.get_line_node)(asset);
-                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -234,7 +235,7 @@ function genImportedAsset(asset, aiSystem, variables) {
                 catch (e) {
                     let file = (0, cli_util_1.get_file_from)(asset);
                     let line = (0, cli_util_1.get_line_node)(asset);
-                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Error in imported function ${asset.name}.`));
+                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                     throw new Error();
                 }
                 break;
@@ -248,6 +249,7 @@ function genImportedAsset(asset, aiSystem, variables) {
         return result;
     }
     else {
+        // Tgheorically alrerady checked
         let line = (0, cli_util_1.get_line_node)(asset);
         let file = (0, cli_util_1.get_file_from)(asset);
         console.error(chalk_1.default.red(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
@@ -325,54 +327,78 @@ function genAssetReuse(assetReuse, aiSystem, previousMap) {
     let snippetRef = assetReuse.asset.ref;
     // In case the Assets had variables we have to change them
     // Check the number of variables is correct
-    if (Ast.isAssetImport(snippetRef)) {
+    if (Ast.isReferenciable(snippetRef)) {
         var map = new Map();
-        // Get the line where the referenced asset is located (to define the errors)
-        let line = (0, cli_util_1.get_line_node)(assetReuse);
-        let file = (0, cli_util_1.get_file_from)(snippetRef);
-        let imported_asset = (0, cli_util_1.get_imported_asset)(snippetRef);
-        if (Ast.isPrompt(imported_asset) || Ast.isComposer(imported_asset)) {
-            if (imported_asset.pars.pars.length != ((_a = assetReuse.pars) === null || _a === void 0 ? void 0 : _a.pars.length)) {
-                console.log(chalk_1.default.red(`[${file}: ${line}] Error: The imported asset ${snippetRef.name} needs ${imported_asset.pars.pars.length} variables.`));
-                throw Error(`[${file}: ${line}] Error: The imported asset ${snippetRef.name} needs ${imported_asset.pars.pars.length} variables.`);
-            }
-        }
-        else if (Ast.isChain(imported_asset)) {
-            if (((_b = assetReuse.pars) === null || _b === void 0 ? void 0 : _b.pars) && ((_c = assetReuse.pars) === null || _c === void 0 ? void 0 : _c.pars.length) > 0) {
-                console.log(chalk_1.default.red(`[${file}: ${line}] Error: A Chain cannot have parameters`));
-                throw Error(`[${file}: ${line}] Error: A Chain cannot have parameters`);
-            }
-        }
-        else {
-            console.log(chalk_1.default.red(`[${file}: ${line}] Error: You can't import an import`));
-            throw Error(`[${file}: ${line}] Error: You can't import an import`);
-        }
-        if (assetReuse.pars) {
-            let variables = imported_asset.pars.pars;
-            let values = getParamNames((_d = assetReuse.pars) === null || _d === void 0 ? void 0 : _d.pars, aiSystem, previousMap);
-            if (variables) {
-                for (let variable in variables) {
-                    map.set(variables[variable].name, values[variable]);
+        if (Ast.isAssetImport(snippetRef)) {
+            // If it is an import, the snippetRef is the reference of the referenciable object
+            // Get the line where the referenced asset is located (to define the errors)
+            let line = (0, cli_util_1.get_line_node)(assetReuse);
+            let file = (0, cli_util_1.get_file_from)(snippetRef);
+            let imported_asset = (0, cli_util_1.get_imported_asset)(snippetRef);
+            if (Ast.isPrompt(imported_asset) || Ast.isComposer(imported_asset)) {
+                if (imported_asset.pars.pars.length != ((_a = assetReuse.pars) === null || _a === void 0 ? void 0 : _a.pars.length)) {
+                    console.log(chalk_1.default.red(`[${file}: ${line}] Error: The imported asset ${snippetRef.name} needs ${imported_asset.pars.pars.length} variables.`));
+                    throw Error(`[${file}: ${line}] Error: The imported asset ${snippetRef.name} needs ${imported_asset.pars.pars.length} variables.`);
                 }
+            }
+            else if (Ast.isChain(imported_asset)) {
+                if (((_b = assetReuse.pars) === null || _b === void 0 ? void 0 : _b.pars) && ((_c = assetReuse.pars) === null || _c === void 0 ? void 0 : _c.pars.length) > 0) {
+                    console.log(chalk_1.default.red(`[${file}: ${line}] Error: A Chain cannot have parameters`));
+                    throw Error(`[${file}: ${line}] Error: A Chain cannot have parameters`);
+                }
+            }
+            else {
+                console.log(chalk_1.default.red(`[${file}: ${line}] Error: You can't import an import`));
+                throw Error(`[${file}: ${line}] Error: You can't import an import`);
+            }
+            if (assetReuse.pars && !Ast.isChain(imported_asset)) { // Second condition need to avoid errors
+                let variables = imported_asset.pars.pars;
+                let values = getParamNames((_d = assetReuse.pars) === null || _d === void 0 ? void 0 : _d.pars, aiSystem, previousMap);
+                if (variables) {
+                    for (let variable in variables) {
+                        map.set(variables[variable].name, values[variable]);
+                    }
+                }
+            }
+            snippetRef = imported_asset;
+        }
+        else if (Ast.isAsset(snippetRef)) {
+            if (assetReuse.pars) {
+                // Mapping the value of the variables
+                let values = getParamNames((_e = assetReuse.pars) === null || _e === void 0 ? void 0 : _e.pars, aiSystem, previousMap);
+                // Create Mapping
+                let variables;
+                if (!Ast.isImportedAsset(snippetRef) && !Ast.isChain(snippetRef)) {
+                    variables = snippetRef.pars.pars;
+                }
+                if (variables) {
+                    for (let variable in variables) {
+                        map.set(variables[variable].name, values[variable]);
+                    }
+                }
+            }
+            else {
+                console.error(chalk_1.default.red(`An AssetReuse should have the structure: <name>(<parameters>)`));
+                return "";
             }
         }
         var result;
         switch (aiSystem) {
             case exports.AISystem.Midjourney: {
-                result = (0, generate_prompt_MJ_1.genAsset_MJ)(imported_asset, map).toString();
+                result = (0, generate_prompt_MJ_1.genAsset_MJ)(snippetRef, map).toString();
                 break;
             }
             case exports.AISystem.StableDiffusion: {
-                result = (0, generate_prompt_SD_1.genAsset_SD)(imported_asset, map).toString();
+                result = (0, generate_prompt_SD_1.genAsset_SD)(snippetRef, map).toString();
                 break;
             }
             case exports.AISystem.ChatGPT: {
-                result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(imported_asset, map).toString();
+                result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(snippetRef, map).toString();
                 break;
             }
             case undefined: {
                 console.error(chalk_1.default.red(`No target provided. Using 'chatgpt' by default`));
-                result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(imported_asset, map).toString();
+                result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(snippetRef, map).toString();
                 break;
             }
             default: {
@@ -382,55 +408,8 @@ function genAssetReuse(assetReuse, aiSystem, previousMap) {
         }
         return result;
     }
-    else if (Ast.isAsset(snippetRef)) {
-        // Variables
-        var map = new Map();
-        if (assetReuse.pars) {
-            // Mapping the value of the variables
-            let values = getParamNames((_e = assetReuse.pars) === null || _e === void 0 ? void 0 : _e.pars, aiSystem, previousMap);
-            // Create Mapping
-            let variables;
-            if (!Ast.isImportedAsset(snippetRef) && !Ast.isChain(snippetRef)) {
-                variables = snippetRef.pars.pars;
-            }
-            if (variables) {
-                for (let variable in variables) {
-                    map.set(variables[variable].name, values[variable]);
-                }
-            }
-            var result;
-            switch (aiSystem) {
-                case exports.AISystem.Midjourney: {
-                    result = (0, generate_prompt_MJ_1.genAsset_MJ)(snippetRef, map).toString();
-                    break;
-                }
-                case exports.AISystem.StableDiffusion: {
-                    result = (0, generate_prompt_SD_1.genAsset_SD)(snippetRef, map).toString();
-                    break;
-                }
-                case exports.AISystem.ChatGPT: {
-                    result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(snippetRef, map).toString();
-                    break;
-                }
-                case undefined: {
-                    console.error(chalk_1.default.red(`No target provided. Using 'chatgpt' by default`));
-                    result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(snippetRef, map).toString();
-                    break;
-                }
-                default: {
-                    console.error(chalk_1.default.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
-                    result = "";
-                }
-            }
-            return result;
-        }
-        else {
-            console.error(chalk_1.default.red(`An AssetReuse should have the structure: <name>(<parameters>)`));
-            return "";
-        }
-    }
     else {
-        console.error(chalk_1.default.red(`The snippet is not referencing an asset`));
+        throw new Error(`The snippet is not referencing an asset`);
         return '';
     }
 }

@@ -1,7 +1,8 @@
 import { ValidationAcceptor, ValidationChecks } from 'langium';
-import { ImpromptuAstType, Multimodal, Model, Parameters, Prompt, isPrompt, isByExpressionOutputTesting, AssetReuse, isChain, isImportedAsset, ImportedAsset, isAssetReuse, isComposer, Asset, Snippet, CombinationTrait, Language, isAsset, isAssetImport} from './generated/ast';
+import { ImpromptuAstType, Multimodal, Model, Parameters, Prompt, isPrompt, isByExpressionOutputTesting, AssetReuse, isChain, isImportedAsset, ImportedAsset, isAssetReuse, isComposer, Asset, Snippet, CombinationTrait, Language, isAsset, isAssetImport, AssetImport} from './generated/ast';
 import type { ImpromptuServices } from './impromptu-module';
 import fs from 'fs';
+import { get_imported_asset } from '../cli/cli-util';
 
 /**
  * Register custom validation checks.
@@ -22,23 +23,26 @@ export function registerValidationChecks(services: ImpromptuServices) {
     registry.register(checks, validator);
 }
 
-function check_loops_snippets(snippets:Snippet[], accept:ValidationAcceptor, og_asset:Asset[]){
-    if (snippets!= undefined){
-        snippets.forEach(snippet =>{
-            if (isAssetReuse(snippet.content)){
-                if (snippet.content.asset.ref)
-                    if (isAsset(snippet.content.asset.ref)){
-                        check_loops_asset(snippet.content.asset.ref, accept, og_asset);
-                    }
-                    /*  It does not work: the imports are not fully upload yet
-                    else if (isAssetImport(snippet.content.asset.ref)){
-                        check_loops_asset(get_imported_asset() , accept, og_asset);
-                    }*/
-                if (snippet.content.pars && snippet.content.pars.pars )
-                    check_loops_snippets(snippet.content.pars.pars, accept, og_asset);
-            }
-        })
-    }
+function check_loops_snippets(snippets:Snippet[], accept:ValidationAcceptor, og_asset:Asset[]):Asset[]{
+    snippets.forEach(snippet =>{
+        if (isAssetReuse(snippet.content)){
+            // An AssetReuse references an Asset, or an Asset import
+            if (snippet.content.asset.ref)
+                if (isAsset(snippet.content.asset.ref)){
+                    check_loops_asset(snippet.content.asset.ref, accept, og_asset);
+                } else if(isAssetImport(snippet.content.asset.ref)){
+                    check_loops_asset(get_imported_asset(snippet.content.asset.ref),accept, og_asset);
+                }
+                
+            // The parameters of an AssetReuse are references to another snippet
+            if (snippet.content.pars)
+                og_asset =check_loops_snippets(snippet.content.pars.pars, accept, og_asset);
+            
+            // When the asset has beeen studied, the last element is remove so that the assest tracked in the first snippet not interfere with the next one 
+            og_asset.pop()
+        }
+    })
+    return og_asset
     
 }
 
@@ -49,7 +53,10 @@ function check_loops_snippets(snippets:Snippet[], accept:ValidationAcceptor, og_
  */
 function check_loops_asset(asset:Asset, accept:ValidationAcceptor ,og_asset?:Asset[]){
     if (og_asset?.includes(asset)){
-        accept('error', "There is a recursive loop", {node:asset,property:'name'})
+        let text=""
+        og_asset.forEach(element=> text+= `${element.name} -> `)
+        text+=asset.name
+        accept('error', `There is a recursive loop finishing in "${asset.name}": ${text}`, {node:og_asset[0],property:'name'})
     }else{
         let elements:Array<Snippet> =[];
         if (!og_asset){
@@ -69,8 +76,7 @@ function check_loops_asset(asset:Asset, accept:ValidationAcceptor ,og_asset?:Ass
             elements = asset.contents.snippets;
         }
         else if(isImportedAsset(asset)){
-            // Get the asset ImportedAsset references
-            //check_loops_asset(get_imported_asset(asset), og_asset);
+            check_loops_asset(get_imported_asset(asset),accept, og_asset);
         }
         if(elements){
             og_asset.push(asset)
@@ -116,24 +122,26 @@ export class ImpromptuValidator {
     checkUniqueAssets(model: Model, accept: ValidationAcceptor): void {
         // create a set of visited assets
         // and report an error when we see one we've already seen
-        const reported = new Set();
+        const reported:( Asset| AssetImport)[]= [];
         model.assets.forEach(a => {
-            if (reported.has(a.name)) {
+            let duplicate = reported.find(element => element.name==a.name)
+            if (duplicate) {
                 accept('error', `Asset has non-unique name '${a.name}'.`,  {node: a, property: 'name'});
+                accept('error', `Asset has non-unique name '${a.name}'.`,  {node: duplicate, property: 'name'}); // The error appears in both assets
             }
-            reported.add(a.name);
+            reported.push(a);
         });
         // It also has to consider the imported assets
-        const reported_imports = new Set();
         model.imports.forEach(import_line => {
             import_line.asset_name.forEach(a =>{
-                if (reported.has(a.name)) {
-                    accept('error', `Asset has non-unique name '${a.name}'.`,  {node: a, property: 'name'});
-                }
-                else if (reported_imports.has(a.name)) {
-                    accept('error', `Two imported assets has non-unique name '${a.name}'.`,  {node: a, property: 'name'});
-                }
-                reported_imports.add(a.name);
+                if (a.asset.ref){
+                    let duplicate = reported.find(element => element.name==a.asset.ref?.name)
+                    if (duplicate) {
+                        accept('error', `Asset has non-unique name '${a.asset.ref?.name}'.`,  {node: a, property: 'name'});
+                        accept('error', `Asset has non-unique name '${a.asset.ref?.name}'.`,  {node: duplicate, property: 'name'});
+                    }
+                    reported.push(a.asset.ref);
+                }  
             })
         });
     }
@@ -219,9 +227,12 @@ export class ImpromptuValidator {
                 accept('error',`The Asset referenced is a Chain. A Chain does not have nay parameters.`,  {node: assetReuse})
             }
         }
+        else if (isAssetImport(ogAsset)){
+            if (ogAsset.asset.ref){
+                accept('error',`Error in the imported asset`,  {node: assetReuse})
+            }
+        }
     }
-
-
 
     checkUniqueParams(parset: Parameters, accept: ValidationAcceptor): void {
         // create a set of visited parameters
@@ -264,14 +275,12 @@ export class ImpromptuValidator {
         else if (!fs.existsSync(workspace_path+'/'+library+'.prm')) {
             accept('error',`The library ` +workspace_path+library+` does not exist.`,{node:imported_asset})
         }
-        else{
-        // II- The prompt it tries to import (`imported_asset.name`) exists in the told file.
-            let buffer=fs.readFileSync(workspace_path+'/'+library+'.prm');
-            imported_asset.asset_name.forEach(asset_import =>{
-                
-                let assetRegex = new RegExp(`.*\\s${asset_import.name}\\s*\\(.*`);
-                if (! assetRegex.test(buffer.toString())){
-                    accept('error',`The prompt `+ asset_import.name +` is not included in `+library,{node:imported_asset})
+        else{  
+            // II - The asset exists in the imported file
+
+            imported_asset.asset_name.forEach(a =>{
+                if(a.asset.ref?.name== undefined){
+                    accept('error',`Not exists an asset in ${imported_asset.library} with such name.`,{node:a})
                 }
             })
             

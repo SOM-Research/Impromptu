@@ -8,6 +8,5 @@ prompt main():text
 core=A(),B()
 language=English
 
-prompt A():text
-core="hola",B()
-language=English
+prompt A(): text
+core="hola"

@@ -43,7 +43,7 @@ ImportedAsset:
     ;
 
 AssetImport: 
-    name=QualifiedName;
+    asset = [Asset:QualifiedName]('as' name=QualifiedName )?;
 
 
 HyperParameters:
@@ -240,6 +240,7 @@ Language: // Change: Language should be the same for all the file -> Does not ma
     ;
 
 fragment AssetLanguage:
+    ('language''=' language=ID)?
     ('language''=' language=ID)?
     ;
 

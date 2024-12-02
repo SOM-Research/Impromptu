@@ -39,8 +39,8 @@ export const ImpromptuModule: Module<ImpromptuServices, PartialLangiumServices &
         ImpromptuValidator: () => new ImpromptuValidator()
     },
     references: {
-        ScopeProvider: (services) => new ScopeParamProvider(services),
-        ScopeComputation: (services) => new ImpromptuScopeComputation(services)
+        ScopeComputation: (services) => new ImpromptuScopeComputation(services),
+        ScopeProvider: (services) => new ScopeParamProvider(services)
     }
         
 };

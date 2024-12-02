@@ -11,7 +11,7 @@ prompt probability_prompt(@p_prompt):  text
 
 prompt roling_prompt():  text
     core = 
-    "Respond whether you suppot the following sentence: "
+    "Respond whether you support the following sentence: "
     language=English
 
 

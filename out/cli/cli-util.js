@@ -12,12 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLanguage = exports.get_file_from = exports.get_line_node = exports.get_imported_asset = exports.check_loops = exports.extractDestinationAndName = exports.extractAstNode = exports.extractDocument = void 0;
+exports.getLanguage = exports.get_file_from = exports.get_line_node = exports.get_imported_asset = exports.extractDestinationAndName = exports.extractAstNode = exports.extractDocument = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
 const vscode_uri_1 = require("vscode-uri");
 const ast_1 = require("../language-server/generated/ast");
+const globby_1 = __importDefault(require("globby"));
 function extractDocument(fileName, services) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,12 +26,11 @@ function extractDocument(fileName, services) {
             console.error(chalk_1.default.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
             process.exit(1);
         }
-        if (!fs_1.default.existsSync('build_files/' + fileName)) {
-            console.error(chalk_1.default.red(`File ${fileName} does not exist.`));
-            process.exit(1);
-        }
-        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName)));
-        yield services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+        let documents = [];
+        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName))); // Here is the problem
+        const files = yield (0, globby_1.default)("**/*.prm"); // Get all .prm files
+        files.forEach(file => documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve(file)))));
+        yield services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
         const validationErrors = ((_a = document.diagnostics) !== null && _a !== void 0 ? _a : []).filter(e => e.severity === 1);
         if (validationErrors.length > 0) {
             console.error(chalk_1.default.red(`There are validation errors in ${fileName}:`));
@@ -47,6 +46,13 @@ function extractDocument(fileName, services) {
     });
 }
 exports.extractDocument = extractDocument;
+/**
+ * Build the Langium Document that allows to analyze the `.prm` file
+ * @param fileName uri of the file, relative to the folder `build_files`
+ * @param services LangiumService
+ * @param calls_buffer Auxiliar variable with the Assets "visited"
+ * @returns
+ */
 function extractAstNode(fileName, services, calls_buffer) {
     var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
@@ -56,6 +62,7 @@ function extractAstNode(fileName, services, calls_buffer) {
         if (calls_buffer == undefined)
             calls_buffer = [];
         let new_calls = [];
+        // Checks all the imports. Needed for the CLI mode
         if (calls_buffer) {
             const model = (_a = (yield extractDocument(fileName, services)).parseResult) === null || _a === void 0 ? void 0 : _a.value;
             if ((0, ast_1.isModel)(model)) {
@@ -65,27 +72,17 @@ function extractAstNode(fileName, services, calls_buffer) {
                         // Checks that it is imported from a different file
                         //if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
                         libraries.push(asset.$container.library);
-                        import_names.push(asset.name);
+                        if (asset.name) {
+                            import_names.push(asset.name);
+                        }
                         new_calls.push(asset);
                         //}
                     });
                 });
-                // Also
-                /// REHACER TODO: Buffer tiene que construirse de otra manera
-                // Load the libraries needed to obtain the imports
                 var exists_errors = false; //Mark there are errors or not
                 for (let i = 0; i < new_calls.length; i++) {
                     try {
-                        if (import_names[i] == '*') {
-                            calls_buffer.push(new_calls[i]);
-                            const import_model = yield extractAstNode(libraries[i].split(".").join("/") + ".prm", services, calls_buffer);
-                            let imported_assets = [];
-                            import_model.assets.forEach(asset => {
-                                imported_assets.push(asset);
-                            });
-                            model.assets = model.assets.concat(imported_assets);
-                        }
-                        else if (!calls_buffer.find(element => libraries[i] == element.$container.library && import_names[i] == element.name)) {
+                        if (!calls_buffer.find(element => libraries[i] == element.$container.library && import_names[i] == element.name)) {
                             // Update the elements that have been called
                             calls_buffer.push(new_calls[i]);
                             const import_model = yield extractAstNode(libraries[i].split(".").join("/") + ".prm", services, calls_buffer);
@@ -135,91 +132,14 @@ function extractDestinationAndName(filePath, destination) {
 }
 exports.extractDestinationAndName = extractDestinationAndName;
 /**
- * Checks that the model does not have any recursive loops. It check both assets and imports.
- * Throw an error if a loop exists
- * @param model
- */
-function check_loops(model) {
-    model.assets.forEach(asset => {
-        check_loops_asset(asset);
-    });
-}
-exports.check_loops = check_loops;
-function check_loops_asset(asset, og_asset) {
-    // In case we alredy be in the same asset in the buffer, we have a loop 
-    if (og_asset === null || og_asset === void 0 ? void 0 : og_asset.includes(asset)) {
-        let line = get_line_node(asset);
-        let fileName = get_file_from(asset);
-        console.error(chalk_1.default.red(`[${fileName}: ${line}] Error: There is a recursive loop regarding the asset ${asset.name}`));
-        throw new Error("There is a recursive loop regarding the asset " + asset.name);
-    }
-    else {
-        if (!og_asset) {
-            og_asset = [];
-        }
-        if ((0, ast_1.isPrompt)(asset)) {
-            // Get all of snippets in a Prompt
-            if (asset.core.snippets != undefined) {
-                let elements = asset.core.snippets;
-                if (asset.prefix) {
-                    elements = elements.concat(asset.prefix.snippets);
-                }
-                if (asset.suffix) {
-                    elements = elements.concat(asset.suffix.snippets);
-                }
-                og_asset.push(asset);
-                check_loops_snippets(elements, og_asset);
-            }
-        }
-        else if ((0, ast_1.isComposer)(asset)) {
-            // Get all of snippets in a Composer
-            let elements = asset.contents.snippets;
-            og_asset.push(asset);
-            check_loops_snippets(elements, og_asset);
-        }
-    }
-}
-/**
- * Resolves a recursion loop in a set of snippets.
- * @param snippets array of Snippets to analyze
- * @param og_asset Buffer of the aasets that were already paased
- * @returns ´og_asset´
- */
-function check_loops_snippets(snippets, og_asset) {
-    snippets.forEach(snippet => {
-        if ((0, ast_1.isAssetReuse)(snippet.content)) {
-            // An AssetReuse references an Asset, or an Asset import
-            if (snippet.content.asset.ref)
-                if ((0, ast_1.isAsset)(snippet.content.asset.ref)) {
-                    check_loops_asset(snippet.content.asset.ref, og_asset);
-                }
-                else if ((0, ast_1.isAssetImport)(snippet.content.asset.ref)) {
-                    check_loops_asset(get_imported_asset(snippet.content.asset.ref), og_asset);
-                }
-            // The parameters of an AssetReuse are references to another snippet
-            if (snippet.content.pars)
-                og_asset = check_loops_snippets(snippet.content.pars.pars, og_asset);
-            // When the asset has beeen studied, the last element is remove so that the assest tracked in the first snippet not interfere with the next one 
-            og_asset.pop();
-        }
-    });
-    return og_asset;
-}
-/**
  * Returns the asset from the library which Impoorted Asset refereces
  * @param asset
  * @returns
  */
 function get_imported_asset(asset) {
     if ((0, ast_1.isImportedAsset)(asset.$container)) {
-        let model = asset.$container.$container;
-        let imported_asset = model.assets.find(element => {
-            var _a;
-            let re = new RegExp(String.raw `${asset.name}`, "g");
-            return re.test(element.name) && ((_a = element.$container.$document) === null || _a === void 0 ? void 0 : _a.uri.path.split('/').pop()) == asset.$container.library.split('.').pop() + '.prm'; // TODO: More rigurous check
-        });
-        if ((0, ast_1.isPrompt)(imported_asset) || (0, ast_1.isComposer)(imported_asset)) {
-            return imported_asset;
+        if (asset.asset.ref) {
+            return asset.asset.ref;
         }
         else {
             let file = get_file_from(asset);
