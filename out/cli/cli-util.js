@@ -27,7 +27,7 @@ function extractDocument(fileName, services) {
             process.exit(1);
         }
         let documents = [];
-        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName))); // Here is the problem
+        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName)));
         const files = yield (0, globby_1.default)("**/*.prm"); // Get all .prm files
         files.forEach(file => documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve(file)))));
         yield services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors

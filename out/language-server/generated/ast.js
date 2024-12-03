@@ -532,6 +532,7 @@ class ImpromptuAstReflection extends langium_1.AbstractAstReflection {
                     name: 'Model',
                     mandatory: [
                         { name: 'assets', type: 'array' },
+                        { name: 'equivalencies', type: 'array' },
                         { name: 'imports', type: 'array' }
                     ]
                 };

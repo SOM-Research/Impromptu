@@ -3,7 +3,6 @@ prompt Draw(@animal1): image
 core = "Draw a ", @animal1
 language=English
 
-
 prompt NewMain(): image
 core=Draw("var 2")
 language=English

@@ -14,7 +14,7 @@ export async function extractDocument(fileName: string, services: LangiumService
         process.exit(1);
     }
     let documents:LangiumDocument<AstNode>[] = []
-    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); // Here is the problem
+    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); 
     const files = await globby("**/*.prm");   // Get all .prm files
     files.forEach(file => 
         documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(file))))

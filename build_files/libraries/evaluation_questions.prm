@@ -114,6 +114,15 @@ prompt answer_options(@number,@answers, @distractors): text
     separator=" "
     language= English
 
+//-------------------------------------Question number----------------------------------------------
+prompt number_questions(@number):  text
+    core = 
+        "The exam will consist of", @number,"questions"
+        separator=" "
+    language=English
+//----------------------------------------------------------------------------------------
+
+
 // Give an example of how to choose the distractors for the questions
 prompt distractor_selection(@example):text
     core="Select the distractors of the question imitating the following example", @example
@@ -121,7 +130,7 @@ prompt distractor_selection(@example):text
 
 // Tells the distractors wanted for the question (has to be a multi_mtach() question)
 prompt distractors(@distractors): text
-    core= "Consider the following options as distractors for the question:", @distractors
+    core = "Consider the following options as distractors for the question:", @distractors
     separator = " "
 
 // Tells the correct answer of the question
@@ -143,12 +152,6 @@ prompt hard_question():text
     core="Choose the question so that it will be challenging to the students"
     language=English
 
-//-------------------------------------Question number----------------------------------------------
-prompt number_questions(@number):  text
-    core = 
-        "The exam will consist of", @number,"questions"
-        separator=" "
-    language=English
 
 //-------------------------------------Question level----------------------------------------------
 prompt level(@level): text

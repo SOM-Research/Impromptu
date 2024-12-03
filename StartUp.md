@@ -20,7 +20,7 @@ wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 ```
 respectively.
 
-In case of choosing using `nvm`, there are additional steps the used should follow:
+In case of choosing using `nvm`, there are additional steps the user should follow:
  - Install `node` using `nvm` (v. 23.3.0 recommended)
  ```
  nvm install v23.3.0

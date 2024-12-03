@@ -1,12 +1,8 @@
 language=English
 
 import * from libraries.tests.import_testA
-
-
-prompt main(): image
-core=A()
-language=English
+import notRead from libraries.tests.import_testB
 
 prompt NewMain(): image
-core="hello"
+core=main(),notRead()
 language=English

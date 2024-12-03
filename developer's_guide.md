@@ -52,6 +52,19 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
 }
 ```
 
+## Imports' Scoping
+
+Here it is explained how the import scoping was made:
+
+In order to archieve a correct scoping of items imported from another file, there are needed three steps:
+
+- **Link the reference of the import with the import itself**. This is done similarly to the parameter reference.
+
+- **Reference the import with the original item in another file**. For do this correctly, and only look inside the imported file, one need to manage URIs, and add to the scope the item of those files. This is done using the `vscode\uri` package.
+
+> Between lines 70-78 of `impromptu-scope.ts`,it is used the LangiumDocument object of the file, but it can be probably changed to only use the `vscode\uri` package.
+
+- Compute the exports so that the items can be refeerenciable outside of their own file properly.
 
 ## Testing
 

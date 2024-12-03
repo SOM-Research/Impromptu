@@ -16,9 +16,9 @@ hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
 hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
 
 entry Model:
-    (language=Language)+ // Only one language per file. Warning given bcs ut can me empty
+    language=Language // Only one language per file. Warning given bcs ut can me empty
     (assets+=Asset|imports+=ImportedAsset)+
-    (equivalencies=Equivalency)*;
+    (equivalencies+=Equivalency)*;
 
 Asset:
     ExecutableAsset | Composer ;
@@ -39,7 +39,7 @@ Prompt:
     ;
 
 ImportedAsset:
-    'import' asset_name+=AssetImport (',' asset_name+=AssetImport)* 'from' library=QualifiedName
+    'import' (asset_name+=AssetImport (',' asset_name+=AssetImport)*|everyone='*') 'from' library=QualifiedName
     ;
 
 AssetImport: 
@@ -61,7 +61,7 @@ Chain:
     ;
 
 Composer:
-    'composer' name=QualifiedName  pars=Parameters ':' contents=Contents (separator=STRING)?
+    'composer' name=QualifiedName  pars=Parameters ':' contents=Contents
     AssetSeparator
     AssetLanguage
     AssetRelationships
@@ -196,7 +196,7 @@ ParamInvokation:
     '(' pars+=Snippet (',' pars+=Snippet )*  ')' | '(' ')';
 
 Parameters:
-    '('( pars+= Input ( ',' pars+= Input )* )?')' ;
+    '('( pars+= Input ( ',' pars+= Input )* )?')';
 
 Input:
     Parameter | Multimodal;
@@ -244,7 +244,7 @@ fragment AssetLanguage:
     ;
 
 fragment AssetSeparator:
-    ('separator=' separator=STRING)?
+    ('separator''=' separator=STRING)?
     ;
 
 fragment AssetRelationships:
@@ -265,7 +265,7 @@ Equivalency:
 //    ByExpression | ByReinforcedTrait;
 
 ByExpressionOutputTesting:
-    'validator=['validator=[ExecutableAsset:ID]']';
+    'validator''=['validator=[ExecutableAsset:ID]']';
     //'validators=' '[' (validator=STRING) ']'
     //    ((',['validator=STRING)*']')?;
 

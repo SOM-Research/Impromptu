@@ -129,7 +129,7 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
 }
 
 /**
- * Select the prompt it wants to be generated + validated 
+ * Select the prompt it wants to be generated + validate it 
  * @param generator 
  * @param model .prm flie selected 
  * @returns 

@@ -1,0 +1,10 @@
+// Example that more than one asset can be 8imported in a same line
+
+language=English
+
+import * from libraries.ethic_questions
+import promptA from __test__.testPromptMode
+
+prompt NewMain(): image
+core=job_statement("black person", "doctor"),promptA()
+language=English

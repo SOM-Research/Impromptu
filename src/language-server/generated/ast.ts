@@ -436,6 +436,7 @@ export interface ImportedAsset extends AstNode {
     readonly $container: Model;
     readonly $type: 'ImportedAsset';
     asset_name: Array<AssetImport>
+    everyone?: '*'
     library: QualifiedName
 }
 
@@ -527,7 +528,7 @@ export function isMediumTrait(item: unknown): item is MediumTrait {
 export interface Model extends AstNode {
     readonly $type: 'Model';
     assets: Array<Asset>
-    equivalencies?: Equivalency
+    equivalencies: Array<Equivalency>
     imports: Array<ImportedAsset>
     language: Language
 }
@@ -1020,6 +1021,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
                     name: 'Model',
                     mandatory: [
                         { name: 'assets', type: 'array' },
+                        { name: 'equivalencies', type: 'array' },
                         { name: 'imports', type: 'array' }
                     ]
                 };

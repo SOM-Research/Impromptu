@@ -26,7 +26,7 @@ export const AISystem = {
 * It will generate the code for the single prompt otherwise.
 *
 *   @param model 
-*   @param prompt  Prompt object that it will be addresed
+*   @param prompt  Prompt object that it will be addressed
 *   @param variables Variables transmitted by command line.
 *   @param promptName Prompt transmitted by command line. If it is not declared, `variables` are used in the last prompt of the document
 */

@@ -6,6 +6,8 @@ import { beforeEach, test, expect } from 'vitest';
 import {  AISystem, generatePromptCode } from "../src/cli/generate-prompt";
 import { NodeFileSystem } from "langium/node";
 import { check_loops, extractAstNode } from "../src/cli/cli-util";
+import { URI } from "vscode-uri";
+import path from "path";
 // import { fs, vol } from 'memfs';
 /*
 beforeEach(() => {
@@ -167,7 +169,7 @@ test('validation_recursion_loop', async() => {
   
     const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
     expect(validationErrors).toHaveLength(2) // Test that the prompt is incorrect indeed. Each function should return an error
-    expect(validationErrors[0].message).toBe(`There is a recursive loop finishing in "functionA": functionA -> functionB -> functionA`); // Meassage of the recursion loop 
+    expect(validationErrors[0].message).toBe(`There is a recursive loop finishing in "functionA": functionA -> functionA`); // Meassage of the recursion loop 
     })
   
 
@@ -364,3 +366,49 @@ test('Check_multi_import' , async() => {
   expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // 1st imported asset in ImportedAsset
   expect(result?.join(' ')).toContain("Respond whether you support the following sentence: "); // 2nd imported asset in ImportedAsset
   })
+
+  /**
+ * Check that two imports (imported in the same line) are imported correctly
+ */
+test('Check_import_all' , async() => {
+
+  // Checks that `import * from ....` import all the asset from the file 
+  const services = createImpromptuServices(NodeFileSystem).Impromptu;
+  const fileName= '__test__/import_all.prm';
+  const model = await extractAstNode<Model>(fileName, services);
+  const prompt = model.assets[0]
+  const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
+  expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // 1st imported asset in ImportedAsset
+  expect(result?.join(' ')).toContain("Respond whether you support the following sentence: "); // 2nd imported asset in ImportedAsset
+  })
+
+/**
+ * Checks that `import * from ....` does not affect improtations from other files
+ */
+    test('Check_import_all' , async() => {
+
+       
+      const services = createImpromptuServices(NodeFileSystem).Impromptu;
+      const fileName= '__test__/import_all_error.prm';
+      const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); 
+      await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+      const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
+      
+      // Test that the prompt is incorrect beacuse promptA was never imported
+      expect(validationErrors[0].message).toBe(`Could not resolve reference to Asset named 'promptA'.`); // Meassage of the recursion loop 
+       })
+
+/**
+ * Checks that there is an error when an asset is tried to be imported from a file without that asset
+ */
+test('Check_missing_asset' , async() => {
+
+  const services = createImpromptuServices(NodeFileSystem).Impromptu;
+  const fileName= '__test__/missing_asset.prm';
+  const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); 
+
+  await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
+  const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
+  // Test that the prompt is incorrect because promptA is not found
+  expect(validationErrors[0].message).toBe(`Could not resolve reference to Asset named 'promptA'.`); // Message of the recursion loop 
+   })

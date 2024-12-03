@@ -193,8 +193,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "$ref": "#/rules@73"
               },
               "arguments": []
-            },
-            "cardinality": "+"
+            }
           },
           {
             "$type": "Alternatives",
@@ -229,7 +228,7 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
           {
             "$type": "Assignment",
             "feature": "equivalencies",
-            "operator": "=",
+            "operator": "+=",
             "terminal": {
               "$type": "RuleCall",
               "rule": {
@@ -481,38 +480,57 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
             "value": "import"
           },
           {
-            "$type": "Assignment",
-            "feature": "asset_name",
-            "operator": "+=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@14"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Group",
+            "$type": "Alternatives",
             "elements": [
               {
-                "$type": "Keyword",
-                "value": ","
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "asset_name",
+                    "operator": "+=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@14"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "asset_name",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@14"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
+                  }
+                ]
               },
               {
                 "$type": "Assignment",
-                "feature": "asset_name",
-                "operator": "+=",
+                "feature": "everyone",
+                "operator": "=",
                 "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@14"
-                  },
-                  "arguments": []
+                  "$type": "Keyword",
+                  "value": "*"
                 }
               }
-            ],
-            "cardinality": "*"
+            ]
           },
           {
             "$type": "Keyword",
@@ -794,19 +812,6 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
               },
               "arguments": []
             }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "separator",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@6"
-              },
-              "arguments": []
-            },
-            "cardinality": "?"
           },
           {
             "$type": "RuleCall",
@@ -2662,34 +2667,18 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
       "$type": "ParserRule",
       "name": "Parameters",
       "definition": {
-        "$type": "Group",
+        "$type": "Alternatives",
         "elements": [
-          {
-            "$type": "Keyword",
-            "value": "("
-          },
           {
             "$type": "Group",
             "elements": [
               {
-                "$type": "Assignment",
-                "feature": "pars",
-                "operator": "+=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@56"
-                  },
-                  "arguments": []
-                }
+                "$type": "Keyword",
+                "value": "("
               },
               {
                 "$type": "Group",
                 "elements": [
-                  {
-                    "$type": "Keyword",
-                    "value": ","
-                  },
                   {
                     "$type": "Assignment",
                     "feature": "pars",
@@ -2701,16 +2690,50 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                       },
                       "arguments": []
                     }
+                  },
+                  {
+                    "$type": "Group",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": ","
+                      },
+                      {
+                        "$type": "Assignment",
+                        "feature": "pars",
+                        "operator": "+=",
+                        "terminal": {
+                          "$type": "RuleCall",
+                          "rule": {
+                            "$ref": "#/rules@56"
+                          },
+                          "arguments": []
+                        }
+                      }
+                    ],
+                    "cardinality": "*"
                   }
                 ],
-                "cardinality": "*"
+                "cardinality": "?"
+              },
+              {
+                "$type": "Keyword",
+                "value": ")"
               }
-            ],
-            "cardinality": "?"
+            ]
           },
           {
-            "$type": "Keyword",
-            "value": ")"
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Keyword",
+                "value": "("
+              },
+              {
+                "$type": "Keyword",
+                "value": ")"
+              }
+            ]
           }
         ]
       },
@@ -3560,7 +3583,11 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "elements": [
           {
             "$type": "Keyword",
-            "value": "separator="
+            "value": "separator"
+          },
+          {
+            "$type": "Keyword",
+            "value": "="
           },
           {
             "$type": "Assignment",
@@ -3766,7 +3793,11 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
         "elements": [
           {
             "$type": "Keyword",
-            "value": "validator=["
+            "value": "validator"
+          },
+          {
+            "$type": "Keyword",
+            "value": "=["
           },
           {
             "$type": "Assignment",

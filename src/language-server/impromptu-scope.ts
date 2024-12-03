@@ -67,8 +67,8 @@ export class ScopeParamProvider extends DefaultScopeProvider {
         document.uri
         //get model of document
         const model = document.parseResult.value as Model;
-        //get URI of current document
-        const currentUri = document.uri;
+        //get a base uri
+        //const baseUri = document.uri;
 
         let workspace_path = process.env.WORKSPACE
         if (!workspace_path){
@@ -76,18 +76,18 @@ export class ScopeParamProvider extends DefaultScopeProvider {
         }
 
         //get folder of current document
-        const currentDir = join(currentUri.with({path:workspace_path}).path,'build_files')
+        const currentDir = join(workspace_path,'build_files')
         const uris = new Set<string>();
         //for all file imports of the current file
         
-        for (const asset_name of model.imports) {
+        for (const imp of model.imports) {
             //resolve the file name relatively to the current file
             // Get the absolute path of the file
-            const filePath = join(currentDir,asset_name.library.split('.').join('/')+'.prm');
-            //create an URI withe absolute path
+            const filePath = join(currentDir, imp.library.split('.').join('/')+'.prm');
+            //create an URI wit the absolute path
             const uri=URI.from({scheme:'file',path: filePath.split('\\').join('/')}) 
            
-            // Exmple of uri.toString(): 'file:///c%3A/Users/......../Impromptu/build_files/examples/example.prm')
+            // Example of uri.toString(): 'file:///c%3A/Users/......../Impromptu/build_files/examples/example.prm')
             uris.add(uri.toString());
         }
         //get all possible assets from these files
@@ -95,6 +95,48 @@ export class ScopeParamProvider extends DefaultScopeProvider {
         const astNodeDescriptions = this.indexManager.allElements(Asset,uris).toArray();
         //convert them to descriptions inside of a scope
         return this.createScope(astNodeDescriptions);
+    }
+
+    /**
+     * Same as `getExportedAssetsFromGlobalScope()`, but filtetring only general imports (i.e `import * from ....`)
+     * @param context 
+     * @returns 
+     */
+    private getExportedAssetsFromGlobalScopeGlobal(context: ReferenceInfo): AstNodeDescription[] {
+        //get document for current reference
+        const document = getDocument(context.container);
+        document.uri
+        //get model of document
+        const model = document.parseResult.value as Model;
+        //get a base uri
+        const baseUri = document.uri;
+
+        let workspace_path = process.env.WORKSPACE
+        if (!workspace_path){
+            workspace_path= process.cwd()
+        }
+
+        //get folder of current document
+        const currentDir = join(baseUri.with({path:workspace_path}).path,'build_files')
+        const uris = new Set<string>();
+        //for all file imports of the current file
+        
+        for (const imp of model.imports) {
+            if (imp.everyone){
+                //resolve the file name relatively to the current file
+                // Get the absolute path of the file
+                const filePath = join(currentDir, imp.library.split('.').join('/')+'.prm');
+                //create an URI wit the absolute path
+                const uri=URI.from({scheme:'file',path: filePath.split('\\').join('/')}) 
+                // Example of uri.toString(): 'file:///c%3A/Users/......../Impromptu/build_files/examples/example.prm')
+                uris.add(uri.toString());
+            }
+        }
+        //get all possible assets from these files
+        //console.log("Document: ",document.uri)
+        const astNodeDescriptions = this.indexManager.allElements(Asset,uris).toArray();
+        //convert them to descriptions inside of a scope
+        return astNodeDescriptions;
     }
 
     private getImportedAssetsFromCurrentFile(context: ReferenceInfo) {
@@ -107,7 +149,7 @@ export class ScopeParamProvider extends DefaultScopeProvider {
             let allAssets = model.assets;
             //select the set of parameters
 
-            const descriptions1 = allAssets.map(p => this.astNodeDescriptionProvider.createDescription(p, p.name));
+            const descriptions1 = allAssets.map(p => this.descriptions.createDescription(p, p.name));
             
             const descriptions2 = model.imports.flatMap(fi => fi.asset_name.map(pi => {
 
@@ -117,8 +159,8 @@ export class ScopeParamProvider extends DefaultScopeProvider {
                 //otherwise return nothing
                 return undefined;
             }).filter(d => d != undefined)).map(d => d!);
-        
-            return this.createScope(descriptions1.concat(descriptions2))
+            
+            return this.createScope(descriptions1.concat(descriptions2,this.getExportedAssetsFromGlobalScopeGlobal(context)))
         }
         
         // If not, it means that any parameter have been declared in the prompt
