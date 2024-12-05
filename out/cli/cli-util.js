@@ -185,8 +185,9 @@ function getLanguage(asset) {
             return asset.language;
         }
     }
-    if (asset.$container && asset.$container.language != undefined) {
-        return asset.$container.language.name;
+    const mainlanguage = asset.$container.language;
+    if (asset.$container && mainlanguage) {
+        return mainlanguage.name;
     }
     else { // By default, language is English
         return "English";

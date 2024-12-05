@@ -530,7 +530,7 @@ export interface Model extends AstNode {
     assets: Array<Asset>
     equivalencies: Array<Equivalency>
     imports: Array<ImportedAsset>
-    language: Language
+    language?: Language
 }
 
 export const Model = 'Model';

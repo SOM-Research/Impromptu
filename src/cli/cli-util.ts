@@ -184,8 +184,9 @@ export function getLanguage(asset:Asset){
             return asset.language
         }
     }
-    if (asset.$container && (asset.$container as Model).language!= undefined){
-        return (asset.$container as Model).language.name
+    const mainlanguage= (asset.$container as Model).language
+    if (asset.$container &&  mainlanguage){
+        return mainlanguage.name
     }else{ // By default, language is English
         return "English"
     }

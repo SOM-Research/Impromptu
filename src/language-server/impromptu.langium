@@ -16,7 +16,7 @@ hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
 hidden terminal SL_COMMENT: /\/\/[^\n\r]*/;
 
 entry Model:
-    language=Language // Only one language per file. Warning given bcs ut can me empty
+    (language=Language)? // Only one language per file.
     (assets+=Asset|imports+=ImportedAsset)+
     (equivalencies+=Equivalency)*;
 
@@ -33,7 +33,7 @@ Prompt:
     (suffix=Suffix)?
     (hyper=HyperParameters)?
     AssetSeparator
-    AssetLanguage 
+    AssetLanguage
     AssetRelationships
     (ByExpressionOutputTesting)?
     ;

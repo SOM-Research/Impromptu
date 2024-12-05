@@ -10,7 +10,7 @@ Here it will be explanied all those functions plus some examples of their usage
 
 Use it to indicate that the questions of the exam **should be true/false question**
 
-- `@option`: Indicates any addition option related to these questions. Usually it should be one of the question of the category Option Assets . In case you do not want to add any additional task, add an empty string ( `true_false_answers("")`).
+- `@option`: Indicates any addition option related to these questions. Usually it should be one of the question of the category Option Assets . In case **you do not want to add any additional task, add an empty string** ( `true_false_answers("")`).
 
 
 
@@ -84,18 +84,18 @@ If the total number of questions of the exam (declared with `number_questions()`
 There are the assets that modify question assets to transform them into a similar mode
 
 #### `multiple_answers_option()`
-Use it to indicate that questions of the exam are **mulitple option questions**.
+*Option made for [choose_one_answers(@option)](#choose_one_answersoption)*. Use it to indicate that questions of a multiple choice but that can be mora than one correct option.
 
 
 
 #### `correct_answers_option()`
-*Option made for `true_false_answers()`*. In addition to answer the question the exameniees have to correct the question's statement (in case is false) as well.
+*Option made for [true_false_answers()](#true_false_answers)*. In addition to answer the question the exameniees have to correct the question's statement (in case is false) as well.
 
 #### `only_one_text_option()`
-*Option made for `complete_gaps_questions()`*. Instead of compleating a phrase, all questions  are form a same text.
+*Option made for [complete_gaps_questions()](#complete_gaps_questionsoption )*. Instead of compleating a phrase, all questions  are form a same text.
 
 #### `answer_options(@number,@answers, @distractors)`
-*Option made for `multiple_answers_option()`*. Spicify the number of questions, the wanted correct answers, and the wanted distractors. In case the number of questions is lower than the correct answers given, **ChatGPT will use the first ones**. In addition, it will discard the *odd* distractors, and add in case few distractors were declared.
+*Option made for [choose_one_answers(@option)](#choose_one_answersoption)*. Spicify the number of questions, the wanted correct answers, and the wanted distractors. In case the number of questions is lower than the correct answers given, **ChatGPT will use the first ones**. In addition, it will discard the *odd* distractors, and add in case few distractors were declared.
 
 ### General assets
 
@@ -122,8 +122,11 @@ Specify **the source** used to generate the questions, that is, the **learning r
 
 #### `answer_options(@number,@answers, @distractors)`
 *For <b> multi-choice</b> questions*. Tell the answers (`@answers`) and distractors(`@distractors`) desired for a set of multi-choice questions. In addition, the number of questions (`@number`) is requiered. LLMs tend to related the correct distractor to the correct answer, and discard *bad* distractors (the ones that are obvious).
+
 --------------
 ### Difficulty of the questions
+
+
 
 #### `easy_question()`
 Choose the question so that they are easy/introductory to the prior level chosen.

@@ -20,6 +20,8 @@ function registerValidationChecks(services) {
         AssetReuse: validator.checkAssetReuse,
         Multimodal: validator.checkMultimodalInputNotText,
         ImportedAsset: validator.checkImportedAsset,
+        Prompt: validator.checkLanguagePrompt,
+        Composer: validator.checkLanguageComposer,
         //CombinationTrait: validator.checkCombinationTrait,
         Language: validator.checkLanguage,
     };
@@ -241,7 +243,7 @@ class ImpromptuValidator {
      * @param accept
      */
     checkImportedAsset(imported_asset, accept) {
-        // I- The file it refecences (`imported_asset.library`) exists.
+        // I- The file it references (`imported_asset.library`) exists.
         const library = imported_asset.library.split(".").join("/"); // Convert the Qualified name into a relative path
         let workspace_path = process.env.WORKSPACE;
         if (!workspace_path) {
@@ -263,7 +265,7 @@ class ImpromptuValidator {
             imported_asset.asset_name.forEach(a => {
                 var _a;
                 if (((_a = a.asset.ref) === null || _a === void 0 ? void 0 : _a.name) == undefined) {
-                    accept('error', `Not exists an asset in ${imported_asset.library} with such name.`, { node: a });
+                    accept('error', `Does not exist an asset in ${imported_asset.library} with such name.`, { node: a });
                 }
             });
         }
@@ -308,12 +310,86 @@ class ImpromptuValidator {
                     accept('error', `Language is not supported.`, { node: asset }); // Maybe change AssetLanguage to be an asset
                 }
                 else {
-                    if (asset.language == asset.$container.language.name) {
-                        accept('hint', `Langugae redundant. The file's language is already ${asset.language}`, { node: asset }); // Maybe change AssetLanguage to be an asset
+                    const mainlanguage = asset.$container.language;
+                    if (mainlanguage) {
+                        if (asset.language == mainlanguage.name) {
+                            accept('hint', `Language redundant. The file's language is already ${asset.language}`, { node: asset }); // Maybe change AssetLanguage to be an asset
+                        }
                     }
                 }
             }
         }
+    }
+    /**
+     * Check that the langugae of a Composer and their impored assets is the same
+     * @param asset Prompt
+     * @param accept
+     */
+    checkLanguagePrompt(asset, accept) {
+        var _a, _b;
+        const mainlanguage = (0, cli_util_1.getLanguage)(asset);
+        const references = [];
+        (_a = asset.prefix) === null || _a === void 0 ? void 0 : _a.snippets.forEach(snippet => {
+            if ((0, ast_1.isAssetReuse)(snippet.content))
+                references.push(snippet.content);
+        });
+        asset.core.snippets.forEach(snippet => {
+            if ((0, ast_1.isAssetReuse)(snippet.content))
+                references.push(snippet.content);
+        });
+        (_b = asset.suffix) === null || _b === void 0 ? void 0 : _b.snippets.forEach(snippet => {
+            if ((0, ast_1.isAssetReuse)(snippet.content))
+                references.push(snippet.content);
+        });
+        // Case Asset
+        references.forEach(ar => {
+            if ((0, ast_1.isAsset)(ar.asset.ref)) {
+                const refAsset = ar.asset.ref;
+                const lang = (0, cli_util_1.getLanguage)(refAsset);
+                if (lang != mainlanguage) {
+                    accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${asset.name} is declared in ${mainlanguage}`, { node: ar });
+                }
+            }
+            // Case Asset Import
+            else if ((0, ast_1.isAssetImport)(ar.asset.ref)) {
+                const refAsset = ar.asset.ref.asset.ref; // Ensure the link is well done
+                const lang = (0, cli_util_1.getLanguage)(refAsset);
+                if (lang != mainlanguage) {
+                    accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${asset.name} is declared in ${mainlanguage}`, { node: ar });
+                }
+            }
+        });
+    }
+    /**
+     * Check that the langugae of a Composer and their impored assets is the same
+     * @param asset Composer
+     * @param accept
+     */
+    checkLanguageComposer(asset, accept) {
+        const mainlanguage = (0, cli_util_1.getLanguage)(asset);
+        const references = [];
+        asset.contents.snippets.forEach(snippet => {
+            if ((0, ast_1.isAssetReuse)(snippet.content))
+                references.push(snippet.content);
+        });
+        // Case Asset
+        references.forEach(ar => {
+            if ((0, ast_1.isAsset)(ar.asset.ref)) {
+                const refAsset = ar.asset.ref;
+                const lang = (0, cli_util_1.getLanguage)(refAsset);
+                if (lang != mainlanguage) {
+                    accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${asset.name} is declared in ${mainlanguage}`, { node: ar });
+                }
+            }
+            // Case Asset Import
+            else if ((0, ast_1.isAssetImport)(ar.asset.ref)) {
+                const refAsset = ar.asset.ref.asset.ref; // Ensure the link is well done
+                const lang = (0, cli_util_1.getLanguage)(refAsset);
+                if (lang != mainlanguage) {
+                    accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${asset.name} is declared in ${mainlanguage}`, { node: ar });
+                }
+            }
+        });
     }
 }
 exports.ImpromptuValidator = ImpromptuValidator;

@@ -8,4 +8,4 @@ prompt functionB(): image
 core = 
 medium(photography),medium(photography),
 no("You are in B"), "gooog"
-language=English
+language=Spanish

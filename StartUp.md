@@ -75,7 +75,7 @@ For further details, visit [this post](https://medium.com/@devnurai/how-to-fix-t
 Alternatively, if you open Visual Studio Code and search the extension file (`impromptu-1.0.0.vsix`), you can right-click on it and select `"Install VSIX Extension"` at the bottom of the list of options.
 
 
-- Lastly, in order to make langium operative, the user needs to do an initial run of Impromptu by its `run` commands:
+- Lastly, to make Langium operative, the user needs to do an initial run of Impromptu by its `run` commands:
 ```
 npm run langium:generate
 npm run build

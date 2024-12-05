@@ -2,11 +2,105 @@
 
 ## Writing the syntax
 
+### AST Tree Scheme
+
+Model
+- *language*
+- *assets* (**Asset**[])
+    - **Composer**
+        - *name*
+        - *pars*(**Input**[])
+            - **Input**
+                - **Parameter**
+                    - *name*
+                    - *description*
+                - **Multimodal**
+                    - *name*
+                    - *format*
+                    - *description*
+                    - *weight*(**Weight**)
+        - *contents*(**Snippet**[])
+    - **ExecutableAsset**
+        - **Prompt**
+            - *name*
+            - *description*
+            - *pars*(**Parameter**[])
+                - **Input**
+                - **Parameter**
+                    - *name*
+                    - *description*
+                - **Multimodal**
+                    -  *name*
+                    - *format*
+                    - *description*
+                    - *weight*(**Weight**)
+            - *output* (**Media**): `'text' | 'image' | 'audio' | 'video' | '3dobject'`
+            - *prefix* (**Prefix**)
+                - *name* = `'prefix'`
+                - *snippets* (**Snippet**[])
+            - *core* (**Core**)
+                - *name* = `'core'`
+                - *snippets* (**Snippet**[])
+            - *suffix* (**Suffix**)
+                - *name* = `'suffix'`
+                - *snippets* (**Snippet**[])
+            - **AssetLanguage**
+                - *language*: \<string> 
+            - **AssetSeparator**
+                - *separator*: \<string>
+
+        - **Chain**
+- *imports* (**ImportedAsset**[]):
+    - **ImportedAsset**
+        -  *asset_name* / *everyone*
+            - *asset_name* (**AssetImport**[])
+                - **AssetImport**
+                    - asset (<u>*Ref <b>Asset</b>*</u>)
+
+            - *everyone* = `'*'`
+            
+        - *library*: QualifiedName
+-------
+**Snippet**
+- *content* (**BaseSinppet**)
+    - **TextLiteral**
+        - *content*
+    - **InputRef**
+        - **ParameterRef**
+            - *param* (<u>*Ref <b>Parameter</b>*</u>)
+        - **MultimodalRef**
+            - *param* (<u>*Ref <b>Multimodal</b>*</u>)
+    - **AssetReuse**
+        - *asset* (<u>*Ref <b>Referenciable</b>*</u>)
+        - *pars* (**ParamInvokation**)
+            - *pars* (**Snippet**[])
+    - **Trait** (*See more info in the [traits' cheat sheet](traits_cheat_sheet.md)*)
+        - **TextTrait**
+            - **LiteraryStyleTrait**
+            - LanguageRegisterTrait
+            - PointOfViewTrait
+        - **ImageTrait**
+            - MediumTrait
+            ...
+            - EffectsTrait
+        - MediumIndependentTrait
+            - RelativeTrait
+            ...
+            - ComparisonTrait
+
+- *weight*(**Weight**)
+    - *relevance* (**Relevance**) = `'min' | 'low' | 'medium' | 'high' | 'max'`
+
+Scheme:
+
+<img src="pictures/impromptu.drawio.png"></img>
+You can se close the scheme in the [pictures/impromptu.drawio.png](pictures/impromptu.drawio.png) file.
+
 ## Writing the logic
 ### Types of errors and their syntax
 
 There are two types of possible errors that it may occurr: validation errors or compilation errors.
-- <b>Validation errors</b>. These errors are related to errors of the impromptu syntaxt in the langium document. Therefore, they are detected before creating the AST.
+- <b>Validation errors</b>. These errors are related to errors of the Impromptu syntax in the Langium document. Therefore, they are detected before creating the AST.
 - <b>Compilation errors</b>. There are another errors that are only detected when the prompt is being generated.
 
 The errors have the following syntax:
@@ -52,19 +146,28 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
 }
 ```
 
-## Imports' Scoping
+## Imports' Scoping (`src/language-server/impromptu-scope.ts`)
 
-Here it is explained how the import scoping was made:
+Here it is explained how the scoping of the imports was made:
 
 In order to archieve a correct scoping of items imported from another file, there are needed three steps:
 
-- **Link the reference of the import with the import itself**. This is done similarly to the parameter reference.
+- **Link the reference of the import with the import itself**. This is done similarly to the parameter reference: you have to declare the map of the name and the object manually, since the doufault scope of the AssetReuse does not see Assets.
 
 - **Reference the import with the original item in another file**. For do this correctly, and only look inside the imported file, one need to manage URIs, and add to the scope the item of those files. This is done using the `vscode\uri` package.
 
-> Between lines 70-78 of `impromptu-scope.ts`,it is used the LangiumDocument object of the file, but it can be probably changed to only use the `vscode\uri` package.
 
-- Compute the exports so that the items can be refeerenciable outside of their own file properly.
+- Compute the exports so that the items can be refeerenciable outside of their own file properly. This is donde by forcing to **create the description of the assets during the scope computation phase**.
+
+#### '*' import implementation
+
+ Since in this case the asset are not refered in the ImportedAsset, **the scope has to be made directely between the AssetReuse and the Asset from the other file**, which imply that the elements we need are different from the previous case:
+
+- Instead of the AsseReuse been linked to the assetImport which is linked to original Asset in the other file, is the AsseReuse which is connected with the original Asset. It is possible since the descriptions of the Asset are loaded in the scope computatrion phase
+- This means that this is part of the AssetReuse Scope, where there are the description to the Inputs (ParameterRef) and Referenciables(other Assets+ImportedAssets)
+-  We do not need extra scope computations, since we make use of the  description created to the simple case.
+
+A similar implementation cab be found in the [file-based scoping example of the Langium Documentation](https://langium.org/docs/recipes/scoping/file-based/).
 
 ## Testing
 

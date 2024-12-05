@@ -193,7 +193,8 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                 "$ref": "#/rules@73"
               },
               "arguments": []
-            }
+            },
+            "cardinality": "?"
           },
           {
             "$type": "Alternatives",
@@ -2667,18 +2668,34 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
       "$type": "ParserRule",
       "name": "Parameters",
       "definition": {
-        "$type": "Alternatives",
+        "$type": "Group",
         "elements": [
+          {
+            "$type": "Keyword",
+            "value": "("
+          },
           {
             "$type": "Group",
             "elements": [
               {
-                "$type": "Keyword",
-                "value": "("
+                "$type": "Assignment",
+                "feature": "pars",
+                "operator": "+=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@56"
+                  },
+                  "arguments": []
+                }
               },
               {
                 "$type": "Group",
                 "elements": [
+                  {
+                    "$type": "Keyword",
+                    "value": ","
+                  },
                   {
                     "$type": "Assignment",
                     "feature": "pars",
@@ -2690,50 +2707,16 @@ const ImpromptuGrammar = () => loadedImpromptuGrammar !== null && loadedImprompt
                       },
                       "arguments": []
                     }
-                  },
-                  {
-                    "$type": "Group",
-                    "elements": [
-                      {
-                        "$type": "Keyword",
-                        "value": ","
-                      },
-                      {
-                        "$type": "Assignment",
-                        "feature": "pars",
-                        "operator": "+=",
-                        "terminal": {
-                          "$type": "RuleCall",
-                          "rule": {
-                            "$ref": "#/rules@56"
-                          },
-                          "arguments": []
-                        }
-                      }
-                    ],
-                    "cardinality": "*"
                   }
                 ],
-                "cardinality": "?"
-              },
-              {
-                "$type": "Keyword",
-                "value": ")"
+                "cardinality": "*"
               }
-            ]
+            ],
+            "cardinality": "?"
           },
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "("
-              },
-              {
-                "$type": "Keyword",
-                "value": ")"
-              }
-            ]
+            "$type": "Keyword",
+            "value": ")"
           }
         ]
       },
