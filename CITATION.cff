@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+title: Impromptu
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Robert
+    family-names: Clarisó Viladrosa
+    email: rclariso@uoc.edu
+    affiliation: Universitat Oberta de Catalunya
+    orcid: 'https://orcid.org/0000-0001-9639-0186'
+  - given-names: Sergio
+    family-names: Morales García
+    email: smoralesg@uoc.edu
+    affiliation: Universitat Oberta de Catalunya
+    orcid: 'https://orcid.org/0000-0002-5921-9440'
+  - given-names: Jorge
+    family-names: Martín Villafruela
+    email: jmartinvill@uoc.edu
+    affiliation: Universitat Oberta de Catalunya
