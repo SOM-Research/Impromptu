@@ -7,6 +7,9 @@ import { join } from 'path';
 import { URI } from 'vscode-uri';
 
 
+const URI_SEPARATOR='/';
+
+
 export class ScopeParamProvider extends DefaultScopeProvider {
     private astNodeDescriptionProvider: AstNodeDescriptionProvider;
     
@@ -83,9 +86,9 @@ export class ScopeParamProvider extends DefaultScopeProvider {
         for (const imp of model.imports) {
             //resolve the file name relatively to the current file
             // Get the absolute path of the file
-            const filePath = join(currentDir, imp.library.split('.').join('/')+'.prm');
+            const filePath = join(currentDir, imp.library.split('.').join(URI_SEPARATOR)+'.prm');
             //create an URI wit the absolute path
-            const uri=URI.from({scheme:'file',path: filePath.split('\\').join('/')}) 
+            const uri=URI.from({scheme:'file',path: filePath.split('\\').join(URI_SEPARATOR)}) 
            
             // Example of uri.toString(): 'file:///c%3A/Users/......../Impromptu/build_files/examples/example.prm')
             uris.add(uri.toString());
@@ -125,9 +128,9 @@ export class ScopeParamProvider extends DefaultScopeProvider {
             if (imp.everyone){
                 //resolve the file name relatively to the current file
                 // Get the absolute path of the file
-                const filePath = join(currentDir, imp.library.split('.').join('/')+'.prm');
+                const filePath = join(currentDir, imp.library.split('.').join(URI_SEPARATOR)+'.prm');
                 //create an URI wit the absolute path
-                const uri=URI.from({scheme:'file',path: filePath.split('\\').join('/')}) 
+                const uri=URI.from({scheme:'file',path: filePath.split('\\').join(URI_SEPARATOR)}) 
                 // Example of uri.toString(): 'file:///c%3A/Users/......../Impromptu/build_files/examples/example.prm')
                 uris.add(uri.toString());
             }
@@ -151,7 +154,7 @@ export class ScopeParamProvider extends DefaultScopeProvider {
 
             const descriptions1 = allAssets.map(p => this.descriptions.createDescription(p, p.name));
             
-            const descriptions2 = model.imports.flatMap(fi => fi.asset_name.map(pi => {
+            const descriptions2 = model.imports.flatMap(fi => fi.set_assets.map(pi => {
 
                 if (pi.asset.ref) {
                     return this.descriptions.createDescription(pi.asset.ref, pi.asset.ref.name);

@@ -1,10 +1,10 @@
 language=English
 
-import * from libraries.tests.import_testA
+import * from libraries.tests.import_testB
 
 
 prompt main(): image
-core=A()
+core=B()
 language=English
 
 prompt NewMain(): image

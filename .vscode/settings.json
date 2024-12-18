@@ -1,3 +1,10 @@
 {
-    "env": {"WORKSPACE": "${workspaceFolder}"},
+    "files.exclude": {
+        "node_modules/": true,
+        "__test__": true,
+        "icons": true,
+        "pictures": true,
+        "**/generate-prompt_base.ts":true
+    }
+
 }

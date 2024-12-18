@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLanguage = exports.get_file_from = exports.get_line_node = exports.get_imported_asset = exports.extractDestinationAndName = exports.extractAstNode = exports.extractDocument = void 0;
+exports.get_all_asset_reuse = exports.get_all_snippets = exports.getLanguage = exports.get_file_from = exports.get_line_node = exports.get_imported_asset = exports.extractDestinationAndName = exports.extractAstNode = exports.extractDocument = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const path_1 = __importDefault(require("path"));
 const vscode_uri_1 = require("vscode-uri");
@@ -58,7 +58,6 @@ function extractAstNode(fileName, services, calls_buffer) {
     return __awaiter(this, void 0, void 0, function* () {
         let libraries = [];
         let import_names = [];
-        // let file = fileName.split('/').pop()?.split('.')[0] as string
         if (calls_buffer == undefined)
             calls_buffer = [];
         let new_calls = [];
@@ -68,7 +67,7 @@ function extractAstNode(fileName, services, calls_buffer) {
             if ((0, ast_1.isModel)(model)) {
                 // get all the imports of the file
                 model.imports.forEach(import_line => {
-                    import_line.asset_name.forEach(asset => {
+                    import_line.set_assets.forEach(asset => {
                         // Checks that it is imported from a different file
                         //if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
                         libraries.push(asset.$container.library);
@@ -194,4 +193,31 @@ function getLanguage(asset) {
     }
 }
 exports.getLanguage = getLanguage;
+function get_all_snippets(asset) {
+    if ((0, ast_1.isPrompt)(asset)) {
+        return asset.core.snippets;
+    }
+    else if ((0, ast_1.isComposer)(asset)) {
+        return asset.contents.snippets;
+    }
+    else {
+        return [];
+    }
+}
+exports.get_all_snippets = get_all_snippets;
+function get_all_asset_reuse(asset) {
+    try {
+        let snippets = get_all_snippets(asset);
+        const base_snippets = [];
+        snippets.forEach(snippet => {
+            base_snippets.push(snippet.content);
+        });
+        const assets = base_snippets.filter(element => { return (0, ast_1.isAssetReuse)(element); });
+        return assets;
+    }
+    catch (e) {
+        throw [];
+    }
+}
+exports.get_all_asset_reuse = get_all_asset_reuse;
 //# sourceMappingURL=cli-util.js.map

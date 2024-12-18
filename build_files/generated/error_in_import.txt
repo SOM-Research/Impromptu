@@ -1,1 +1,7 @@
-Has llegado a C. hola hello
+Positive prompt:
+,Positive prompt:
+,hola,
+,Negative prompt:
+,, You arrive to B,
+,Negative prompt:
+, hello

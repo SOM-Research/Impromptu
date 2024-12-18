@@ -12,16 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseAndValidate = exports.generateAll = exports.testing = exports.generatePromptAction = exports.generateAction = void 0;
+exports.version = exports.parseAndValidate = exports.removeAI = exports.addAI = exports.generateAll = exports.testing = exports.generatePromptAction = exports.generateAction = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const commander_1 = require("commander");
 const module_1 = require("../language-server/generated/module");
 const impromptu_module_1 = require("../language-server/impromptu-module");
 const cli_util_1 = require("./cli-util");
 const generator_1 = require("./generator");
-const generate_prompt_1 = require("./generate-prompt");
+const generate_prompt_1 = require("./gen/generate-prompt");
 const node_1 = require("langium/node");
 const node_fs_1 = require("node:fs");
+const files_management_1 = require("./files_management");
+const gen_folder = 'src/cli/gen'; // TODO: Check where is used
 const generateAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
@@ -68,6 +70,11 @@ const testing = () => __awaiter(void 0, void 0, void 0, function* () {
     //const model = await extractAstNode<Model>(fileName, services);
 });
 exports.testing = testing;
+/**
+ * Generate the files from all the .prm files of a folder
+ * @param fileName
+ * @param opts
+ */
 const generateAll = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
     (0, node_fs_1.readdirSync)(fileName).forEach(file => {
         if (/[^].prm/.test(file)) {
@@ -76,23 +83,69 @@ const generateAll = (fileName, opts) => __awaiter(void 0, void 0, void 0, functi
     });
 });
 exports.generateAll = generateAll;
-const parseAndValidate = (fileName) => __awaiter(void 0, void 0, void 0, function* () {
+/**
+ * Add an additional AI System and create a document to customize its generated prompts
+ * @param llm : LLM to add
+ * @param opts:
+ *      @param alias Name used in the file and files' fuctions i.e. `genPrompt_<alias>`
+ *      @param promptName Name used in the CLI to refereing the LLM. If it is not given is `llm` in lower case
+ */
+const addAI = (llm, opts) => __awaiter(void 0, void 0, void 0, function* () {
+    let fileAlias;
+    if (opts.alias) {
+        fileAlias = opts.alias;
+    }
+    else {
+        fileAlias = `${llm}`;
+    }
+    const file = `generate-prompt_${fileAlias}.ts`;
+    let command;
+    if (!opts.promptName) {
+        command = llm.toLowerCase();
+    }
+    else {
+        command = opts.promptName;
+    }
+    try {
+        (0, files_management_1.addLLM)(llm, file, fileAlias, command);
+    }
+    catch (e) { }
+});
+exports.addAI = addAI;
+/**
+ * Remove the file and the code in `generate-prompt.ts` that specify Impromptu the behavior for a certain LLM
+ * @param llm LLM to delete
+ */
+const removeAI = (llm) => __awaiter(void 0, void 0, void 0, function* () {
+    const generate_prompt = (0, node_fs_1.readFileSync)(`${gen_folder}/generate-prompt.ts`);
+    let content = generate_prompt.toString();
+    (0, files_management_1.removeLLM)(llm, content);
+});
+exports.removeAI = removeAI;
+const parseAndValidate = (alias) => __awaiter(void 0, void 0, void 0, function* () {
     // retrieve the services for our language
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     // extract a document for our program
-    const document = yield (0, cli_util_1.extractDocument)(fileName, services);
+    const document = yield (0, cli_util_1.extractDocument)(alias, services);
     // extract the parse result details
     const parseResult = document.parseResult;
     // verify no lexer, parser, or general diagnostic errors show up
     if (parseResult.lexerErrors.length === 0 &&
         parseResult.parserErrors.length === 0) {
-        console.log(chalk_1.default.green(`Parsed and validated ${fileName} successfully!`));
+        console.log(chalk_1.default.green(`Parsed and validated ${alias} successfully!`));
     }
     else {
-        console.log(chalk_1.default.red(`Failed to parse and validate ${fileName}!`));
+        console.log(chalk_1.default.red(`Failed to parse and validate ${alias}!`));
     }
 });
 exports.parseAndValidate = parseAndValidate;
+/**
+ * Tell the Impromptu's version used
+ */
+const version = () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(process.env.npm_package_version);
+});
+exports.version = version;
 function default_1() {
     const program = new commander_1.Command();
     program
@@ -120,9 +173,20 @@ function default_1() {
         .description('Indicates where a program parses & validates successfully, but produces no output code')
         .action(exports.parseAndValidate);
     program
-        .command('testing')
-        .description('Uses several examples to check that the progem works properly')
-        .action(exports.testing);
+        .command('version')
+        .action(exports.version);
+    program
+        .command('addAI')
+        .argument('<LLM>', `Name used in for refering to the LLM`)
+        .option('-f, --alias <alias>', 'Name of the file where the function will be located.')
+        .option('-pn, --promptName <promptName>', 'Name of the file where declared in the CLI.')
+        .description('Add a new AI System so it can be customize.')
+        .action(exports.addAI);
+    program
+        .command('removeAI')
+        .argument('<LLM>', `Name used in for refering to the LLM`)
+        .description('Remove an AI System so it can be customize.')
+        .action(exports.removeAI);
     program
         .command('genpromptAll')
         .argument('<file>', `source directory (possible file extensions: ${fileExtensions})`)

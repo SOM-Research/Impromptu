@@ -1,0 +1,2 @@
+const v = require("../package.json").version
+console.log(v)

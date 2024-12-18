@@ -1,7 +1,8 @@
 import chalk from 'chalk';
-import * as Ast from '../language-server/generated/ast';
-import { get_file_from, get_line_node } from './cli-util';
+import * as Ast from '../../language-server/generated/ast';
+import { get_file_from, get_line_node } from '../cli-util';
 import { AISystem, extractMedium, genAssetReuse, genImportedAsset } from './generate-prompt';
+import * as df from './generate-prompt_default';
 
 /** 
 *Generate a prompt for each asset (Generate the single requested prompt).
@@ -157,14 +158,18 @@ export function genBaseSnippet_MJ(snippet: Ast.BaseSnippet, variables?:Map<strin
         return genParameterRef(snippet,variables);
     } else if (Ast.isAssetReuse(snippet)) {
         return genAssetReuse(snippet, AISystem.Midjourney, variables)
-    } else if (Ast.isNegativeTrait(snippet)) {
-        return genNegativeTrait_MJ(snippet,variables);
-    } else if (Ast.isCombinationTrait(snippet)) {
-        return genCombinationTrait_MJ(snippet, variables);
-    } else if (Ast.isAudienceTrait(snippet)) {
-        return genAudienceTrait_MJ(snippet);
-    } else if (Ast.isMediumTrait(snippet)) {
-        return genMediumTrait_MJ(snippet);
+    } else if (Ast.isTrait(snippet)){ 
+        if (Ast.isNegativeTrait(snippet)) {
+            return genNegativeTrait_MJ(snippet,variables);
+        } else if (Ast.isCombinationTrait(snippet)) {
+            return genCombinationTrait_MJ(snippet, variables);
+        } else if (Ast.isAudienceTrait(snippet)) {
+            return genAudienceTrait_MJ(snippet);
+        } else if (Ast.isMediumTrait(snippet)) {
+            return genMediumTrait_MJ(snippet);
+        }else{
+            return df.genTraits_default(snippet,variables,genSnippet_MJ)
+        }
     }
    return "";
 }
@@ -177,7 +182,7 @@ export function genBaseSnippet_MJ(snippet: Ast.BaseSnippet, variables?:Map<strin
  * @returns prompt
  */
 function genNegativeTrait_MJ(snippet: Ast.NegativeTrait,variables?:Map<string,string>): string {
-    return "--no " + genSnippet_MJ(snippet.content,variables).toString(); //Why Snippet_SD
+    return "--no " + genSnippet_MJ(snippet.content,variables).toString();
 }
 
 /**
@@ -213,14 +218,11 @@ function genCombinationTrait_MJ(snippet: Ast.CombinationTrait, variables?:Map<st
 }
 
 export function genAudienceTrait_MJ(snippet: Ast.AudienceTrait): string {
-    const content  = snippet.content;
-    const text     = genSnippet_MJ(content);
-    return "for " + text;
+    return df.genAudienceTrait_default(snippet,genSnippet_MJ);
 }
 
 function genMediumTrait_MJ(snippet: Ast.MediumTrait): string {
-    const text  = snippet.value;
-    return text;
+    return df.genMediumTrait_default(snippet)
 }
 
 function genParameterRef(snippet: Ast.ParameterRef,variables?: Map<string,string>){

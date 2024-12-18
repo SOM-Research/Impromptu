@@ -7,7 +7,7 @@ import { NodeFileSystem } from 'langium/node';
 import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionContext } from 'vscode';
-import { generatePromptCode, AISystem, getPromptsList, generatePromptTraitValidators } from './cli/generate-prompt';
+import { generatePromptCode, AISystem, getPromptsList, generatePromptTraitValidators } from './cli/gen/generate-prompt.js';
 
 export interface Generator {
     // Load the Abstract Syntax Tree of the .prm active file

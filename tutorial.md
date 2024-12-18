@@ -13,7 +13,8 @@ There are different types of assets. Each one have a different syntax:
     separator=<string>              <- optional
     ```
     - **Prompt** 
-    ```prompt <name>(<parameters>): <media>
+    ```
+    prompt <name>(<parameters>): <media>
     prefix=<snippets>               <- optional
     core=<snippets>
     suffix=<snippets>               <- optional

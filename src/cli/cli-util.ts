@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import path from 'path';
 import { AstNode, LangiumDocument, LangiumServices } from 'langium';
 import { URI } from 'vscode-uri';
-import { Asset, AssetImport, ImportedAsset, isChain, isImportedAsset, isModel, Model } from '../language-server/generated/ast';
+import { Asset, AssetImport, AssetReuse, BaseSnippet, ImportedAsset, isAssetReuse, isChain, isComposer, isImportedAsset, isModel, isPrompt, Model, Snippet } from '../language-server/generated/ast';
 import globby from 'globby';
 
 
@@ -49,7 +49,6 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
     let libraries:string[]=[]
     let import_names: string[]=[]
 
-    // let file = fileName.split('/').pop()?.split('.')[0] as string
     if (calls_buffer==undefined)  calls_buffer=[];
     let new_calls:AssetImport[]=[]
 
@@ -60,7 +59,7 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
         if (isModel(model)){
             // get all the imports of the file
             model.imports.forEach( import_line => {
-                import_line.asset_name.forEach( asset =>{
+                import_line.set_assets.forEach( asset =>{
                     // Checks that it is imported from a different file
                     //if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
                         libraries.push((asset.$container as ImportedAsset).library);
@@ -190,4 +189,33 @@ export function getLanguage(asset:Asset){
     }else{ // By default, language is English
         return "English"
     }
+}
+
+
+export function get_all_snippets(asset:Asset):Snippet[]{
+    if(isPrompt(asset)){
+        return asset.core.snippets
+    }
+    else if(isComposer(asset)){
+        return asset.contents.snippets
+    }else{
+        return []
+    }
+}
+
+export function get_all_asset_reuse(asset:Asset):AssetReuse[]{
+    try{
+        let snippets = get_all_snippets(asset);
+        const base_snippets:BaseSnippet[]=[];
+        snippets.forEach(snippet=>{
+            base_snippets.push(snippet.content);
+        });
+
+        const assets = base_snippets.filter(element => {return isAssetReuse(element)}) as AssetReuse[];
+        return assets
+    }
+    catch(e){
+        throw [];
+    }
+
 }

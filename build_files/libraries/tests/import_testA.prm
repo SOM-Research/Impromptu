@@ -4,7 +4,6 @@ import B,notRead from libraries.tests.import_testB
 
 prompt main():text
 core=A(),B()
-language=English
 
 prompt A(): text
 core="hola"

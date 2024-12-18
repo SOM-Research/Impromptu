@@ -1,7 +1,8 @@
 import chalk from 'chalk';
-import * as Ast from '../language-server/generated/ast';
-import { get_file_from, get_line_node } from './cli-util';
+import * as Ast from '../../language-server/generated/ast';
+import { get_file_from, get_line_node } from '../cli-util';
 import { AISystem, extractMedium, genAssetReuse, genImportedAsset } from './generate-prompt';
+import * as df from './generate-prompt_default';
 
 /**
  * Generate a prompt for each asset (Generate the single requested prompt).
@@ -113,7 +114,7 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
         let negative_prompt = negativeText.filter(function(e){return e}).join(separator);
         // Build the final prompt
         const positive = ["Positive prompt:\n"].concat(positive_prompt);
-        const negative = ["Negative prompt:\n"].concat(negative_prompt);
+        const negative = ["\nNegative prompt:\n"].concat(negative_prompt);
         return positive.concat(['\n'], negative);
     } else if (Ast.isComposer(asset)) {
         return asset.contents.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];;
@@ -169,21 +170,26 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
         return genParameterRef(snippet, variables)
     } else if (Ast.isAssetReuse(snippet)) {
         return genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
-    } else if (Ast.isNegativeTrait(snippet)) {
-        return genNegativeTrait(snippet)
-    } else if (Ast.isCombinationTrait(snippet)) {
-        return genCombinationTrait_SD(snippet,variables);
-    } else if (Ast.isAudienceTrait(snippet)) {
-        return genAudienceTrait_SD(snippet);
-    } else if (Ast.isMediumTrait(snippet)) {
-        return genMediumTrait_SD(snippet);
-    } else if (Ast.isCameraAngleTrait(snippet)) {
-        return genCameraAngleTrait_SD(snippet);
-    } else if (Ast.isProximityTrait(snippet)) {
-        return genProximityTrait_SD(snippet);
-    } else if (Ast.isLightingTrait(snippet)) {
-        return genLightingTrait_SD(snippet);
-    } 
+    } else if (Ast.isTrait(snippet)){ 
+        if (Ast.isNegativeTrait(snippet)) {
+            return genNegativeTrait(snippet)
+        } else if (Ast.isCombinationTrait(snippet)) {
+            return genCombinationTrait_SD(snippet,variables);
+        } else if (Ast.isMediumTrait(snippet)) {
+            return genMediumTrait_SD(snippet);
+        } else if (Ast.isCameraAngleTrait(snippet)) {
+            return genCameraAngleTrait_SD(snippet);
+        } else if (Ast.isProximityTrait(snippet)) {
+            return genProximityTrait_SD(snippet);
+        } else if (Ast.isLightingTrait(snippet)) {
+            return genLightingTrait_SD(snippet); 
+        }else{
+            return df.genTraits_default(snippet,variables,genSnippet_SD)
+        }
+    }
+    
+    
+    
    return "";
 }
 
@@ -200,24 +206,16 @@ function genCombinationTrait_SD(snippet: Ast.CombinationTrait,variables?:Map<str
     //combineStrings(texts, ", ", " and ");
 }
 
-function genAudienceTrait_SD(snippet: Ast.AudienceTrait): string  {
-    const content  = snippet.content;
-    const text     = genSnippet_SD(content);
-    return "for " + text;
-}
-
 function genCameraAngleTrait_SD(snippet: Ast.CameraAngleTrait): string  {
-    const text = snippet.value
-    return "from a " + text;
+    return df.genCameraAngleTrait_default(snippet)
 }
 
 function genProximityTrait_SD(snippet: Ast.ProximityTrait): string  {
-    const text = snippet.value
-    return text +" picture";
+    return df.genProximityTrait_default(snippet);
 }
+
 function genLightingTrait_SD(snippet: Ast.LightingTrait): string  {
-    const text = snippet.value
-    return text +" lighting";
+    return df.genLightingTrait_default(snippet)
 }
 
 function genMediumTrait_SD(snippet: Ast.MediumTrait): string {

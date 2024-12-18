@@ -73,6 +73,7 @@ prompt match_format():  text
 
 prompt search_errors(@text_topic ): text 
     core= "The questions should be about searching for grammar and spelling errors in a text about", @text_topic
+    separator = " "
     language=English
     
 

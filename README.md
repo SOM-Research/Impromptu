@@ -269,7 +269,10 @@ for children::2, --no violent, --no scary
 
 In case that parameters but no prompt were declared in the command, the last asset of the file will be used. That means that in the previous example we may have omitted `-p Mixture` and we would have obtained the same result. 
 
+### Adding extra LLMs
 
+Impromptu allows the user to customize the behavior of the generator making prompts to a specific LLM.
+The CLI command `addAI <name> (-f <alias>) (-pn promptName)`. This command would create a file `generate-prompt_<alias>.ts` that would dictate the behavior of the traits and the different assets. **This is internal coding, and thus, it is done in <i>typescript</i>**. The created file copies how a default LLM behaves, so one only needs to modify the functions that acts differentely.
 
 ## VSCode Extension
 ### Code generation for prompt execution and output validation

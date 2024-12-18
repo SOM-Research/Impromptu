@@ -6,6 +6,8 @@ const ast_func = require('../out/language-server/generated/ast')
 const fs = require('fs')
 const node = require('langium/node')
 
+const package = require('../package.json')
+
 var express = require('express'); 
 var bodyParser = require('body-parser'); 
 const chalk = require('chalk')
@@ -15,6 +17,11 @@ var app = express();
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: false })); 
 
+
+// call it using http://127.0.0.1:3000/version. 
+app.post("/generateprompt", async (req, res) => { 
+	res= package.version
+});
 
 // call it using http://127.0.0.1:3000/generateprompt. 
 app.post("/generateprompt", async (req, res) => { 

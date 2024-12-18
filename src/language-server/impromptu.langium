@@ -39,7 +39,7 @@ Prompt:
     ;
 
 ImportedAsset:
-    'import' (asset_name+=AssetImport (',' asset_name+=AssetImport)*|everyone='*') 'from' library=QualifiedName
+    'import' (set_assets+=AssetImport (',' set_assets+=AssetImport)*|everyone='*') 'from' library=QualifiedName
     ;
 
 AssetImport: 
@@ -120,7 +120,7 @@ MediumIndependentTrait:
     RelativeTrait | AudienceTrait | IncludesTrait | SimilarToTrait | ByAuthorTrait | TargetSizeTrait | ComparisonTrait ;
 
 RelativeTrait:
-    NegativeTrait | AlternativeTrait | CombinationTrait;
+    NegativeTrait | CombinationTrait;
 
 NegativeTrait:
     'no' '(' content=Snippet ')'
@@ -128,10 +128,6 @@ NegativeTrait:
 
 ComparisonTrait:
     'compare' '(' content1=Snippet ',' content2=Snippet ',' comparison=Snippet ')';
-
-AlternativeTrait:
-    'alternative' '(' contents+=Snippet (',' content+=Snippet)+ ')'
-    ByReinforcedTraitOutputTesting;
 
 CombinationTrait:
     'between' '(' contents+=Snippet (',' contents+=Snippet)+ ')'
@@ -146,7 +142,7 @@ IncludesTrait:
     ByReinforcedTraitOutputTesting;
 
 SimilarToTrait:
-    'like' '(' contents+=Snippet (',' contents+=Snippet)* ')'
+    'like' '(' content =Snippet ')'
     ByReinforcedTraitOutputTesting;
 
 ByAuthorTrait:

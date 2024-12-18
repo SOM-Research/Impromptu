@@ -40,7 +40,7 @@ const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const node_1 = require("vscode-languageclient/node");
 const impromptu_code_generator_1 = require("./impromptu-code-generator");
-const generate_prompt_1 = require("./cli/generate-prompt");
+const generate_prompt_1 = require("./cli/gen/generate-prompt");
 const fs_1 = __importDefault(require("fs"));
 let client;
 let previewPanel;

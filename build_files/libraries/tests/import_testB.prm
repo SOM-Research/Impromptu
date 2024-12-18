@@ -5,7 +5,6 @@ import A from libraries.tests.import_testA
 
 prompt B(): text
 core=A(),"You arrive to B"
-language=English
 
 prompt notRead():text
 core="Shouldn't be here"

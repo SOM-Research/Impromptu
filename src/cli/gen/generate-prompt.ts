@@ -3,22 +3,25 @@ import chalk from 'chalk';
 //import AbstractFormatter from 'langium';
 //import { CompositeGeneratorNode, NL, toString } from 'langium';
 import path from 'path';
-import * as Ast from '../language-server/generated/ast';
+import * as Ast from '../../language-server/generated/ast';
 /* import  { Model, Asset, Snippet, CombinationTrait, NegativeTrait, AudienceTrait, MediumTrait,
          isPrompt, isChain, 
          isComposer, isTextLiteral, isParameterRef, isAssetReuse, isNegativeTrait, 
          isCombinationTrait, isAudienceTrait, isMediumTrait } from '../language-server/generated/ast';
          */
-import { extractDestinationAndName, get_file_from, get_imported_asset, get_line_node } from './cli-util';
+import { extractDestinationAndName, get_file_from, get_imported_asset, get_line_node } from '../cli-util';
 import { genAsset_MJ, generatePrompt_MJ } from './generate-prompt_MJ';
 import { genAsset_SD, generatePrompt_SD } from './generate-prompt_SD';
 import { genAsset_ChatGPT, genBaseSnippet_ChatGPT, generatePrompt_ChatGPT } from './generate-prompt_ChatGPT';
+import { genAsset_default, generatePrompt_default } from './generate-prompt_default';
 
 export const AISystem = {
 	ChatGPT: "chatgpt",
 	StableDiffusion: "stable-diffusion",
     Midjourney: "midjourney"
 }
+
+
 
 /** 
 * Generate a prompt for each asset (Generate the single requested prompt).
@@ -44,14 +47,12 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
         case AISystem.ChatGPT: {
             result = generatePrompt_ChatGPT(model, prompt, variables);
             break;
-        }
-        case undefined: {
-            console.log(chalk.yellow(`No target provided. Using 'chatgpt' by default`));
-            result = generatePrompt_ChatGPT(model, prompt, variables); 
+        }case undefined: {
+            result = generatePrompt_default(model, prompt, variables); 
             break;
         }
         default: {
-            console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+            console.error(chalk.red(`Wrong parameter: AI system "${aiSystem}" not supported!`));
         }
     }
     return result;
@@ -225,17 +226,29 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
                     throw new Error();
                 }
                 break;
+            }case undefined: {
+                try{
+                    result = genAsset_default(imported_asset,new_map);
+                }catch(e){
+                    let file = get_file_from(asset);
+                    let line = get_line_node(asset);
+                    console.error(chalk.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
+                    throw new Error();
+                }
+                break;
             }
             default: {
-                // No case should get here
-                console.error(chalk.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+                let file = get_file_from(asset);
+                let line = get_line_node(asset);
+                console.error(chalk.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                 throw new Error();
             }
+
         }
         return result;
     }
     else {
-        // Tgheorically alrerady checked
+        // Theorically alrerady checked
         let line = get_line_node(asset);
         let file = get_file_from(asset);
         console.error(chalk.red(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
@@ -383,10 +396,9 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                 case AISystem.ChatGPT: {
                     result = genAsset_ChatGPT(snippetRef,map).toString()
                     break;
-                }
-                case undefined: {
+                }case undefined: {
                     console.error(chalk.yellow(`No target provided. Using 'chatgpt' by default`));
-                    result = genAsset_ChatGPT(snippetRef,map).toString()
+                    result = genAsset_default(snippetRef,map).toString()
                     break;
                 }
                 default: {

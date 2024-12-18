@@ -42,6 +42,8 @@ const cli_util_1 = require("./cli-util");
 const generate_prompt_MJ_1 = require("./generate-prompt_MJ");
 const generate_prompt_SD_1 = require("./generate-prompt_SD");
 const generate_prompt_ChatGPT_1 = require("./generate-prompt_ChatGPT");
+;
+const generate_prompt_default_1 = require("./generate-prompt_default");
 exports.AISystem = {
     ChatGPT: "chatgpt",
     StableDiffusion: "stable-diffusion",
@@ -73,8 +75,7 @@ function generatePromptCode(model, aiSystem, prompt, variables) {
             break;
         }
         case undefined: {
-            console.log(chalk_1.default.yellow(`No target provided. Using 'chatgpt' by default`));
-            result = (0, generate_prompt_ChatGPT_1.generatePrompt_ChatGPT)(model, prompt, variables);
+            result = (0, generate_prompt_default_1.generatePrompt_default)(model, prompt, variables);
             break;
         }
         default: {
@@ -240,16 +241,29 @@ function genImportedAsset(asset, aiSystem, variables) {
                 }
                 break;
             }
+            case undefined: {
+                try {
+                    result = (0, generate_prompt_default_1.genAsset_default)(imported_asset, new_map);
+                }
+                catch (e) {
+                    let file = (0, cli_util_1.get_file_from)(asset);
+                    let line = (0, cli_util_1.get_line_node)(asset);
+                    console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
+                    throw new Error();
+                }
+                break;
+            }
             default: {
-                // No case should get here
-                console.error(chalk_1.default.red(`Wrong parameter: AI system ${aiSystem} not supported!`));
+                let file = (0, cli_util_1.get_file_from)(asset);
+                let line = (0, cli_util_1.get_line_node)(asset);
+                console.error(chalk_1.default.red(`[${file}: ${line}] Error: Sudden error in imported function ${asset.name}.`));
                 throw new Error();
             }
         }
         return result;
     }
     else {
-        // Tgheorically alrerady checked
+        // Theorically alrerady checked
         let line = (0, cli_util_1.get_line_node)(asset);
         let file = (0, cli_util_1.get_file_from)(asset);
         console.error(chalk_1.default.red(`[${file}: ${line}] Error: Import error. Does not exist an asset with the name "${asset.name}" in the library.`));
@@ -398,7 +412,7 @@ function genAssetReuse(assetReuse, aiSystem, previousMap) {
             }
             case undefined: {
                 console.error(chalk_1.default.yellow(`No target provided. Using 'chatgpt' by default`));
-                result = (0, generate_prompt_ChatGPT_1.genAsset_ChatGPT)(snippetRef, map).toString();
+                result = (0, generate_prompt_default_1.genAsset_default)(snippetRef, map).toString();
                 break;
             }
             default: {

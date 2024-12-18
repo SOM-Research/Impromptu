@@ -164,7 +164,7 @@ export function isReferenciable(item: unknown): item is Referenciable {
     return reflection.isInstance(item, Referenciable);
 }
 
-export type RelativeTrait = AlternativeTrait | CombinationTrait | NegativeTrait;
+export type RelativeTrait = CombinationTrait | NegativeTrait;
 
 export const RelativeTrait = 'RelativeTrait';
 
@@ -204,20 +204,6 @@ export type Unit = 'character' | 'frame' | 'hour' | 'line' | 'minute' | 'page' |
 
 export function isUnit(item: unknown): item is Unit {
     return item === 'character' || item === 'word' || item === 'sentence' || item === 'line' || item === 'paragraph' || item === 'page' || item === 'second' || item === 'minute' || item === 'hour' || item === 'frame' || item === 'pixel' || item === 'point';
-}
-
-export interface AlternativeTrait extends AstNode {
-    readonly $container: Snippet;
-    readonly $type: 'AlternativeTrait';
-    content: Array<Snippet>
-    contents: Array<Snippet>
-    validator?: '[reinforced]'
-}
-
-export const AlternativeTrait = 'AlternativeTrait';
-
-export function isAlternativeTrait(item: unknown): item is AlternativeTrait {
-    return reflection.isInstance(item, AlternativeTrait);
 }
 
 export interface AssetImport extends AstNode {
@@ -435,9 +421,9 @@ export function isHyperParameters(item: unknown): item is HyperParameters {
 export interface ImportedAsset extends AstNode {
     readonly $container: Model;
     readonly $type: 'ImportedAsset';
-    asset_name: Array<AssetImport>
     everyone?: '*'
     library: QualifiedName
+    set_assets: Array<AssetImport>
 }
 
 export const ImportedAsset = 'ImportedAsset';
@@ -694,7 +680,7 @@ export function isProximityTrait(item: unknown): item is ProximityTrait {
 export interface SimilarToTrait extends AstNode {
     readonly $container: Snippet;
     readonly $type: 'SimilarToTrait';
-    contents: Array<Snippet>
+    content: Snippet
     validator?: '[reinforced]'
 }
 
@@ -705,7 +691,7 @@ export function isSimilarToTrait(item: unknown): item is SimilarToTrait {
 }
 
 export interface Snippet extends AstNode {
-    readonly $container: AlternativeTrait | AudienceTrait | ByAuthorTrait | CombinationTrait | ComparisonTrait | Contents | Core | IncludesTrait | NegativeTrait | ParamInvokation | Prefix | SimilarToTrait | Suffix;
+    readonly $container: AudienceTrait | ByAuthorTrait | CombinationTrait | ComparisonTrait | Contents | Core | IncludesTrait | NegativeTrait | ParamInvokation | Prefix | SimilarToTrait | Suffix;
     readonly $type: 'Snippet';
     content: BaseSnippet
     weight?: Weight
@@ -783,7 +769,6 @@ export function isByExpressionOutputTesting(item: unknown): item is ByExpression
 }
 
 export type ImpromptuAstType = {
-    AlternativeTrait: AlternativeTrait
     Asset: Asset
     AssetImport: AssetImport
     AssetReuse: AssetReuse
@@ -842,16 +827,11 @@ export type ImpromptuAstType = {
 export class ImpromptuAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['AlternativeTrait', 'Asset', 'AssetImport', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'ComparisonTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'ImportedAsset', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'Referenciable', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
+        return ['Asset', 'AssetImport', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'ComparisonTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'ImportedAsset', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'Referenciable', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
         switch (subtype) {
-            case AlternativeTrait:
-            case CombinationTrait:
-            case NegativeTrait: {
-                return this.isSubtype(RelativeTrait, supertype);
-            }
             case Asset:
             case AssetImport: {
                 return this.isSubtype(Referenciable, supertype);
@@ -885,6 +865,10 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
             case Chain:
             case Prompt: {
                 return this.isSubtype(ExecutableAsset, supertype);
+            }
+            case CombinationTrait:
+            case NegativeTrait: {
+                return this.isSubtype(RelativeTrait, supertype);
             }
             case Composer:
             case ExecutableAsset: {
@@ -951,15 +935,6 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
 
     getTypeMetaData(type: string): TypeMetaData {
         switch (type) {
-            case 'AlternativeTrait': {
-                return {
-                    name: 'AlternativeTrait',
-                    mandatory: [
-                        { name: 'content', type: 'array' },
-                        { name: 'contents', type: 'array' }
-                    ]
-                };
-            }
             case 'CombinationTrait': {
                 return {
                     name: 'CombinationTrait',
@@ -1004,7 +979,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
                 return {
                     name: 'ImportedAsset',
                     mandatory: [
-                        { name: 'asset_name', type: 'array' }
+                        { name: 'set_assets', type: 'array' }
                     ]
                 };
             }
@@ -1047,14 +1022,6 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
                     name: 'Prefix',
                     mandatory: [
                         { name: 'snippets', type: 'array' }
-                    ]
-                };
-            }
-            case 'SimilarToTrait': {
-                return {
-                    name: 'SimilarToTrait',
-                    mandatory: [
-                        { name: 'contents', type: 'array' }
                     ]
                 };
             }

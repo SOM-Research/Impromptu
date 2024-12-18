@@ -1,8 +1,9 @@
-import { ValidationAcceptor, ValidationChecks } from 'langium';
+import { getContainerOfType, ValidationAcceptor, ValidationChecks } from 'langium';
 import { ImpromptuAstType, Multimodal, Model, Parameters, Prompt, isPrompt, isByExpressionOutputTesting, AssetReuse, isChain, isImportedAsset, ImportedAsset, isAssetReuse, isComposer, Asset, Snippet, CombinationTrait, Language, isAsset, isAssetImport, AssetImport, Composer} from './generated/ast';
 import type { ImpromptuServices } from './impromptu-module';
 import fs from 'fs';
-import { get_imported_asset, getLanguage } from '../cli/cli-util';
+import { get_all_asset_reuse, get_imported_asset, getLanguage } from '../cli/cli-util';
+
 
 /**
  * Register custom validation checks.
@@ -135,7 +136,7 @@ export class ImpromptuValidator {
         });
         // It also has to consider the imported assets
         model.imports.forEach(import_line => {
-            import_line.asset_name.forEach(a =>{
+            import_line.set_assets.forEach(a =>{
                 if (a.asset.ref){
                     let duplicate = reported.find(element => element.name==a.asset.ref?.name)
                     if (duplicate) {
@@ -234,6 +235,7 @@ export class ImpromptuValidator {
                 accept('error',`Error in the imported asset`,  {node: assetReuse})
             }
         }
+        asset_reuse_check_language(assetReuse,assetReuse,accept)
     }
 
     checkUniqueParams(parset: Parameters, accept: ValidationAcceptor): void {
@@ -280,7 +282,7 @@ export class ImpromptuValidator {
         else{  
             // II - The asset exists in the imported file
 
-            imported_asset.asset_name.forEach(a =>{
+            imported_asset.set_assets.forEach(a =>{
                 if(a.asset.ref?.name== undefined){
                     accept('error',`Does not exist an asset in ${imported_asset.library} with such name.`,{node:a})
                 }
@@ -426,7 +428,7 @@ function asset_reuse_language_validation(references:AssetReuse[], mainAsset:Asse
             const refAsset = ar.asset.ref
             const lang = getLanguage(refAsset)
             if (lang != mainlanguage){
-                accept('warning',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
+                accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
             }
         }
     // Case Asset Import
@@ -434,8 +436,95 @@ function asset_reuse_language_validation(references:AssetReuse[], mainAsset:Asse
             const refAsset = ar.asset.ref.asset.ref as Asset // Ensure the link is well done
             const lang = getLanguage(refAsset)
             if (lang != mainlanguage){
-                accept('warning',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
+                accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
             }
         }
     })
 }
+
+/**
+ * Validates that the references from a set of BaseSinppet work with the same language than the asset where they are located
+ * @param references Set of BaseSinppet - AssetReuse
+ * @param mainAsset Asset where the snippets are in
+ * @param accept Validator
+ */
+function asset_reuse_check_language(reference:AssetReuse, ogAsset:AssetReuse, accept:ValidationAcceptor){
+    const mainAsset = getContainerOfType(reference, isAsset)
+    if (mainAsset){
+        try{
+            const mainlanguage = getLanguage(mainAsset)
+            
+            // Case Asset
+            if (isAsset(reference.asset.ref)){
+                const refAsset = reference.asset.ref
+                const lang = getLanguage(refAsset)
+                if (lang != mainlanguage){
+                    accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ogAsset});
+                }
+                const assets = get_all_asset_reuse(refAsset)
+                if (assets)
+                assets.forEach(element =>{
+                    if (element) 
+                        asset_reuse_check_language(element, ogAsset, accept)
+                    }
+                )
+                
+            }
+            // Case Asset Import
+            else if (isAssetImport(reference.asset.ref)){
+                const refAsset = reference.asset.ref.asset.ref as Asset // Ensure the link is well done
+                const lang = getLanguage(refAsset)
+                if (lang != mainlanguage){
+                    accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ogAsset});
+                }
+                const assets = get_all_asset_reuse(refAsset)
+                if (assets)
+                assets.forEach(element =>{
+                    if (element) 
+                        asset_reuse_check_language(element, ogAsset, accept)
+                    }
+                )
+            }
+        }catch(e){
+            // console.log(chalk.yellow(" Maximum call stack size exceeded. Try deleting some .prm files."))
+        }
+    }
+}
+
+
+/**
+ * Validates that the references from a set of BaseSinppet work with the same language than the asset where they are located
+ * @param references Set of BaseSinppet - AssetReuse
+ * @param mainAsset Asset where the snippets are in
+ * @param accept Validator
+ */
+/*
+function check_language(reference:AssetReuse):string{
+    const mainAsset = getContainerOfType(reference, isAsset)
+    if (mainAsset){
+        const mainlanguage = getLanguage(mainAsset)
+        
+        // Case Asset
+        if (isAsset(reference.asset.ref)){
+            const refAsset = reference.asset.ref
+            const lang = getLanguage(refAsset)
+            if (lang != mainlanguage){
+                return `The Asset "${refAsset.name}" is supposed to be used in a ${lang} prompt, but "${mainAsset.name}" is declared in ${mainlanguage}`
+            }
+            return check_language(reference)
+        }
+        // Case Asset Import
+        else if (isAssetImport(reference.asset.ref)){
+            const refAsset = reference.asset.ref.asset.ref as Asset // Ensure the link is well done
+            const lang = getLanguage(refAsset)
+            if (lang != mainlanguage){
+                return `The Asset "${refAsset.name}" is supposed to be used in a ${lang} prompt, but "${mainAsset.name}" is declared in ${mainlanguage}`
+            
+            }
+            return check_language(reference)
+        }
+    }
+    return ''
+}
+
+*/

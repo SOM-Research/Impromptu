@@ -1,7 +1,8 @@
 import chalk from 'chalk';
-import * as Ast from '../language-server/generated/ast';
-import { get_file_from, get_line_node } from './cli-util';
+import * as Ast from '../../language-server/generated/ast';
+import { get_file_from, get_line_node } from '../cli-util';
 import { AISystem, genAssetReuse, genImportedAsset } from './generate-prompt';
+import * as df from './generate-prompt_default';
 
 /** Generate a prompt for each asset (Generate the single requested prompt). 
  *
@@ -138,29 +139,30 @@ export function genSnippet_ChatGPT(snippet: Ast.Snippet, variables?: Map <string
 export function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet, variables?: Map<string,string>): string {
     if (Ast.isTextLiteral(snippet)) {
         return genTextLiteral(snippet);
-    } else if (Ast.isLanguageRegisterTrait(snippet)) {
-        return genLanguageRegister(snippet);
-    } else if (Ast.isLiteraryStyleTrait(snippet)) {
-        return genLiteraryStyle(snippet);
-    } else if (Ast.isPointOfViewTrait(snippet)) {
-        return genPoinOfView(snippet);
-    }else if (Ast.isParameterRef(snippet)) {
+        }else if (Ast.isParameterRef(snippet)) {
         return genParameterRef(snippet,variables);
     }else if (Ast.isAssetReuse(snippet)) {
         return genAssetReuse(snippet, AISystem.ChatGPT, variables)
-    }else if (Ast.isNegativeTrait(snippet)) {
-        return genNegativeTait(snippet,variables);
-    }else if (Ast.isComparisonTrait(snippet)) {
-        return genComparisonTrait(snippet, variables);
-    }
-    // } else if (Ast.isCombinationTrait(snippet)) {
-    //     return "";
-    else if (Ast.isAudienceTrait(snippet)) {
-        return genAudienceTrait(snippet, variables);
-    }
-    // } else if (Ast.isMediumTrait(snippet)) {
-    //     return "";
-    // }
+    } else if (Ast.isTrait(snippet)){
+        if (Ast.isLanguageRegisterTrait(snippet)) {
+            return genLanguageRegister(snippet);
+        } else if (Ast.isLiteraryStyleTrait(snippet)) {
+            return genLiteraryStyle(snippet);
+        } else if (Ast.isPointOfViewTrait(snippet)) {
+            return genPoinOfView(snippet);
+        
+        }else if (Ast.isNegativeTrait(snippet)) {
+            return genNegativeTait(snippet,variables);
+        }else if (Ast.isComparisonTrait(snippet)) {
+            return genComparisonTrait(snippet, variables);
+        }
+        else if (Ast.isAudienceTrait(snippet)) {
+            return genAudienceTrait(snippet, variables);
+        }
+        else{
+            df.genTraits_default(snippet)
+        }
+    } 
     else{
         let file = get_file_from(snippet);
         let line = get_line_node(snippet);
@@ -173,15 +175,15 @@ function genTextLiteral(snippet:Ast.TextLiteral){
 }
 
 function genLanguageRegister(snippet:Ast.LanguageRegisterTrait){
-    return "The answer is written using a " + snippet.value + " register";
+    return df.genLanguageRegister_default(snippet);
 }
 
 function genLiteraryStyle(snippet:Ast.LiteraryStyleTrait){
-    return "The answer is written as a " + snippet.value;
+    return df.genLiteraryStyle_default(snippet);
 }
 
 function genPoinOfView(snippet:Ast.PointOfViewTrait){
-    return "The answer is written in " + snippet.value;
+    return df.genPoinOfView_default(snippet);
 }
 
 function genParameterRef(snippet: Ast.ParameterRef,variables?: Map<string,string>){

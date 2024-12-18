@@ -30,7 +30,7 @@ const node_1 = require("langium/node");
 // To retrieve the template files
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
-const generate_prompt_1 = require("./cli/generate-prompt");
+const generate_prompt_js_1 = require("./cli/gen/generate-prompt.js");
 /**
 * Python code generator service main class
 */
@@ -43,10 +43,10 @@ class CodeGenerator {
         // preload Python templates for invoking OpenAI and Stable Diffusion into a dictionary
         var fullFilePath = context.asAbsolutePath(path.join('resources', 'openai-chatgpt-template.py'));
         var template = fs.readFileSync(fullFilePath, "utf8");
-        this.templates.set(generate_prompt_1.AISystem.ChatGPT, template); // Add ChatGPT template
+        this.templates.set(generate_prompt_js_1.AISystem.ChatGPT, template); // Add ChatGPT template
         fullFilePath = context.asAbsolutePath(path.join('resources', 'stable-diffusion-template.py'));
         template = fs.readFileSync(fullFilePath, "utf8");
-        this.templates.set(generate_prompt_1.AISystem.StableDiffusion, template);
+        this.templates.set(generate_prompt_js_1.AISystem.StableDiffusion, template);
         fullFilePath = context.asAbsolutePath(path.join('resources', 'prompt-service-template.py'));
         template = fs.readFileSync(fullFilePath, "utf8");
         this.templates.set(this.GENERIC_PROMPT_SERVICE, template);
@@ -59,7 +59,7 @@ class CodeGenerator {
      */
     getPromptsList(model) {
         const astNode = this.parser.parse(model).value;
-        return ((0, ast_js_1.isModel)(astNode) ? (0, generate_prompt_1.getPromptsList)(astNode) : undefined);
+        return ((0, ast_js_1.isModel)(astNode) ? (0, generate_prompt_js_1.getPromptsList)(astNode) : undefined);
     }
     /**
      * Get the python prompt that generates the code of a certain asset (located in a certain file) for a certain AI system
@@ -87,9 +87,9 @@ class CodeGenerator {
         const prompt = this.getPrompt(model, promptName);
         if (prompt) {
             const media = this.getPromptOutputMedia(prompt);
-            const promptCode = (_a = (0, generate_prompt_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
+            const promptCode = (_a = (0, generate_prompt_js_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
             if (promptCode) {
-                const validators = (0, generate_prompt_1.generatePromptTraitValidators)(model, prompt);
+                const validators = (0, generate_prompt_js_1.generatePromptTraitValidators)(model, prompt);
                 return template
                     .replace('{PROMPT}', promptCode)
                     .replace('{VALIDATORS}', JSON.stringify(validators))

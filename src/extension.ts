@@ -4,7 +4,7 @@ import {
     LanguageClient, LanguageClientOptions, ServerOptions, TransportKind
 } from 'vscode-languageclient/node';
 import { CodeGenerator } from './impromptu-code-generator';
-import { AISystem } from './cli/generate-prompt';
+import { AISystem } from './cli/gen/generate-prompt';
 import fs from 'fs';
 
 let client: LanguageClient;
