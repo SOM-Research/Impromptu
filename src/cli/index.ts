@@ -112,6 +112,8 @@ export const addAI = async(llm: string, opts:GenAIOptions):Promise<void> =>{
     }else{
         command = opts.promptName;
     }
+    
+
     try{
         addLLM(llm,file,fileAlias,command)
     }catch(e){}
