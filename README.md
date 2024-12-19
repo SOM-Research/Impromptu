@@ -410,6 +410,13 @@ module.exports = {
 
 
 In case of working without any server manager, the server must be open from the main folder of Impromptu.
+
+## Publications
+
+This repository is the companion to the following research paper:
+
+> Robert Clarisó and Jordi Cabot, "Model-Driven Prompt Engineering," 2023 ACM/IEEE 26th International Conference on Model Driven Engineering Languages and Systems (MODELS), Västerås, Sweden, 2023, pp. 47-54. ([link](https://doi.org/10.1109/MODELS58315.2023.00020))
+
 ## License
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
