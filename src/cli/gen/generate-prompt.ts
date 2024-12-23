@@ -59,7 +59,7 @@ export function generatePromptCode(model: Ast.Model, aiSystem: string | undefine
 }
 
 /**
- * Given a prompt, checks the valu of the attribute `validator`, in case it has it
+ * Given a prompt, checks the value of the attribute `validator`, in case it has it
  * @param prompt 
  * @returns 
  */
@@ -174,16 +174,6 @@ export function genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefine
     let imported_asset = get_imported_asset(asset)
     if (Ast.isAsset(imported_asset)){
         let new_map
-
-        // Language checking
-        /* DEACTIVATED FROM NOW
-        const asset_language = getLanguage(asset);
-        const imported_language = getLanguage(imported_asset);
-        if (asset_language !== imported_language){
-            let file = get_file_from(asset);
-            let line = get_line_node(asset);
-            console.log(chalk.yellow(`[${file}: ${line}] Warning: The imported asset language and original language does not coincide.`))
-        }*/
 
         if (variables){
             // In case parameters were given, we have to extend that map to the imported asset

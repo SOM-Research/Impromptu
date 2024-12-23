@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 
 // call it using http://127.0.0.1:3000/version. 
-app.post("/generateprompt", async (req, res) => { 
+app.post("/version", async (req, res) => { 
 	res= package.version
 });
 

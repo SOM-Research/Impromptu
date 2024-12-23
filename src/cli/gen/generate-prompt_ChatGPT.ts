@@ -31,9 +31,13 @@ export function generatePrompt_ChatGPT(model: Ast.Model, prompt: Ast.Prompt | un
             return genAsset_ChatGPT(prompt, map).filter(e => e !== undefined) as string[];
         }
         else{
-            let line = get_line_node(prompt);
-            let file = get_file_from(prompt);
-            console.log(`[${file}]-Error in line ${line}: The number of values and variables of the prompt does not match.`);
+            return genAsset_ChatGPT(prompt) 
+            //Need it for vscode extension case
+
+
+            //let line = get_line_node(prompt);
+            // let file = get_file_from(prompt);
+            //console.log(`[${file}]-Error in line ${line}: The number of values and variables of the prompt does not match.`);
             throw new Error();
         }
         
@@ -121,12 +125,20 @@ export function genAsset_ChatGPT(asset: Ast.Asset, variables?: Map <string, stri
   * @returns 
   */
 export function genSnippet_ChatGPT(snippet: Ast.Snippet, variables?: Map <string, string>): string {
-    if (snippet.weight){
-        let file = get_file_from(snippet);
-        let line = get_line_node(snippet);
-        console.log(chalk.yellow(`[${file}]- Warning in line ${line}: Weights of a snippet are not implemented in ChatGPT yet. Its prompt will be omitted.`));
+    const text = genBaseSnippet_ChatGPT(snippet.content, variables);
+        
+    if (snippet.weight != null) {
+        switch(snippet.weight.relevance) {
+            case 'min': { return "[[" + text + "]]"; }
+            case 'low':     { return "[" + text + "]";}
+            case 'medium':  { return text; }
+            case 'high':    { return "(" + text + ")"; }
+            case 'max': { return "((" + text + "))"; }
+            default:        { return ""; }
         }
-    return genBaseSnippet_ChatGPT(snippet.content, variables);
+    } else {
+        return text;
+    }
 }
 
 /**

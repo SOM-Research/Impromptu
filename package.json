@@ -97,9 +97,6 @@
             ]
         }
     },
-    "activationEvents": [
-        "onLanguage:impromptu"
-    ],
     "files": [
         "bin",
         "out",

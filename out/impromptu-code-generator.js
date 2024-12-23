@@ -70,6 +70,7 @@ class CodeGenerator {
      */
     generateCode(modelName, aiSystem, promptName) {
         const model = this.parser.parse(modelName).value; // Get the Ast node of the model
+        // Needs to import the Ast of the imported files as well
         const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
         return ((0, ast_js_1.isModel)(model) ? this.model2Code(model, aiSystem, template, promptName) : undefined);
     }
@@ -85,6 +86,7 @@ class CodeGenerator {
     model2Code(model, aiSystem, template, promptName) {
         var _a;
         const prompt = this.getPrompt(model, promptName);
+        // Add gnerateAstNode (?)
         if (prompt) {
             const media = this.getPromptOutputMedia(prompt);
             const promptCode = (_a = (0, generate_prompt_js_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();

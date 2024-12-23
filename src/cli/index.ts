@@ -99,6 +99,7 @@ export type GenAIOptions = {
  */
 export const addAI = async(llm: string, opts:GenAIOptions):Promise<void> =>{
     let fileAlias:string
+    console.log("asad")
     if (opts.alias){
         fileAlias = opts.alias;
     }else{

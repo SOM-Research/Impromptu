@@ -1,7 +1,3 @@
-// A launch configuration that launches the extension inside a new window
-// Use IntelliSense to learn about possible attributes.
-// Hover to view descriptions of existing attributes.
-// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 {
     "version": "0.2.0",
     "configurations": [
@@ -10,14 +6,16 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "env": {"WORKSPACE": "${workspaceFolder}"}, // Variable to pass the workspace to the vscode extension
+            "env": {
+                "WORKSPACE": "${workspaceFolder}"
+            },
             "args": [
                 "${workspaceFolder}/build_files/",
                 "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
+            ]
         },
         {
-            "name": "Attach to Language Server",
+            "name": "Language Server",
             "type": "node",
             "port": 6009,
             "request": "attach",
@@ -29,6 +27,12 @@
                 "${workspaceFolder}/out/**/*.js",
                 "${workspaceFolder}/node_modules/langium"
             ]
+        },
+        {
+            "type": "node-terminal",
+            "name": "JavaScript Debug Terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

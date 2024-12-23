@@ -92,6 +92,7 @@ exports.generateAll = generateAll;
  */
 const addAI = (llm, opts) => __awaiter(void 0, void 0, void 0, function* () {
     let fileAlias;
+    console.log("asad");
     if (opts.alias) {
         fileAlias = opts.alias;
     }
