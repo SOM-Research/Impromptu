@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -23,7 +46,6 @@ const generate_prompt_1 = require("./gen/generate-prompt");
 const node_1 = require("langium/node");
 const node_fs_1 = require("node:fs");
 const files_management_1 = require("./files_management");
-const gen_folder = 'src/cli/gen'; // TODO: Check where is used
 const generateAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
@@ -92,35 +114,65 @@ exports.generateAll = generateAll;
  */
 const addAI = (llm, opts) => __awaiter(void 0, void 0, void 0, function* () {
     let fileAlias;
-    console.log("asad");
-    if (opts.alias) {
-        fileAlias = opts.alias;
+    if (opts) {
+        if (opts.alias) {
+            fileAlias = opts.alias;
+        }
+        else {
+            fileAlias = `${llm}`;
+        }
     }
     else {
         fileAlias = `${llm}`;
     }
-    const file = `generate-prompt_${fileAlias}.ts`;
     let command;
-    if (!opts.promptName) {
-        command = llm.toLowerCase();
+    if (opts) {
+        if (!opts.promptName) {
+            command = llm.toLowerCase();
+        }
+        else {
+            command = opts.promptName;
+        }
     }
     else {
-        command = opts.promptName;
+        command = `${llm}`;
     }
     try {
-        (0, files_management_1.addLLM)(llm, file, fileAlias, command);
+        (0, files_management_1.addLLM)(llm, fileAlias, command);
     }
     catch (e) { }
 });
 exports.addAI = addAI;
+const readline = __importStar(require("readline"));
 /**
  * Remove the file and the code in `generate-prompt.ts` that specify Impromptu the behavior for a certain LLM
  * @param llm LLM to delete
  */
 const removeAI = (llm) => __awaiter(void 0, void 0, void 0, function* () {
-    const generate_prompt = (0, node_fs_1.readFileSync)(`${gen_folder}/generate-prompt.ts`);
-    let content = generate_prompt.toString();
-    (0, files_management_1.removeLLM)(llm, content);
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    const llm_alias = (0, files_management_1.getAI_Alias)(llm);
+    if (llm_alias != undefined) {
+        rl.question(`Are you sure you want to delete content related to the LLM "${llm}"? [y/n] `, (answer) => {
+            switch (answer.toLowerCase()) {
+                case 'y':
+                    (0, files_management_1.removeLLM)(llm);
+                    break;
+                case 'n':
+                    console.log('Deletion stopped');
+                    break;
+                default:
+                    console.log('Deletion stopped');
+            }
+            rl.close();
+        });
+    }
+    else {
+        console.log(chalk_1.default.blue(`It does not exist any AI system is saved by the name of "${llm}".`));
+        rl.close();
+    }
 });
 exports.removeAI = removeAI;
 const parseAndValidate = (alias) => __awaiter(void 0, void 0, void 0, function* () {

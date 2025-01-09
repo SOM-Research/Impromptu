@@ -3,7 +3,7 @@ import { createImpromptuServices } from "../src/language-server/impromptu-module
 import { AssetReuse, Model } from "../src/language-server/generated/ast";
 import { parseHelper } from "langium/test";
 import { beforeEach, test, expect } from 'vitest';
-import {  AISystem, generatePromptCode } from "../src/cli/generate-prompt";
+import {  AISystem, generatePromptCode } from "../src/cli/gen/generate-prompt";
 import { NodeFileSystem } from "langium/node";
 import { check_loops, extractAstNode } from "../src/cli/cli-util";
 import { URI } from "vscode-uri";

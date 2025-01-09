@@ -1,8 +1,8 @@
 import { Reference } from "langium";
 import { AssetReuse, BaseSnippet, CombinationTrait, Core, Parameters, InputRef, Parameter, ParamInvokation, Prompt, Snippet, TextLiteral, Suffix, Composer, NegativeTrait, ImportedAsset} from "../src/language-server/generated/ast";
 import { test, expect, vi } from 'vitest'
-import { genAssetReuse, AISystem, genImportedAsset} from "../src/cli/generate-prompt";
-import { genBaseSnippet_SD, genAsset_SD } from "../src/cli/generate-prompt_SD";
+import { genAssetReuse, AISystem, genImportedAsset} from "../src/cli/gen/generate-prompt";
+import { genBaseSnippet_SD, genAsset_SD } from "../src/cli/gen/generate-prompt_SD";
 import * as utils from "../src/cli/cli-util";
 
 
@@ -16,7 +16,7 @@ function get_imported_ast(asset) {
   return mock_prompt
 }
 
-let mock_prompt_solution = 'Positive prompt:\n,@elemento, @elemento, @elemento,\n,Negative prompt:\n,fuego'
+let mock_prompt_solution = 'Positive prompt:\n,@elemento, @elemento, @elemento,\n,\nNegative prompt:\n,fuego'
 
 
 //--------------------------MOCK ELEMENTS--------------------------------------
@@ -427,7 +427,7 @@ test('check_imported_asset', async() => {
 test('check_imported_asset_in_asset_reuse', async() => {
   const spy = vi.spyOn( utils,'get_imported_asset');
   spy.mockReturnValue(mock_prompt);
-  expect(genAssetReuse(mock_assetReuse_imported_asset, AISystem.StableDiffusion)).toBe('Positive prompt:\n,fuego, fuego, fuego,\n,Negative prompt:\n,fuego'); // Do the same with the rest AISystems
+  expect(genAssetReuse(mock_assetReuse_imported_asset, AISystem.StableDiffusion)).toBe('Positive prompt:\n,fuego, fuego, fuego,\n,\nNegative prompt:\n,fuego'); // Do the same with the rest AISystems
 })
 
 test('reference_in_text_literal', async() => {
@@ -480,7 +480,7 @@ test('reference_in_prompt', async() => {
   expect(genAsset_SD(mock_prompt,map)[0]).toBe("Positive prompt:\n"); // Stable Diffusion particularity
   expect(genAsset_SD(mock_prompt,map)[1]).toContain("fuego"); // reference in Positive Part
   expect(genAsset_SD(mock_prompt,map)[2]).toBe("\n"); // split between Positive & Negative part
-  expect(genAsset_SD(mock_prompt,map)[3]).toBe("Negative prompt:\n"); // Negative Traits
+  expect(genAsset_SD(mock_prompt,map)[3]).toBe("\nNegative prompt:\n"); // Negative Traits
   expect(genAsset_SD(mock_prompt,map)[4]).toContain("fuego"); // reference in Negative
   // TODO: See how to check them individually
 /*

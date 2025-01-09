@@ -7,12 +7,9 @@ import { extractAstNode, extractDocument } from './cli-util';
 import { generateJavaScript } from './generator';
 import { generatePrompt } from './gen/generate-prompt';
 import { NodeFileSystem } from 'langium/node';
-import { readdirSync,  readFileSync} from 'node:fs';
-import { addLLM, removeLLM } from './files_management';
-
-
-
-const gen_folder='src/cli/gen'; // TODO: Check where is used
+import { readdirSync} from 'node:fs';
+import { addLLM, getAI_Alias, removeLLM } from './files_management';
+import * as readline from 'readline';
 
 export const generateAction = async (fileName: string, opts: GenerateOptions): Promise<void> => {
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
@@ -89,7 +86,6 @@ export type GenAIOptions = {
     alias?: string;
     promptName?: string;
 }
-
 /**
  * Add an additional AI System and create a document to customize its generated prompts
  * @param llm : LLM to add
@@ -99,24 +95,31 @@ export type GenAIOptions = {
  */
 export const addAI = async(llm: string, opts:GenAIOptions):Promise<void> =>{
     let fileAlias:string
-    console.log("asad")
-    if (opts.alias){
-        fileAlias = opts.alias;
+    if (opts){
+        if (opts.alias){
+            fileAlias = opts.alias;
+        }else{
+            fileAlias = `${llm}`;
+        }
     }else{
         fileAlias = `${llm}`;
     }
-    const file= `generate-prompt_${fileAlias}.ts`
+    
+   
 
     let command:string
-    if (!opts.promptName){
-        command = llm.toLowerCase();
+    if (opts){
+        if (!opts.promptName){
+            command = llm.toLowerCase();
+        }else{
+            command = opts.promptName;
+        }
     }else{
-        command = opts.promptName;
-    }
-    
+        command = `${llm}`;
+    }   
 
     try{
-        addLLM(llm,file,fileAlias,command)
+        addLLM(llm,fileAlias,command)
     }catch(e){}
 };
 
@@ -125,11 +128,30 @@ export const addAI = async(llm: string, opts:GenAIOptions):Promise<void> =>{
  * @param llm LLM to delete
  */
 export const removeAI = async (llm: string): Promise<void> => {
-    const generate_prompt = readFileSync(`${gen_folder}/generate-prompt.ts`);
-    let content = generate_prompt.toString();
-    
-    removeLLM(llm, content)
-    
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    const llm_alias= getAI_Alias(llm)
+    if(llm_alias!=undefined){
+        rl.question(`Are you sure you want to delete content related to the LLM "${llm}"? [y/n] `, (answer) => {
+            switch(answer.toLowerCase()) {
+            case 'y':
+                removeLLM(llm)
+                break;
+            case 'n':
+                console.log('Deletion stopped');
+                break;
+            default:
+                console.log('Deletion stopped');
+            }
+            rl.close();
+        });
+    }
+    else{
+        console.log(chalk.blue(`It does not exist any AI system is saved by the name of "${llm}".`));
+        rl.close();
+    }
 }
 
 

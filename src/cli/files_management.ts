@@ -12,8 +12,13 @@ type AISyst ={
     command:string
 }
 
+/**
+ * Add a certain LLM to the JSON `cli/gen/llm_json.json` (it is hidden).
+ * @param llm Name to identify the LLM
+ * @param fileAlias Alias used to create its related files
+ * @param command name used in the CLI
+ */
 function add_in_JSON(llm: string, fileAlias: string, command: string){
-    
 
     const data = fs.readFileSync(`${gen_folder}/llm_json.json`,'utf-8');
     
@@ -25,34 +30,43 @@ function add_in_JSON(llm: string, fileAlias: string, command: string){
 
 }
 
-export function addLLM(llm:string,file:string,fileAlias:string,command:string){
+/**
+ * 
+ * @param llm 
+ * @param file 
+ * @param fileAlias 
+ * @param command 
+ */
+export function addLLM(llm:string,fileAlias:string,command:string){
     
+    const file = `generate-prompt_${fileAlias}.ts`
     
     // add in the JSON
     checkAI(llm) // First check if already exists
     add_in_JSON(llm,fileAlias,command)
 
-    const generate_prompt = readFileSync(`${gen_folder}/generate-prompt.ts`)
-    let content = generate_prompt.toString();
+    const generate_prompt = readFileSync(`${gen_folder}/generate-prompt.ts`);
 
     
     // Create a new file with the default coding
     
-    createFile(file,fileAlias,content)
-    
+    createFile(file,fileAlias);
     
     // Change the `generate-prompt.ts` file so that it accepts the new LLM
     
-    content = generate_prompt.toString()
+    let content = generate_prompt.toString();
 
-    content = changeMainFile(llm,fileAlias,command,content)
+    content = changeMainFile(llm,fileAlias,command,content);
     
     console.log(chalk.green(`AI System "${llm}" added correctly`));
     writeFileSync(`${gen_folder}/generate-prompt.ts`,content);
 
 }
 
-
+/**
+ * Checks whether a LLM is already considered individually or not
+ * @param llm 
+ */
 function checkAI(llm:string){
     
     const data = fs.readFileSync(`${gen_folder}/llm_json.json`,'utf-8');
@@ -67,14 +81,19 @@ function checkAI(llm:string){
     }
 }
 
-function createFile(file:string,fileAlias:string,content:string){
+/**
+ * Create the file that will manage the behavior of a certain LLM
+ * @param file 
+ * @param fileAlias alias of the LLM
+ */
+function createFile(file:string,fileAlias:string){
     // Checks if the file already exists
     if (existsSync(`${gen_folder}/${file}`)) {
         console.error(chalk.red(`The file ${file} already exists. An error may have occuror while removing an LLM before. Please delete it manually`));
         throw new Error();
     }
-    const generate_prompt_base = readFileSync(`${gen_folder}/generate-prompt_base.ts`)
-    content = generate_prompt_base.toString()
+    const generate_prompt_base = readFileSync(`${gen_folder}/generate-prompt_base.ts`) // 
+    let content = generate_prompt_base.toString()
     content=content.replaceAll('_base',`_${fileAlias}`)
     writeFileSync(`${gen_folder}/${file}`,content);
 }
@@ -116,6 +135,10 @@ function changeMainFile(llm:string, fileAlias:string, command:string, content:st
 
 }
 
+/**
+ * Delete a LLM from the JSON `cli/gen//llm_json.json` (hidden file)
+ * @param llm 
+ */
 function remove_from_JSON(llm:string){
     const data = fs.readFileSync(`${gen_folder}/llm_json.json`,'utf-8');
             
@@ -126,27 +149,29 @@ function remove_from_JSON(llm:string){
     fs.writeFileSync(`${gen_folder}/llm_json.json`,JSON.stringify(data_updated));
 }
 
-export function removeLLM(llm:string, content:string){
+/**
+ * Delete the custom behavior of a LLM
+ * @param llm 
+ * @param content 
+ */
+export function removeLLM(llm:string){
     
-    let llm_alias= getAI_Alias(llm, content)
+    const generate_prompt = readFileSync(`${gen_folder}/generate-prompt.ts`);
+    let content = generate_prompt.toString();
+    let llm_alias= getAI_Alias(llm)
 
-    if(llm_alias!=undefined){
     // Get the command and checks that the LLM is saved
-        content = removeImports(llm,content);
+    content = removeImports(llm,content);
 
-        // remove from JSON
-        remove_from_JSON(llm);
+    // remove from JSON
+    remove_from_JSON(llm);
 
-        content = removeSwitch(llm,llm_alias as string,content)
+    content = removeSwitch(llm,llm_alias as string,content);
 
-        unlinkSync(`${gen_folder}/generate-prompt${llm_alias}.ts`); // Remove the file of the LLM
-        writeFileSync(`${gen_folder}/generate-prompt.ts`,content);
-        console.log(chalk.green(`The AI System "${llm}" has been removed correctly`));
-    }
-    else{
-        console.log(chalk.blue(`It does not exist any AI system is saved by the name of "${llm}".`));
-       
-    }
+    unlinkSync(`${gen_folder}/generate-prompt${llm_alias}.ts`); // Remove the file of the LLM
+    writeFileSync(`${gen_folder}/generate-prompt.ts`,content);
+    console.log(chalk.green(`The AI System "${llm}" has been removed correctly`));
+
 }
 
 
@@ -157,7 +182,7 @@ export function removeLLM(llm:string, content:string){
  * @param content Text to analyse (generally, `generate-prompt.ts`)
  * @returns 
  */
-function getAI_Alias(llm:string, content:string):string|undefined{
+export function getAI_Alias(llm:string):string|undefined{
     
     const data = fs.readFileSync(`${gen_folder}/llm_json.json`,'utf-8');
     let alias='';
@@ -173,6 +198,13 @@ function getAI_Alias(llm:string, content:string):string|undefined{
     }
 }
 
+
+/**
+ * Remove the ''import line'' related of a LLM from a content of a file
+ * @param llm 
+ * @param content 
+ * @returns 
+ */
 function removeImports(llm:string, content:string){
     // Remove from the AISystem
     const AIObject = content.match(AISystem_RegEx);
@@ -182,7 +214,7 @@ function removeImports(llm:string, content:string){
 
             content = content.replace(AISystem_RegEx,AIObject[0].replace(llm_entry_RegEx,''))
 
-            const llm_alias= getAI_Alias(llm, content);
+            const llm_alias= getAI_Alias(llm);
             // Get rid of the imports
             if (llm_alias){
                 const llm_import_RegEx = new RegExp(String.raw`(\s)*import((.)*?)from(\s)*'.\/generate-prompt${llm_alias}(\s)*'(;)?`,'gm') 
@@ -196,6 +228,13 @@ function removeImports(llm:string, content:string){
     return ''
 }
 
+/**
+ * Remove a llm from the possibilities of the switches contained in a certain content of a file
+ * @param llm 
+ * @param llm_alias 
+ * @param content 
+ * @returns 
+ */
 function removeSwitch(llm:string,llm_alias:string,content:string){
     const switch_case_RegEx = new RegExp(String.raw`case(\s)*AISystem\.${llm}((\s|\S)*?)${llm_alias}(\s)*\(((\s|\S)*?)break;((\s|\S)*?)}`,'gm')
     // case AISystem.<llm> 

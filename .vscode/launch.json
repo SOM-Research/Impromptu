@@ -15,7 +15,7 @@
             ]
         },
         {
-            "name": "Language Server",
+            "name": "Attach to Language Server",
             "type": "node",
             "port": 6009,
             "request": "attach",
@@ -23,16 +23,19 @@
                 "<node_internals>/**"
             ],
             "sourceMaps": true,
-            "outFiles": [
-                "${workspaceFolder}/out/**/*.js",
-                "${workspaceFolder}/node_modules/langium"
-            ]
+            "outFiles": []
         },
         {
             "type": "node-terminal",
             "name": "JavaScript Debug Terminal",
             "request": "launch",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Python Debugger: Python File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}"
         }
     ]
 }

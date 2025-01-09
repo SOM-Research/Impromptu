@@ -66586,7 +66586,6 @@ function genPoinOfView_default(snippet) {
   return "The answer is written in " + text;
 }
 function genTraits_default(trait, variables, snippet_function) {
-  console.log("Hello");
   return genBaseSnippet_default(trait, variables, snippet_function);
 }
 

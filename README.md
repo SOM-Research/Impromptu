@@ -271,8 +271,8 @@ In case that parameters but no prompt were declared in the command, the last ass
 
 ### Adding extra LLMs
 
-Impromptu allows the user to customize the behavior of the generator making prompts to a specific LLM.
-The CLI command `addAI <name> (-f <alias>) (-pn promptName)`. This command would create a file `generate-prompt_<alias>.ts` that would dictate the behavior of the traits and the different assets. **This is internal coding, and thus, it is done in <i>typescript</i>**. The created file copies how a default LLM behaves, so one only needs to modify the functions that acts differentely.
+Impromptu allows the user to **customize the behavior** of the generator making prompts **to a specific LLM**.
+The CLI command `addAI <name> (-f <alias>) (-pn promptName)`. This command would create a file `generate-prompt_<alias>.ts` that would dictate the behavior of the traits and the different assets. **This is internal coding, and thus, it is done in <i>typescript</i>**. The created file copies how a default LLM behaves, so one only needs to modify the functions that acts differentely. In the same way, it also exists a command to **delete added LLMs**: `removeAI <name>`.
 
 ## VSCode Extension
 ### Code generation for prompt execution and output validation
@@ -356,12 +356,22 @@ constructor(context: ExtensionContext) {
 
 ## Impromptu as server
 
-By the command `node .bin/server_main.js`, one starts a node http server so that, given a text that follows the `.prm` file format, and it returns a generated prompt to the client.
+By the command `node .bin/server_main.js`, one starts a node http server so that, given a text that follows the `.prm` file format, and it returns a generated prompt to the client, in the same it would be done in the prompt line.
  It is done by sending to the server a POST request to the server as `generateprompt` (http://127.0.0.1:3000/generateprompt). That text, together with the atributes (`aiSystem`, `prompt`),are transmitted to the server in the body of a POST call, where
     - `content`. Text acting as a `.prm`file.
     - `aiSystem`. LLM that where the prompt will be used. They are the same ones that are available in the CLI mode (`midjourney` for MD, `stable-diffusion` for SD and `chatgpt` for ChatGPT).
     - `prompt`. In case is transmitted, tells which prompt defined in `content` has to be created. If any, all the prompts will be generated.
 The generated prompt is sent in the body of the response in the concept `result` if no errors were happen. In the other case, the errors are shared with the client in the body inside the concept `errors`.
+
+In the same way, the client can send request equivalent to the other prompt commands, such as adding/removing a LLM (`/addLLM`, and `/removeLLM`), or asking for the Impromptu's version (`/version`). Each different request has a **different body structure and a different reponse syntax**.
+
+| request | url's request | request's body | response |
+| ----- |:----------:| :----------------:|:-------:|
+| `generateprompt` |http://127.0.0.1:3000/generateprompt| {`content`, `aiSystem`, `prompt` (opt)}|{`response`} or {`error`}|
+| `addLLM` |http://127.0.0.1:3000/addLLM| {`llm`, `alias` (opt),`promptName` (opt)}|{`response`} or {`error`}|
+| `removeLLM` |http://127.0.0.1:3000/removeLLM| {`llm`}|{`response`} or {`error`}|
+| `version` |http://127.0.0.1:3000/version| {`version`}|`version`|
+
 
 This has the problem that the server has to be open from Impromptu workspace itself to work. Therefore, it is recommended to use a proccess manager such as **pm2** to configure the closing and opening of the server without considering the workspace. 
 

@@ -1,8 +1,8 @@
 import { Reference } from "langium";
 import { AssetReuse, BaseSnippet, CombinationTrait, Core, Parameters, InputRef, Parameter, ParamInvokation, Prompt, Snippet, TextLiteral, Suffix, Composer, NegativeTrait, ImportedAsset } from "../src/language-server/generated/ast";
 import { test, expect, vi } from 'vitest'
-import { AISystem, genAssetReuse, genImportedAsset } from "../src/cli/generate-prompt";
-import { genBaseSnippet_ChatGPT, genAsset_ChatGPT } from "../src/cli/generate-prompt_ChatGPT";
+import { AISystem, genAssetReuse, genImportedAsset } from "../src/cli/gen/generate-prompt";
+import { genBaseSnippet_ChatGPT, genAsset_ChatGPT } from "../src/cli/gen/generate-prompt_ChatGPT";
 import * as utils from "../src/cli/cli-util";
 
 //---------------------------------VARIABLES----------------------------------

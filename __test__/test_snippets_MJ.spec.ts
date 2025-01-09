@@ -1,8 +1,8 @@
 import { Reference } from "langium";
 import { AssetReuse, BaseSnippet, CombinationTrait, Core, Parameters, InputRef, Parameter, ParamInvokation, Prompt, Snippet, TextLiteral, Suffix, Composer, NegativeTrait, ImportedAsset, AssetImport } from "../src/language-server/generated/ast";
 import { test, expect, vi } from 'vitest'
-import { genAssetReuse, AISystem, genImportedAsset } from "../src/cli/generate-prompt";
-import { genBaseSnippet_MJ, genAsset_MJ } from "../src/cli/generate-prompt_MJ";
+import { genAssetReuse, AISystem, genImportedAsset } from "../src/cli/gen/generate-prompt";
+import { genBaseSnippet_MJ, genAsset_MJ } from "../src/cli/gen/generate-prompt_MJ";
 import * as utils from "../src/cli/cli-util"; // Imported as module so that we can spy on its functions
 
 //---------------------------------VARIABLES----------------------------------

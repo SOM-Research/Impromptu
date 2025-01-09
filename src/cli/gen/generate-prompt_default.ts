@@ -368,6 +368,5 @@ export function genPoinOfView_default(snippet:Ast.PointOfViewTrait){
 
 
 export function genTraits_default(trait:Ast.Trait, variables?:Map<string,string>,snippet_function?: { (snippet: Ast.Snippet, variables?: Map<string, string>): string; (arg0: Ast.Snippet, arg1: Map<string, string> | undefined): string; }){
-    console.log("Hello")
     return genBaseSnippet_default(trait,variables,snippet_function);
 }
