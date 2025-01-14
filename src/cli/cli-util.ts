@@ -5,7 +5,12 @@ import { URI } from 'vscode-uri';
 import { Asset, AssetImport, AssetReuse, BaseSnippet, ImportedAsset, isAssetReuse, isChain, isComposer, isImportedAsset, isModel, isPrompt, Model, Snippet } from '../language-server/generated/ast';
 import globby from 'globby';
 
-
+/**
+ * Gets the `LangiumDocument` of the a certain file
+ * @param fileName relative path of the file from `build_files`
+ * @param services LangiumService
+ * @returns LangiumDocument
+ */
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
     const extensions = services.LanguageMetaData.fileExtensions;
    

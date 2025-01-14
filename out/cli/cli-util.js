@@ -18,6 +18,12 @@ const path_1 = __importDefault(require("path"));
 const vscode_uri_1 = require("vscode-uri");
 const ast_1 = require("../language-server/generated/ast");
 const globby_1 = __importDefault(require("globby"));
+/**
+ * Gets the `LangiumDocument` of the a certain file
+ * @param fileName relative path of the file from `build_files`
+ * @param services LangiumService
+ * @returns LangiumDocument
+ */
 function extractDocument(fileName, services) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {

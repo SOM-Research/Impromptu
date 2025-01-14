@@ -50,7 +50,6 @@ let previewPanel;
 function activate(context) {
     //@ts-ignore
     global.VSMODE = true;
-    //@ts-ignore
     client = startLanguageClient(context);
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', () => __awaiter(this, void 0, void 0, function* () {
         yield generateCodeService(context, generate_prompt_1.AISystem.ChatGPT);
@@ -110,14 +109,14 @@ function generateCodeService(context, aiSystem) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const generator = new impromptu_code_generator_1.CodeGenerator(context);
-        const model = (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.document.getText();
+        const model = (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.document;
         if (model) {
-            var prompt = yield requestPromptAndValidation(generator, model);
+            var prompt = yield requestPromptAndValidation(generator, model.getText());
             if (prompt) {
                 /**
                  * code that generates the prompt
                  */
-                const returner = generator.generateCode(model, aiSystem, prompt);
+                const returner = yield generator.generateCode(model.fileName, aiSystem, prompt);
                 let title = 'Code Test Scenario';
                 /**
                  * webview panel
@@ -133,7 +132,7 @@ function generateCodeService(context, aiSystem) {
                     enableScripts: false,
                     retainContextWhenHidden: false,
                     // And restrict the webview to only loading content from our extension's 'assets' directory. -> PROBLEM WITH IMPORTS
-                    localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
+                    //localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
                 });
                 setPreviewActiveContext('liveCodePreviewer', true);
                 updateCodePreview(returner);
@@ -147,7 +146,7 @@ function generateCodeService(context, aiSystem) {
 /**
  * Select the prompt it wants to be generated + validate it
  * @param generator
- * @param model .prm flie selected
+ * @param model .prm file selected
  * @returns
  */
 function requestPromptAndValidation(generator, model) {

@@ -4,11 +4,6 @@ import chalk from 'chalk';
 //import { CompositeGeneratorNode, NL, toString } from 'langium';
 import path from 'path';
 import * as Ast from '../../language-server/generated/ast';
-/* import  { Model, Asset, Snippet, CombinationTrait, NegativeTrait, AudienceTrait, MediumTrait,
-         isPrompt, isChain, 
-         isComposer, isTextLiteral, isParameterRef, isAssetReuse, isNegativeTrait, 
-         isCombinationTrait, isAudienceTrait, isMediumTrait } from '../language-server/generated/ast';
-         */
 import { extractDestinationAndName, get_file_from, get_imported_asset, get_line_node } from '../cli-util';
 import { genAsset_MJ, generatePrompt_MJ } from './generate-prompt_MJ';
 import { genAsset_SD, generatePrompt_SD } from './generate-prompt_SD';
@@ -140,6 +135,7 @@ export function generatePrompt(model: Ast.Model, filePath: string, destination: 
  * 
  */
 export function getPromptsList(model: Ast.Model) {
+
     return model.assets.map(asset => genAssetDescription(asset)).filter(e => e !== undefined);
 }
 

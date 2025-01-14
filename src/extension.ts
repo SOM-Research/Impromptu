@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
     
     //@ts-ignore
     global.VSMODE = true;
-    //@ts-ignore
+    
     client = startLanguageClient(context);
     
     context.subscriptions.push(vscode.commands.registerCommand('impromptu.generateChatGPT', async () => {
@@ -90,14 +90,14 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
 async function generateCodeService(context: vscode.ExtensionContext, aiSystem: string) {
 
     const generator =  new CodeGenerator(context);
-    const model = vscode.window.activeTextEditor?.document.getText();
+    const model = vscode.window.activeTextEditor?.document;
     if (model) {
-        var prompt = await requestPromptAndValidation(generator, model);
+        var prompt = await requestPromptAndValidation(generator, model.getText());
         if (prompt) {
             /**
              * code that generates the prompt
              */
-            const returner = generator.generateCode(model, aiSystem, prompt);
+            const returner = await generator.generateCode(model.fileName, aiSystem, prompt);
             let title : string = 'Code Test Scenario';
 
             /**
@@ -116,7 +116,7 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
                     enableScripts: false,
                     retainContextWhenHidden: false,
                     // And restrict the webview to only loading content from our extension's 'assets' directory. -> PROBLEM WITH IMPORTS
-                    localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
+                    //localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'assets'))]
                 }
             )
             setPreviewActiveContext('liveCodePreviewer', true);
@@ -131,7 +131,7 @@ async function generateCodeService(context: vscode.ExtensionContext, aiSystem: s
 /**
  * Select the prompt it wants to be generated + validate it 
  * @param generator 
- * @param model .prm flie selected 
+ * @param model .prm file selected 
  * @returns 
  */
 async function requestPromptAndValidation(generator: CodeGenerator, model: string) {

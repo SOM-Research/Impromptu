@@ -46,6 +46,7 @@ const generate_prompt_1 = require("./gen/generate-prompt");
 const node_1 = require("langium/node");
 const node_fs_1 = require("node:fs");
 const files_management_1 = require("./files_management");
+const readline = __importStar(require("readline"));
 const generateAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
@@ -143,7 +144,6 @@ const addAI = (llm, opts) => __awaiter(void 0, void 0, void 0, function* () {
     catch (e) { }
 });
 exports.addAI = addAI;
-const readline = __importStar(require("readline"));
 /**
  * Remove the file and the code in `generate-prompt.ts` that specify Impromptu the behavior for a certain LLM
  * @param llm LLM to delete
