@@ -15,7 +15,7 @@ import * as df from './generate-prompt_default';
 
 export function generatePrompt_ChatGPT(model: Ast.Model, prompt: Ast.Prompt | undefined, variables?: string[],promptName?:string): string[] {
     // Generate the single requested prompt
-    
+
     if (prompt){
         const parameters= prompt.pars 
         if (!variables) variables=[];

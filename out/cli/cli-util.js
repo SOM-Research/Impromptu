@@ -22,7 +22,7 @@ const globby_1 = __importDefault(require("globby"));
  * Gets the `LangiumDocument` of the a certain file
  * @param fileName relative path of the file from `build_files`
  * @param services LangiumService
- * @returns LangiumDocument
+ * @returns
  */
 function extractDocument(fileName, services) {
     var _a;

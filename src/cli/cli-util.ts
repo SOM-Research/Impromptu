@@ -9,7 +9,7 @@ import globby from 'globby';
  * Gets the `LangiumDocument` of the a certain file
  * @param fileName relative path of the file from `build_files`
  * @param services LangiumService
- * @returns LangiumDocument
+ * @returns 
  */
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
     const extensions = services.LanguageMetaData.fileExtensions;

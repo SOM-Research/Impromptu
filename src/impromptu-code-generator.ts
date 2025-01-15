@@ -140,22 +140,19 @@ export async function extractAstNodeVSCode<T extends AstNode>(fileName: string, 
         const model = (await extractDocumentVSCode(fileName, services)).parseResult?.value as T;
         
         if (isModel(model)){
-            // get all the imports of the file
+            // Get all the imports of the file
             model.imports.forEach( import_line => {
                 import_line.set_assets.forEach( asset =>{
                     // Checks that it is imported from a different file
-                    if(! calls_buffer?.find(element => (element.$container as ImportedAsset).library==(asset.$container as ImportedAsset).library)){
-                        libraries.push((asset.$container as ImportedAsset).library);
+                    libraries.push((asset.$container as ImportedAsset).library);
                         if (asset.name){
                             import_names.push(asset.name);
                         }
                         new_calls.push(asset);
-                    }
                 })   
-            })
-            
-            
 
+            })
+            // Search the imported prompts
             var exists_errors=false; //Mark there are errors or not
             for (let i=0; i < new_calls.length; i++){
                 try{
@@ -192,16 +189,22 @@ export async function extractAstNodeVSCode<T extends AstNode>(fileName: string, 
     }
 }
 
+/**
+ * Gets the `LangiumDocument` of the a certain file for a VSCode extension
+ * @param fileName relative path of the file from `build_files`
+ * @param services LangiumService used to extract the document
+ * @returns 
+ */
 async function extractDocumentVSCode(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
     
     let documents:LangiumDocument<AstNode>[] = []
     const document = await services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(fileName))); 
     
-    let workspace_path = process.env.WORKSPACE //Requiered since we are in VSCODE LOCAL
+    let workspace_path = process.env.WORKSPACE //Required since we are in VSCODE LOCAL
     if (!workspace_path){
         workspace_path= process.cwd()
     }
-    const files_dir = join(workspace_path,'build_files').split('\\').join('/')
+    const files_dir = join(workspace_path,'build_files').split('\\').join('/') // `glooby` need foward slash to work
     
     const files = await globby(`${files_dir}/**/*.prm`);   // Get all .prm files
     files.forEach(file => 
@@ -209,7 +212,6 @@ async function extractDocumentVSCode(fileName: string, services: LangiumServices
     )
     await services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
 
-        
     const validationErrors =(document.diagnostics ?? []).filter(e => e.severity === 1);
     
     if (validationErrors.length > 0) {

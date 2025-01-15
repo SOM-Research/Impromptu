@@ -104,11 +104,10 @@ class CodeGenerator {
      */
     model2Code(model, aiSystem, template, promptName) {
         var _a;
-        const prompt = this.getPrompt(model, promptName);
-        // Add gnerateAstNode (?)
+        const prompt = this.getPrompt(model, promptName); // Get the prompts of the file
         if (prompt) {
-            const media = this.getPromptOutputMedia(prompt);
-            const promptCode = (_a = (0, generate_prompt_js_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString();
+            const media = this.getPromptOutputMedia(prompt); // Obtain the media of the answer
+            const promptCode = (_a = (0, generate_prompt_js_1.generatePromptCode)(model, aiSystem, prompt)) === null || _a === void 0 ? void 0 : _a.toString(); // Generate the prompt
             if (promptCode) {
                 const validators = (0, generate_prompt_js_1.generatePromptTraitValidators)(model, prompt);
                 return template
@@ -156,19 +155,18 @@ function extractAstNodeVSCode(fileName, services, calls_buffer) {
         if (calls_buffer) {
             const model = (_a = (yield extractDocumentVSCode(fileName, services)).parseResult) === null || _a === void 0 ? void 0 : _a.value;
             if ((0, ast_js_1.isModel)(model)) {
-                // get all the imports of the file
+                // Get all the imports of the file
                 model.imports.forEach(import_line => {
                     import_line.set_assets.forEach(asset => {
                         // Checks that it is imported from a different file
-                        if (!(calls_buffer === null || calls_buffer === void 0 ? void 0 : calls_buffer.find(element => element.$container.library == asset.$container.library))) {
-                            libraries.push(asset.$container.library);
-                            if (asset.name) {
-                                import_names.push(asset.name);
-                            }
-                            new_calls.push(asset);
+                        libraries.push(asset.$container.library);
+                        if (asset.name) {
+                            import_names.push(asset.name);
                         }
+                        new_calls.push(asset);
                     });
                 });
+                // Search the imported prompts
                 var exists_errors = false; //Mark there are errors or not
                 for (let i = 0; i < new_calls.length; i++) {
                     try {
@@ -208,16 +206,22 @@ function extractAstNodeVSCode(fileName, services, calls_buffer) {
     });
 }
 exports.extractAstNodeVSCode = extractAstNodeVSCode;
+/**
+ * Gets the `LangiumDocument` of the a certain file for a VSCode extension
+ * @param fileName relative path of the file from `build_files`
+ * @param services LangiumService used to extract the document
+ * @returns
+ */
 function extractDocumentVSCode(fileName, services) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         let documents = [];
         const document = yield services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path.resolve(fileName)));
-        let workspace_path = process.env.WORKSPACE; //Requiered since we are in VSCODE LOCAL
+        let workspace_path = process.env.WORKSPACE; //Required since we are in VSCODE LOCAL
         if (!workspace_path) {
             workspace_path = process.cwd();
         }
-        const files_dir = (0, path_1.join)(workspace_path, 'build_files').split('\\').join('/');
+        const files_dir = (0, path_1.join)(workspace_path, 'build_files').split('\\').join('/'); // `glooby` need foward slash to work
         const files = yield (0, globby_1.default)(`${files_dir}/**/*.prm`); // Get all .prm files
         files.forEach(file => documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path.resolve(file)))));
         yield services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors

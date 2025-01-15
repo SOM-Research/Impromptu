@@ -15,9 +15,37 @@
             ]
         },
         {
-            "name": "Language Server",
+            "name": "Attach to Language Server",
             "type": "node",
             "port": 6009,
+            "request": "attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js",
+                "${workspaceFolder}/node_modules/langium"
+            ]
+        },
+        {
+            "name": "CLI & Server Debugger",
+            "type": "node",
+            "port": 9229,
+            "request": "attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js",
+                "${workspaceFolder}/node_modules/langium"
+            ]
+        },
+        {
+            "name": "Attach to Impromptu Server",
+            "type": "node",
+            "port": 3000,
             "request": "attach",
             "skipFiles": [
                 "<node_internals>/**"

@@ -20,7 +20,7 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
 
 
 export const generatePromptAction = async (fileName: string, opts: GenPromptOptions): Promise<void> => {
-   
+
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     try{
         const model = await extractAstNode<Model>(fileName, services);
