@@ -31,11 +31,10 @@ function add_in_JSON(llm: string, fileAlias: string, command: string){
 }
 
 /**
- * 
- * @param llm 
- * @param file 
- * @param fileAlias 
- * @param command 
+ * Creates a custom prompt generator to the wanted LLM. It also modify `generate-prompt` and add it to the JSON
+ * @param llm wanted LLM
+ * @param fileAlias Name used to deno LLM's file and prompts
+ * @param command Name used to refer the LLM in the CLI
  */
 export function addLLM(llm:string,fileAlias:string,command:string){
     

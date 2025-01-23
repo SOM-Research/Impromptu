@@ -26,6 +26,13 @@ export function registerValidationChecks(services: ImpromptuServices) {
     registry.register(checks, validator);
 }
 
+/**
+ * Check that in a array of snippets are infinite loops
+ * @param snippets 
+ * @param accept Validator
+ * @param og_asset Assests already paased
+ * @returns 
+ */
 function check_loops_snippets(snippets:Snippet[], accept:ValidationAcceptor, og_asset:Asset[]):Asset[]{
     snippets.forEach(snippet =>{
         if (isAssetReuse(snippet.content)){
@@ -52,7 +59,7 @@ function check_loops_snippets(snippets:Snippet[], accept:ValidationAcceptor, og_
 /**
  * Check whether there are infinite loops in the model due to the references or not. Recursive function
  * @param asset Asset where we are
- * @param og_asset Noted asset used to check if there is a loop 
+ * @param og_asset array of Asset used to check if there is a loop 
  */
 function check_loops_asset(asset:Asset, accept:ValidationAcceptor ,og_asset?:Asset[]){
     if (og_asset?.includes(asset)){
@@ -122,6 +129,11 @@ export class ImpromptuValidator {
         this.checkNoRecursivity(model,accept)
     }
 
+    /**
+     * Validates that there are no assets with the same name (included the assets imported from another file)
+     * @param model 
+     * @param accept 
+     */
     checkUniqueAssets(model: Model, accept: ValidationAcceptor): void {
         // create a set of visited assets
         // and report an error when we see one we've already seen
@@ -168,12 +180,22 @@ export class ImpromptuValidator {
         });
     }
 
+    /**
+     * Cheks that the model does not have inifinite loops
+     * @param model 
+     * @param accept 
+     */
     checkNoRecursivity(model: Model, accept: ValidationAcceptor): void {
         model.assets.forEach(asset =>{
             check_loops_asset(asset, accept)
         });
     }
 
+    /**
+     * Checks that a reference dos not reference itself
+     * @param model 
+     * @param accept 
+     */
     checkNoCyclesInRefines(model: Model, accept: ValidationAcceptor): void {
         model.assets.forEach(a => {
             if (a.refines != undefined) {
@@ -330,7 +352,11 @@ export class ImpromptuValidator {
     }
 
 
-
+    /**
+     * Checks that the langugae selected in an Asset is supported
+     * @param language 
+     * @param accept 
+     */
     checkLanguageAsset(asset:Asset, accept:ValidationAcceptor){
         if(!isChain(asset)){
             if(asset.language){ // If declares the language individually

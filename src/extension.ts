@@ -83,7 +83,7 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
 }
 
 /**
- * Service of the extention that enables the generation of the code file.
+ * Service of the extension that enables the generation of the code file.
  * @param context 
  * @param aiSystem 
  */

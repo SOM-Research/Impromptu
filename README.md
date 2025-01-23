@@ -12,7 +12,7 @@
 
 
 **[Impromptu's Modes](#impromptus-modes)** 
-- [CLI Mode](#cli-mode-and-prompt-customization)
+- [CLI Mode and Prompt customization](#cli-mode-and-prompt-customization)
 - [Server Mode](#impromptu-as-server)
     - [PM2 Installation](#pm2-instalation)
 
@@ -272,7 +272,9 @@ In case that parameters but no prompt were declared in the command, the last ass
 ### Adding extra LLMs
 
 Impromptu allows the user to **customize the behavior** of the generator making prompts **to a specific LLM**.
-The CLI command `addAI <name> (-f <alias>) (-pn promptName)`. This command would create a file `generate-prompt_<alias>.ts` that would dictate the behavior of the traits and the different assets. **This is internal coding, and thus, it is done in <i>typescript</i>**. The created file copies how a default LLM behaves, so one only needs to modify the functions that acts differentely. In the same way, it also exists a command to **delete added LLMs**: `removeAI <name>`.
+The CLI command `node .bin/cli addAI <name> (-f <alias>) (-pn promptName)`. This command would create a file `generate-prompt_<alias>.ts` that would dictate the behavior of the traits and the different assets. **This is internal coding, and thus, it is done in <i>typescript</i>**. The created file copies how a default LLM behaves, so one only needs to modify the functions that acts differentely. In the same way, it also exists a command to **delete added LLMs**: `node .bin/cli removeAI <name>`.
+
+This commands create/remove a new file that will allow to change the behaviour of Impromptu while generating a prompt to that specific LLM. However, the customization of this behavior is done by modifing (thus, coding) the `.ts` file created
 
 ## VSCode Extension
 ### Code generation for prompt execution and output validation

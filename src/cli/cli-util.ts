@@ -57,9 +57,9 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
     if (calls_buffer==undefined)  calls_buffer=[];
     let new_calls:AssetImport[]=[]
 
+    const model = (await extractDocument(fileName, services)).parseResult?.value as T;
     // Checks all the imports. Needed for the CLI mode
     if (calls_buffer){
-        const model = (await extractDocument(fileName, services)).parseResult?.value as T;
         
         if (isModel(model)){
             // get all the imports of the file
@@ -106,10 +106,11 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
             }
             if(exists_errors) throw new Error();
             return model
-        } return (await extractDocument(fileName, services)).parseResult?.value as T;
+        } 
+        return model;
     }
     else{
-        return (await extractDocument(fileName, services)).parseResult?.value as T;
+        return model;
     }
 }
 

@@ -18,7 +18,15 @@ export const generateAction = async (fileName: string, opts: GenerateOptions): P
     console.log(chalk.green(`JavaScript code generated successfully: ${generatedFilePath}`));
 };
 
-
+/**
+ * Generate a prompt form the file transmitted 
+ * @param fileName relative path of the `.prm` (string)
+ * @param opts :
+ *      @param destination Name used in the file and files' fuctions i.e. `genPrompt_<alias>`
+ *      @param target LLM where the prompt will be used
+ *      @param prompt If sent, the prompt it will be generated. If not sent, prompts of all assets in the file are generated instead.
+ *      @param variables values give to prompt's inputs 
+ */
 export const generatePromptAction = async (fileName: string, opts: GenPromptOptions): Promise<void> => {
 
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
@@ -69,14 +77,14 @@ export const testing = async(): Promise<void> => {
 
 /**
  * Generate the files from all the .prm files of a folder
- * @param fileName 
+ * @param folderName relative path to the folder
  * @param opts 
  */
-export const generateAll = async(fileName: string, opts: GenPromptOptions):Promise<void> =>{
+export const generateAll = async(folderName: string, opts: GenPromptOptions):Promise<void> =>{
     
-    readdirSync(fileName).forEach(file => {
+    readdirSync(folderName).forEach(file => {
         if (/[^].prm/.test(file)){
-            generatePromptAction(fileName+'/'+file, opts)
+            generatePromptAction(folderName+'/'+file, opts)
         }
     });
 };

@@ -146,6 +146,14 @@ export function genSnippet_default(snippet: Ast.Snippet, variables?:Map<string,s
     }
 }
 
+/**
+ * Generate the prompt realted to the core of the Snippet (BaseSnippet). Depend of the type of BaseSnippet, the rpompt will be generated in onw way or another.
+ * in addition, it can be used by custom prompt generators as a default managemt of the BaseSnippets
+ * @param snippet Snippet 
+ * @param variables Map of the inputs of the asset and their values in case a Snippet has ParameterRef
+ * @param snippet_function If sent, tells the fuctions that will be used to generate the prompts of the snippets inside the BaseSnippets. If any were sent, it will be `genSnippet_dafult`. It is recommended to use `genSnippet_<alias>` as its value.
+ * @returns Genrated prompt (string)
+ */
 export function genBaseSnippet_default(snippet: Ast.BaseSnippet, variables?:Map<string,string>,
     snippet_function?: { (snippet: Ast.Snippet, variables?: Map<string, string>): string; (arg0: Ast.Snippet, arg1: Map<string, string> | undefined): string; }){
     
