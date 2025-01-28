@@ -71,7 +71,7 @@ See the file [StartUp.md](StartUp.md).
 
 # Project Structure
 
-The main folders that are important to the developtment of the application are:
+The main folders that are important to the development of the application are:
 
 - `__test__`, where are **located the unitary tests**. It is hidden. For more information, see the [Testing](#testing) section.
 - `.vscode` Here are the json files that defines how the **vscode expansion** would behave, and the **debug options**.
@@ -87,7 +87,8 @@ The main folders that are important to the developtment of the application are:
 
 
 # Core Concepts
-In this section are explained the different functionalities of Impromptu, as well as the arquitecture of the Impromptu's files. When talking about the different functionalities and files, it will also be explain the main function and in which files are located.
+In this section are explained the different functionalities of Impromptu, as well as the arquitecture of the Impromptu's files. When talking about the different functionalities and files, it will also be explain the main function and in which files are located. These division can be represented by the follwing use Case diagram: 
+<img src='./pictures/UML_diagram.drawio.png'>
 
 ## Functions
 The main function of Impromptu is to generate the prompt of a `.prm` file written by the user. However, there are another important functionalities that Impromptu has, which would give the user several facilities to help in that matter.
@@ -293,7 +294,11 @@ Additionally, some modifications in Langium's Validators has had to be done as w
 
 ## Architecture
 ### Impromptu's Architecture
+The file `impromptu-langium` defines how the semantic of a `.prm` script should be. That is done by defining different structures, and how they have to appear in a `.prm` to be wqell defined. 
 
+The tree below represents this grammar, by denoting in **bold** the structures, and in *cursive* how thaty object is called.
+
+When a structure is inside  another structure without a name (for example, **Input-Parameter**), it means that the structure inside is a **type of the bigger structure**, in a relationship similar to child - parent classes in O.O.P.
 
 
 **Model**
