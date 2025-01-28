@@ -1,0 +1,9 @@
+language=English
+// Check detection of recursion loops in assets imported in the assets imported
+// IT SHOULD RETURN ERROR
+
+import * from examples.examples_heritage.wrong_prompts.error_in_import
+
+prompt function(): image
+core = "You are in A", function_aux()
+language=English

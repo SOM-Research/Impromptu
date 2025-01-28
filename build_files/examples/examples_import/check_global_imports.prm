@@ -1,5 +1,7 @@
 language=English
 
+
+// Example of the usage of the global import (import * ....) by importing the asset `main()`
 import * from libraries.tests.import_testA
 import notRead from libraries.tests.import_testB
 

@@ -1,23 +1,10 @@
 
 language=English
 
-import question_topic from libraries.evaluation_questions
-import paraphrase from libraries.evaluation_questions
-
-import number_questions from libraries.evaluation_questions
-
-import goal_content from libraries.evaluation_questions
-
-import give_answers from libraries.evaluation_questions
-
-import multi_format from libraries.evaluation_questions
-import choose_one_answers from libraries.evaluation_questions
-
-import InitialConditions from libraries.evaluation_questions
-import DetailedInstructions from libraries.evaluation_questions
+import * from libraries.evaluation_questions
 
 
-
+// Example of usage of the evaluatioon_question library
 prompt main(): text
     prefix = InitialConditions()
     core = 

@@ -35,27 +35,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = exports.parseAndValidate = exports.removeAI = exports.addAI = exports.generateAll = exports.testing = exports.generatePromptAction = exports.generateAction = void 0;
+exports.version = exports.parseAndValidate = exports.removeAI = exports.addAI = exports.generateAll = exports.generatePromptAction = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const commander_1 = require("commander");
 const module_1 = require("../language-server/generated/module");
 const impromptu_module_1 = require("../language-server/impromptu-module");
 const cli_util_1 = require("./cli-util");
-const generator_1 = require("./generator");
 const generate_prompt_1 = require("./gen/generate-prompt");
 const node_1 = require("langium/node");
 const node_fs_1 = require("node:fs");
 const files_management_1 = require("./files_management");
 const readline = __importStar(require("readline"));
-const generateAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
-    const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
-    const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
-    const generatedFilePath = (0, generator_1.generateJavaScript)(model, fileName, opts.destination);
-    console.log(chalk_1.default.green(`JavaScript code generated successfully: ${generatedFilePath}`));
-});
-exports.generateAction = generateAction;
+/**
+ * Generate a prompt form the file transmitted
+ * @param fileName relative path of the `.prm` (string)
+ * @param opts :
+ *      @param destination Name used in the file and files' fuctions i.e. `genPrompt_<alias>`
+ *      @param target LLM where the prompt will be used
+ *      @param prompt If sent, the prompt it will be generated. If not sent, prompts of all assets in the file are generated instead.
+ *      @param variables values give to prompt's inputs
+ */
 const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
-    debugger;
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     try {
         const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
@@ -84,25 +84,14 @@ const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 
 });
 exports.generatePromptAction = generatePromptAction;
 /**
- *  Promise of the testing command
- */
-const testing = () => __awaiter(void 0, void 0, void 0, function* () {
-    //const services = createImpromptuServices(NodeFileSystem).Impromptu;
-    //const dir= 'examples/test/'
-    //const testList= ['exampleChatGPT.prm','exampleHeritage.prm','output-validators.prm','testMissingPrompt.prm']
-    //var testFile=dir+testList[0] // Example of Heritage. Check that NewMain runs Draw() beacuse it runs Mixture
-    //const model = await extractAstNode<Model>(fileName, services);
-});
-exports.testing = testing;
-/**
  * Generate the files from all the .prm files of a folder
- * @param fileName
+ * @param folderName relative path to the folder
  * @param opts
  */
-const generateAll = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
-    (0, node_fs_1.readdirSync)(fileName).forEach(file => {
+const generateAll = (folderName, opts) => __awaiter(void 0, void 0, void 0, function* () {
+    (0, node_fs_1.readdirSync)(folderName).forEach(file => {
         if (/[^].prm/.test(file)) {
-            (0, exports.generatePromptAction)(fileName + '/' + file, opts);
+            (0, exports.generatePromptAction)(folderName + '/' + file, opts);
         }
     });
 });
@@ -111,11 +100,13 @@ exports.generateAll = generateAll;
  * Add an additional AI System and create a document to customize its generated prompts
  * @param llm : LLM to add
  * @param opts:
- *      @param alias Name used in the file and files' fuctions i.e. `genPrompt_<alias>`
- *      @param promptName Name used in the CLI to refereing the LLM. If it is not given is `llm` in lower case
+ *      @param promptName Name used in the CLI to refereing the LLM. If it is not given is `llm` in lower case.
+ *      @param alias Name used in the file and files' fuctions i.e. `genPrompt_<alias>`. OPTIONAL
+ *      @param command Name used in the CLI. OPTIONAL
  */
 const addAI = (llm, opts) => __awaiter(void 0, void 0, void 0, function* () {
     let fileAlias;
+    // If no alias was transmitted, the alias of the LLM will be the name
     if (opts) {
         if (opts.alias) {
             fileAlias = opts.alias;
@@ -127,6 +118,7 @@ const addAI = (llm, opts) => __awaiter(void 0, void 0, void 0, function* () {
     else {
         fileAlias = `${llm}`;
     }
+    // If no command was transmitted, the command of the LLM will be the name, but in lower case
     let command;
     if (opts) {
         if (!opts.promptName) {
@@ -155,6 +147,7 @@ const removeAI = (llm) => __awaiter(void 0, void 0, void 0, function* () {
         output: process.stdout
     });
     const llm_alias = (0, files_management_1.getAI_Alias)(llm);
+    // Confirmation that the LLM is wanted to be deleted
     if (llm_alias != undefined) {
         rl.question(`Are you sure you want to delete content related to the LLM "${llm}"? [y/n] `, (answer) => {
             switch (answer.toLowerCase()) {
@@ -206,20 +199,22 @@ function default_1() {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         .version(require('../../package.json').version);
     const fileExtensions = module_1.ImpromptuLanguageMetaData.fileExtensions.join(', ');
+    /*
     program
         .command('generate')
         .argument('<file>', `source file (possible file extensions: ${fileExtensions})`)
         .option('-d, --destination <dir>', 'destination directory of generating')
         .description('generates JavaScript code that prints "Hello, {name}!" for each greeting in a source file')
-        .action(exports.generateAction);
+        .action(generateAction);
+    */
     program
         .command('genprompt')
         .argument('<file>', `source file (possible file extensions: ${fileExtensions})`)
-        .option('-d, --destination <dir>', 'destination directory of generating')
+        .option('-d, --destination <dir>', 'directory where the generated file is created')
         .option('-p, --prompt <prompt>', 'Prompt where the varaibles are used')
         .option('-v, --variables <var...>', 'arguments transmitted to the prompt')
         .option('-t, --target <name>', 'name of the target generative AI system that will receive the prompt')
-        .description('Generate the textual prompt stored in a given file')
+        .description('Generate the textual prompt stored in a given .prm file.')
         .action(exports.generatePromptAction);
     program
         .command('parseAndValidate')

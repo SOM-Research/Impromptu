@@ -193,10 +193,6 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
    return "";
 }
 
-/* Not neccesary. Maybe reactivate?
-function genNegativeTrait_SD(snippet: Ast.NegativeTrait): string  {
-    return genSnippet_SD(snippet.content).toString();
-} */
 
 function genCombinationTrait_SD(snippet: Ast.CombinationTrait,variables?:Map<string,string>): string  {
     const contents  = snippet.contents;

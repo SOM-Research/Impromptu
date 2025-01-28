@@ -1,5 +1,9 @@
 language=English
 
+// Check detection of different languages
+// IT SHOULD RETURN WARNING
+
+
 prompt functionA(): image
 core = "You are in A", functionB()
 language=English

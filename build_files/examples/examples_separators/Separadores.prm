@@ -1,5 +1,7 @@
 language=English
 
+// Example of different separators, and its utility
+
 prompt Draw(): text
 core = "Draw a", "picture"
 separator= ""

@@ -2,6 +2,8 @@ language=English
 
 import job_statement from libraries.ethic_questions
 
+// Checks the the import is imported withe the value of the inputs
+
 
 prompt NewMain(): image
 core=job_statement("black person", "doctor")

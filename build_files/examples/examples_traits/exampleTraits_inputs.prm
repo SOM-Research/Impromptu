@@ -1,5 +1,6 @@
 language=English
 
+// Example of a prompt with trats, with inputs inside them
 prompt main(@animal, @animal2): image
 core =  between(@animal, @animal2), lighting(back),'adorable'
 language=English

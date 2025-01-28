@@ -1,7 +1,0 @@
-language=English
-
-prompt main(@animal, @animal2): image
-core =  includes(@animal, @animal2), audience("back"),like('adorable')
-language=English
-
-

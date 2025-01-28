@@ -97,7 +97,14 @@ function createFile(file:string,fileAlias:string){
     writeFileSync(`${gen_folder}/${file}`,content);
 }
 
-
+/**
+ * Make the changes in `generate-prompt-ts` to be able to access the file `generate-prompt_<alias>`
+ * @param llm name of the llm
+ * @param fileAlias Alias thatidentity the file
+ * @param command name used in CLI
+ * @param content string with the content of the file
+ * @returns 
+ */
 function changeMainFile(llm:string, fileAlias:string, command:string, content:string){
     // Write the importations
     let reg = /import((.)*?)from '.\/generate-prompt_default'(;)?/gm // ==> import......from '.\/generate-prompt_default'

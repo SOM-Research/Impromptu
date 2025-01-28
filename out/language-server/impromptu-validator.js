@@ -23,12 +23,19 @@ function registerValidationChecks(services) {
         ImportedAsset: validator.checkImportedAsset,
         Prompt: validator.checkLanguagePrompt,
         Composer: validator.checkLanguageComposer,
-        //CombinationTrait: validator.checkCombinationTrait,
+        CombinationTrait: validator.checkCombinationTrait,
         Language: validator.checkLanguage,
     };
     registry.register(checks, validator);
 }
 exports.registerValidationChecks = registerValidationChecks;
+/**
+ * Check that in a array of snippets are infinite loops
+ * @param snippets
+ * @param accept Validator
+ * @param og_asset Assests already paased
+ * @returns
+ */
 function check_loops_snippets(snippets, accept, og_asset) {
     snippets.forEach(snippet => {
         if ((0, ast_1.isAssetReuse)(snippet.content)) {
@@ -52,7 +59,7 @@ function check_loops_snippets(snippets, accept, og_asset) {
 /**
  * Check whether there are infinite loops in the model due to the references or not. Recursive function
  * @param asset Asset where we are
- * @param og_asset Noted asset used to check if there is a loop
+ * @param og_asset array of Asset used to check if there is a loop
  */
 function check_loops_asset(asset, accept, og_asset) {
     if (og_asset === null || og_asset === void 0 ? void 0 : og_asset.includes(asset)) {
@@ -118,6 +125,11 @@ class ImpromptuValidator {
         this.checkNoCyclesInRefines(model, accept);
         this.checkNoRecursivity(model, accept);
     }
+    /**
+     * Validates that there are no assets with the same name (included the assets imported from another file)
+     * @param model
+     * @param accept
+     */
     checkUniqueAssets(model, accept) {
         // create a set of visited assets
         // and report an error when we see one we've already seen
@@ -162,11 +174,21 @@ class ImpromptuValidator {
             }
         });
     }
+    /**
+     * Cheks that the model does not have inifinite loops
+     * @param model
+     * @param accept
+     */
     checkNoRecursivity(model, accept) {
         model.assets.forEach(asset => {
             check_loops_asset(asset, accept);
         });
     }
+    /**
+     * Checks that a reference dos not reference itself
+     * @param model
+     * @param accept
+     */
     checkNoCyclesInRefines(model, accept) {
         model.assets.forEach(a => {
             if (a.refines != undefined) {
@@ -305,6 +327,11 @@ class ImpromptuValidator {
             accept('error', `Language is not supported.`, { node: language });
         }
     }
+    /**
+     * Checks that the langugae selected in an Asset is supported
+     * @param language
+     * @param accept
+     */
     checkLanguageAsset(asset, accept) {
         if (!(0, ast_1.isChain)(asset)) {
             if (asset.language) { // If declares the language individually
@@ -394,7 +421,7 @@ function asset_reuse_language_validation(references, mainAsset, accept) {
             const refAsset = ar.asset.ref;
             const lang = (0, cli_util_1.getLanguage)(refAsset);
             if (lang != mainlanguage) {
-                accept('error', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ar });
+                accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ar });
             }
         }
         // Case Asset Import
@@ -402,7 +429,7 @@ function asset_reuse_language_validation(references, mainAsset, accept) {
             const refAsset = ar.asset.ref.asset.ref; // Ensure the link is well done
             const lang = (0, cli_util_1.getLanguage)(refAsset);
             if (lang != mainlanguage) {
-                accept('error', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ar });
+                accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ar });
             }
         }
     });
@@ -423,7 +450,7 @@ function asset_reuse_check_language(reference, ogAsset, accept) {
                 const refAsset = reference.asset.ref;
                 const lang = (0, cli_util_1.getLanguage)(refAsset);
                 if (lang != mainlanguage) {
-                    accept('error', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ogAsset });
+                    accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ogAsset });
                 }
                 const assets = (0, cli_util_1.get_all_asset_reuse)(refAsset);
                 if (assets)
@@ -437,7 +464,7 @@ function asset_reuse_check_language(reference, ogAsset, accept) {
                 const refAsset = reference.asset.ref.asset.ref; // Ensure the link is well done
                 const lang = (0, cli_util_1.getLanguage)(refAsset);
                 if (lang != mainlanguage) {
-                    accept('error', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ogAsset });
+                    accept('warning', `The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`, { node: ogAsset });
                 }
                 const assets = (0, cli_util_1.get_all_asset_reuse)(refAsset);
                 if (assets)

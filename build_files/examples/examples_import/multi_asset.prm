@@ -1,5 +1,6 @@
 language=English
 
+// Example of importing more than one asset in the same line
 import job_statement,roling_prompt from libraries.ethic_questions
 
 prompt NewMain(): image

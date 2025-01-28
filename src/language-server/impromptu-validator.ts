@@ -20,7 +20,7 @@ export function registerValidationChecks(services: ImpromptuServices) {
         ImportedAsset: validator.checkImportedAsset,
         Prompt: validator.checkLanguagePrompt,
         Composer: validator.checkLanguageComposer,
-        //CombinationTrait: validator.checkCombinationTrait,
+        CombinationTrait: validator.checkCombinationTrait,
         Language: validator.checkLanguage,
     };
     registry.register(checks, validator);
@@ -454,7 +454,7 @@ function asset_reuse_language_validation(references:AssetReuse[], mainAsset:Asse
             const refAsset = ar.asset.ref
             const lang = getLanguage(refAsset)
             if (lang != mainlanguage){
-                accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
+                accept('warning',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
             }
         }
     // Case Asset Import
@@ -462,7 +462,7 @@ function asset_reuse_language_validation(references:AssetReuse[], mainAsset:Asse
             const refAsset = ar.asset.ref.asset.ref as Asset // Ensure the link is well done
             const lang = getLanguage(refAsset)
             if (lang != mainlanguage){
-                accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
+                accept('warning',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ar});
             }
         }
     })
@@ -485,7 +485,7 @@ function asset_reuse_check_language(reference:AssetReuse, ogAsset:AssetReuse, ac
                 const refAsset = reference.asset.ref
                 const lang = getLanguage(refAsset)
                 if (lang != mainlanguage){
-                    accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ogAsset});
+                    accept('warning',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ogAsset});
                 }
                 const assets = get_all_asset_reuse(refAsset)
                 if (assets)
@@ -501,7 +501,7 @@ function asset_reuse_check_language(reference:AssetReuse, ogAsset:AssetReuse, ac
                 const refAsset = reference.asset.ref.asset.ref as Asset // Ensure the link is well done
                 const lang = getLanguage(refAsset)
                 if (lang != mainlanguage){
-                    accept('error',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ogAsset});
+                    accept('warning',`The Asset ${refAsset.name} is supposed to be used in a ${lang} prompt, but ${mainAsset.name} is declared in ${mainlanguage}`,{node:ogAsset});
                 }
                 const assets = get_all_asset_reuse(refAsset)
                 if (assets)

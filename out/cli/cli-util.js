@@ -60,16 +60,16 @@ exports.extractDocument = extractDocument;
  * @returns
  */
 function extractAstNode(fileName, services, calls_buffer) {
-    var _a, _b, _c;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         let libraries = [];
         let import_names = [];
         if (calls_buffer == undefined)
             calls_buffer = [];
         let new_calls = [];
+        const model = (_a = (yield extractDocument(fileName, services)).parseResult) === null || _a === void 0 ? void 0 : _a.value;
         // Checks all the imports. Needed for the CLI mode
         if (calls_buffer) {
-            const model = (_a = (yield extractDocument(fileName, services)).parseResult) === null || _a === void 0 ? void 0 : _a.value;
             if ((0, ast_1.isModel)(model)) {
                 // get all the imports of the file
                 model.imports.forEach(import_line => {
@@ -114,10 +114,10 @@ function extractAstNode(fileName, services, calls_buffer) {
                     throw new Error();
                 return model;
             }
-            return (_b = (yield extractDocument(fileName, services)).parseResult) === null || _b === void 0 ? void 0 : _b.value;
+            return model;
         }
         else {
-            return (_c = (yield extractDocument(fileName, services)).parseResult) === null || _c === void 0 ? void 0 : _c.value;
+            return model;
         }
     });
 }
