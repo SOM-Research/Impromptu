@@ -7,36 +7,42 @@ import globby from 'globby';
 
 /**
  * Gets the `LangiumDocument` of the a certain file
- * @param fileName relative path of the file from `build_files`
+ * @param fileName ABSOLUTE path of the file from `build_files`
  * @param services LangiumService
  * @returns 
  */
 export async function extractDocument(fileName: string, services: LangiumServices): Promise<LangiumDocument> {
     const extensions = services.LanguageMetaData.fileExtensions;
    
-    if (!extensions.includes(path.extname('build_files/'+fileName))) {
+    if (!extensions.includes(path.extname(fileName))) {
         console.error(chalk.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
         process.exit(1);
     }
-    let documents:LangiumDocument<AstNode>[] = []
-    const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); 
-    const files = await globby("**/*.prm");   // Get all .prm files
+    let documents:LangiumDocument<AstNode>[] = [];
+    const document = await services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(fileName))); 
+    
+    let workspace_path = get_workspace() //Required since we are it may be accessed by VSCode (it operates in VSCODE_LOCAL)
+
+    const files_dir = path.join(workspace_path,'build_files').split('\\').join('/') // `glooby` need foward slash to work
+    
+    const files = await globby(`${files_dir}/**/*.prm`);   // Get all .prm files
     files.forEach(file => 
         documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(file))))
     )
     await services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
 
-    const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
+    const validationErrors =(document.diagnostics ?? []).filter(e => e.severity === 1);
+    
     if (validationErrors.length > 0) {
-        console.error(chalk.red(`There are validation errors in ${fileName}:`));
+        console.error(`There are validation errors in ${fileName}:`);
         var errors = []
         for (const validationError of validationErrors) {
             errors.push(`[${fileName}: ${validationError.range.start.line + 1}] Error : ${validationError.message} [${document.textDocument.getText(validationError.range)}]`);
-            console.error(chalk.red(
+            console.error(
                 errors.at(-1)
-            ));
+            );
         }
-        console.error(chalk.red("----------------------------------------------------------------------------"))
+        console.error("----------------------------------------------------------------------------")
         throw new Error(errors.join("\n"));
     }
 
@@ -84,8 +90,11 @@ export async function extractAstNode<T extends AstNode>(fileName: string, servic
                     if (!calls_buffer.find(element=> libraries[i]==(element.$container as ImportedAsset).library && import_names[i]==element.name )) {
                         // Update the elements that have been called
                         calls_buffer.push(new_calls[i]);
-                        
-                        const import_model = await extractAstNode<Model>(libraries[i].split(".").join("/")+".prm", services,calls_buffer);
+                        const fileName =libraries[i].split(".").join("/")+".prm" // Get absolute path of the import file
+                        let workspace_path = get_workspace(); //Required since we are in VSCODE LOCAL
+                    
+                        const abs_path = path.join(workspace_path,'build_files', fileName).split('\\').join('/')
+                        const import_model = await extractAstNode<Model>(abs_path, services,calls_buffer);
                         let imported_assets: Asset[]=[];
                         import_model.assets.forEach(asset =>{
                             //filter to only get the wanted functions
@@ -224,4 +233,15 @@ export function get_all_asset_reuse(asset:Asset):AssetReuse[]{
         throw [];
     }
 
+}
+
+/**
+ * Get Impromptu's main folder (the required wrokspace) as string
+ */
+export function get_workspace():string{
+    let workspace_path = process.env.WORKSPACE;
+    if (!workspace_path){
+        workspace_path= process.cwd();
+    }
+    return workspace_path
 }

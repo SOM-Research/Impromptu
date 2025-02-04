@@ -31,11 +31,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractAstNodeVSCode = exports.CodeGenerator = void 0;
+exports.CodeGenerator = void 0;
 const impromptu_module_js_1 = require("./language-server/impromptu-module.js");
 const ast_js_1 = require("./language-server/generated/ast.js");
 const node_1 = require("langium/node");
@@ -43,9 +40,7 @@ const node_1 = require("langium/node");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const generate_prompt_js_1 = require("./cli/gen/generate-prompt.js");
-const vscode_uri_1 = require("vscode-uri");
-const globby_1 = __importDefault(require("globby"));
-const path_1 = require("path");
+const cli_util_js_1 = require("./cli/cli-util.js");
 /**
 * Python code generator service main class
 */
@@ -87,7 +82,7 @@ class CodeGenerator {
     generateCode(modelName, aiSystem, promptName) {
         return __awaiter(this, void 0, void 0, function* () {
             const services = this.services; // Use the service to extract the AST of the wanted file
-            const model = yield extractAstNodeVSCode(modelName, services.Impromptu);
+            const model = yield (0, cli_util_js_1.extractAstNode)(modelName, services.Impromptu);
             // Needs to import the Ast of the imported files as well
             const template = this.templates.get(this.GENERIC_PROMPT_SERVICE) + this.templates.get(aiSystem);
             return ((0, ast_js_1.isModel)(model) ? this.model2Code(model, aiSystem, template, promptName) : undefined);
@@ -137,106 +132,4 @@ class CodeGenerator {
     }
 }
 exports.CodeGenerator = CodeGenerator;
-/**
- * Build the Langium Document that allows to analyze the `.prm` file
- * @param fileName uri of the file, relative to the folder `build_files`
- * @param services LangiumService
- * @param calls_buffer Auxiliar variable with the Assets "visited"
- * @returns
- */
-function extractAstNodeVSCode(fileName, services, calls_buffer) {
-    var _a, _b, _c;
-    return __awaiter(this, void 0, void 0, function* () {
-        let libraries = [];
-        let import_names = [];
-        if (calls_buffer == undefined)
-            calls_buffer = [];
-        let new_calls = [];
-        if (calls_buffer) {
-            const model = (_a = (yield extractDocumentVSCode(fileName, services)).parseResult) === null || _a === void 0 ? void 0 : _a.value;
-            if ((0, ast_js_1.isModel)(model)) {
-                // Get all the imports of the file
-                model.imports.forEach(import_line => {
-                    import_line.set_assets.forEach(asset => {
-                        // Checks that it is imported from a different file
-                        libraries.push(asset.$container.library);
-                        if (asset.name) {
-                            import_names.push(asset.name);
-                        }
-                        new_calls.push(asset);
-                    });
-                });
-                // Search the imported prompts
-                var exists_errors = false; //Mark there are errors or not
-                for (let i = 0; i < new_calls.length; i++) {
-                    try {
-                        if (!calls_buffer.find(element => libraries[i] == element.$container.library && import_names[i] == element.name)) {
-                            // Update the elements that have been called
-                            calls_buffer.push(new_calls[i]);
-                            const import_model = yield extractAstNodeVSCode(libraries[i].split(".").join("/") + ".prm", services, calls_buffer);
-                            let imported_assets = [];
-                            import_model.assets.forEach(asset => {
-                                //filter to only get the wanted functions
-                                if (import_names.find(element => element == asset.name)) {
-                                    imported_assets.push(asset);
-                                }
-                            });
-                            model.assets = model.assets.concat(imported_assets);
-                        }
-                        else {
-                        }
-                    }
-                    catch (e) {
-                        /*
-                        let line = get_line_node(new_calls[i]);
-                        console.error(chalk.red(`[${fileName}: ${line}] Error in the imported file "${(new_calls[i].$container as ImportedAsset).library}.prm".`));
-                        console.error(chalk.red("----------------------------------------------------------------------------"))
-                        exists_errors = true*/
-                    }
-                }
-                if (exists_errors)
-                    throw new Error();
-                return model;
-            }
-            return (_b = (yield extractDocumentVSCode(fileName, services)).parseResult) === null || _b === void 0 ? void 0 : _b.value;
-        }
-        else {
-            return (_c = (yield extractDocumentVSCode(fileName, services)).parseResult) === null || _c === void 0 ? void 0 : _c.value;
-        }
-    });
-}
-exports.extractAstNodeVSCode = extractAstNodeVSCode;
-/**
- * Gets the `LangiumDocument` of the a certain file for a VSCode extension
- * @param fileName relative path of the file from `build_files`
- * @param services LangiumService used to extract the document
- * @returns
- */
-function extractDocumentVSCode(fileName, services) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        let documents = [];
-        const document = yield services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path.resolve(fileName)));
-        let workspace_path = process.env.WORKSPACE; //Required since we are in VSCODE LOCAL
-        if (!workspace_path) {
-            workspace_path = process.cwd();
-        }
-        const files_dir = (0, path_1.join)(workspace_path, 'build_files').split('\\').join('/'); // `glooby` need foward slash to work
-        const files = yield (0, globby_1.default)(`${files_dir}/**/*.prm`); // Get all .prm files
-        files.forEach(file => documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path.resolve(file)))));
-        yield services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
-        const validationErrors = ((_a = document.diagnostics) !== null && _a !== void 0 ? _a : []).filter(e => e.severity === 1);
-        if (validationErrors.length > 0) {
-            console.error(`There are validation errors in ${fileName}:`);
-            var errors = [];
-            for (const validationError of validationErrors) {
-                errors.push(`[${fileName}: ${validationError.range.start.line + 1}] Error : ${validationError.message} [${document.textDocument.getText(validationError.range)}]`);
-                console.error(errors.at(-1));
-            }
-            console.error("----------------------------------------------------------------------------");
-            throw new Error(errors.join("\n"));
-        }
-        return document;
-    });
-}
 //# sourceMappingURL=impromptu-code-generator.js.map

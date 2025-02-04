@@ -46,6 +46,7 @@ const node_1 = require("langium/node");
 const node_fs_1 = require("node:fs");
 const files_management_1 = require("./files_management");
 const readline = __importStar(require("readline"));
+const path_1 = __importDefault(require("path"));
 /**
  * Generate a prompt form the file transmitted
  * @param fileName relative path of the `.prm` (string)
@@ -58,7 +59,7 @@ const readline = __importStar(require("readline"));
 const generatePromptAction = (fileName, opts) => __awaiter(void 0, void 0, void 0, function* () {
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     try {
-        const model = yield (0, cli_util_1.extractAstNode)(fileName, services);
+        const model = yield (0, cli_util_1.extractAstNode)(path_1.default.resolve('build_files/' + fileName), services);
         var validPrompt = true;
         if (opts.prompt) {
             // In case a certain prompt is sent, we have to check that the prompt exists
@@ -173,7 +174,7 @@ const parseAndValidate = (alias) => __awaiter(void 0, void 0, void 0, function* 
     // retrieve the services for our language
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     // extract a document for our program
-    const document = yield (0, cli_util_1.extractDocument)(alias, services);
+    const document = yield (0, cli_util_1.extractDocument)(path_1.default.resolve('build_files/' + alias), services);
     // extract the parse result details
     const parseResult = document.parseResult;
     // verify no lexer, parser, or general diagnostic errors show up

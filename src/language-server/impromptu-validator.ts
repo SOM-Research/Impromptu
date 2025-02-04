@@ -2,7 +2,7 @@ import { getContainerOfType, ValidationAcceptor, ValidationChecks } from 'langiu
 import { ImpromptuAstType, Multimodal, Model, Parameters, Prompt, isPrompt, isByExpressionOutputTesting, AssetReuse, isChain, isImportedAsset, ImportedAsset, isAssetReuse, isComposer, Asset, Snippet, CombinationTrait, Language, isAsset, isAssetImport, AssetImport, Composer} from './generated/ast';
 import type { ImpromptuServices } from './impromptu-module';
 import fs from 'fs';
-import { get_all_asset_reuse, get_imported_asset, getLanguage } from '../cli/cli-util';
+import { get_all_asset_reuse, get_imported_asset, get_workspace, getLanguage } from '../cli/cli-util';
 
 
 /**
@@ -282,10 +282,7 @@ export class ImpromptuValidator {
     checkImportedAsset(imported_asset:ImportedAsset, accept:ValidationAcceptor){
         // I- The file it references (`imported_asset.library`) exists.
         const library = imported_asset.library.split(".").join("/"); // Convert the Qualified name into a relative path
-        let workspace_path = process.env.WORKSPACE
-        if (!workspace_path){
-            workspace_path= process.cwd()
-        }
+        let workspace_path = get_workspace()
 
         let uri_array = workspace_path.split("/")
         let last='build_files'
@@ -423,14 +420,10 @@ export class ImpromptuValidator {
  * @returns 
  */
 function findLanguage(language_name:string){
-    let workspace_path = process.env.WORKSPACE
-        if (!workspace_path){
-            workspace_path= process.cwd()
-        }
 
     let found=false;
 
-    const json_file=fs.readFileSync(workspace_path+'/languages/lang.json')
+    const json_file=fs.readFileSync(get_workspace()+'/languages/lang.json')
     const json=JSON.parse(json_file.toString());
     json.forEach((element: { [x: string]: string; }) =>{
         if(element["language"]==language_name ||element["code"]==language_name){

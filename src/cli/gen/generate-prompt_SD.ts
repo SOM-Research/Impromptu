@@ -4,6 +4,7 @@ import { get_file_from, get_line_node } from '../cli-util';
 import { AISystem, extractMedium, genAssetReuse, genImportedAsset } from './generate-prompt';
 import * as df from './generate-prompt_default';
 
+
 /**
  * Generate a prompt for each asset (Generate the single requested prompt).
  * StableDiffusion Version
@@ -76,6 +77,8 @@ export function generatePrompt_SD(model: Ast.Model, prompt: Ast.Prompt | undefin
     }
 }
 
+
+
 /**
  * Generate the prompt of an Asset in Stable Diffusion
  * 
@@ -90,8 +93,8 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
         if (asset.separator !== undefined){
             separator = asset.separator;
         }
-        const prefix = (asset.prefix != null ? asset.prefix.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
-        const suffix = (asset.suffix != null ? asset.suffix.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
+        const pos_prefix = (asset.prefix != null ? extractPositiveModifiers(asset.prefix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
+        const pos_suffix = (asset.suffix != null ? extractPositiveModifiers(asset.suffix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         
         // Prompt structure: 
         // Positive prompt: [medium] of [subject] [modifiers]
@@ -106,16 +109,67 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
             text = ( medium == undefined ? [] : [ medium ] );
         }
         
-        const core  = asset.core.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];
-        let positive_prompt = prefix.concat(text,core, suffix).filter(function(e){return e}).join(separator);
+        let pos_core  = extractPositiveModifiers(asset.core.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];
+        
+        const neg_prefix = (asset.prefix != null ? extractNegativeModifiers(asset.prefix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
+        const neg_suffix = (asset.suffix != null ? extractNegativeModifiers(asset.suffix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
+        
+        const neg_core  = extractNegativeModifiers(asset.core.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];
+        
+        let neg_part:string[]=[]
 
-        const negativeModifiers = extractNegativeModifiers(asset.core.snippets);
-        const negativeText = negativeModifiers.flatMap(snippet => genSnippet_SD(((snippet.content as unknown) as Ast.NegativeTrait).content, variables)).filter(e => e !== undefined) as string[];
-        let negative_prompt = negativeText.filter(function(e){return e}).join(separator);
+        let pos_part:string[]=[]
+
+
+    
+        pos_prefix.forEach(snippet => {try{
+            pos_part.push(JSON.parse(snippet)["Positive"]);
+        }catch(e){pos_part.push(snippet)}} );
+        pos_core.forEach(snippet => {try{
+            pos_part.push(JSON.parse(snippet)["Positive"]);
+            neg_part.push(JSON.parse(snippet)["Negative"]);
+        }catch(e){pos_part.push(snippet)}} );
+        pos_suffix.forEach(snippet => {try{
+            pos_part.push(JSON.parse(snippet)["Positive"]);
+        }catch(e){pos_part.push(snippet)}} );
+
+
+        
+        neg_prefix.forEach(snippet => {try{
+            neg_part.push(JSON.parse(snippet)["Negative"]);
+        }catch(e){neg_part.push(snippet)}} );
+        neg_core.forEach(snippet => {try{
+            neg_part.push(JSON.parse(snippet)["Negative"]);
+            neg_part.push(JSON.parse(snippet)["Positive"]);
+        }catch(e){neg_part.push(snippet)}} );
+        neg_suffix.forEach(snippet => {try{
+            neg_part.push(JSON.parse(snippet)["Negative"]);
+        }catch(e){neg_part.push(snippet)}} );
+
+
+
+        
+        let positive_prompt = text.concat(pos_part).filter(function(e){return e}).join(separator);
+
+        let negative_prompt = neg_part.filter(function(e){return e}).join(separator);
         // Build the final prompt
-        const positive = ["Positive prompt:\n"].concat(positive_prompt);
-        const negative = ["\nNegative prompt:\n"].concat(negative_prompt);
-        return positive.concat(['\n'], negative);
+        const positive= positive_prompt;
+        const negative = negative_prompt;
+        let json_obj
+        if (positive && negative){
+            json_obj = `{"Positive":"${positive}","Negative":"${negative}"}` 
+        }
+        else if(positive && !negative){
+            json_obj = `{"Positive":"${positive}"}` 
+        }
+        else if(!positive && negative){
+            json_obj = `{"Negative":"${negative}"}` 
+        }else{
+            
+            json_obj = `` 
+        }
+        
+        return [json_obj];
     } else if (Ast.isComposer(asset)) {
         return asset.contents.snippets.flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];;
     } else if (Ast.isChain(asset)) {
@@ -135,6 +189,16 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
  */
  function extractNegativeModifiers(snippets: Ast.Snippet[]): Ast.Snippet[] {
     const negative = snippets.filter(s => Ast.isNegativeTrait(s.content));
+    return negative;
+}
+
+/**
+ * For an array of snippets, extract the ones that (their content) are NegativeTrait
+ * @param snippets 
+ * @returns 
+ */
+function extractPositiveModifiers(snippets: Ast.Snippet[]): Ast.Snippet[] {
+    const negative = snippets.filter(s => !Ast.isNegativeTrait(s.content));
     return negative;
 }
 
@@ -226,8 +290,5 @@ function genParameterRef(snippet: Ast.ParameterRef,variables?: Map<string,string
         return variables.get(((snippet as unknown) as Ast.ParameterRef).param.$refText) as string;}
 }
  function genNegativeTrait(snippet:Ast.NegativeTrait){
-    let file = get_file_from(snippet);
-    let line = get_line_node(snippet);
-    console.log(chalk.yellow(`[${file}]- Warning in line ${line}: A Negative Trait should not exist in StableDiffusion`));
-    return ""; // the Negative Traits in SD are in the Negative Prompt part, as an ordinary Trait
+    return genSnippet_SD(snippet.content); // the Negative Traits in SD are in the Negative Prompt part, as an ordinary Trait
  }

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.get_all_asset_reuse = exports.get_all_snippets = exports.getLanguage = exports.get_file_from = exports.get_line_node = exports.get_imported_asset = exports.extractDestinationAndName = exports.extractAstNode = exports.extractDocument = void 0;
+exports.get_workspace = exports.get_all_asset_reuse = exports.get_all_snippets = exports.getLanguage = exports.get_file_from = exports.get_line_node = exports.get_imported_asset = exports.extractDestinationAndName = exports.extractAstNode = exports.extractDocument = void 0;
 const chalk_1 = __importDefault(require("chalk"));
 const path_1 = __importDefault(require("path"));
 const vscode_uri_1 = require("vscode-uri");
@@ -20,7 +20,7 @@ const ast_1 = require("../language-server/generated/ast");
 const globby_1 = __importDefault(require("globby"));
 /**
  * Gets the `LangiumDocument` of the a certain file
- * @param fileName relative path of the file from `build_files`
+ * @param fileName ABSOLUTE path of the file from `build_files`
  * @param services LangiumService
  * @returns
  */
@@ -28,24 +28,26 @@ function extractDocument(fileName, services) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const extensions = services.LanguageMetaData.fileExtensions;
-        if (!extensions.includes(path_1.default.extname('build_files/' + fileName))) {
+        if (!extensions.includes(path_1.default.extname(fileName))) {
             console.error(chalk_1.default.yellow(`Please choose a file with one of these extensions: ${extensions}.`));
             process.exit(1);
         }
         let documents = [];
-        const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve('build_files/' + fileName)));
-        const files = yield (0, globby_1.default)("**/*.prm"); // Get all .prm files
+        const document = yield services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve(fileName)));
+        let workspace_path = get_workspace(); //Required since we are it may be accessed by VSCode (it operates in VSCODE_LOCAL)
+        const files_dir = path_1.default.join(workspace_path, 'build_files').split('\\').join('/'); // `glooby` need foward slash to work
+        const files = yield (0, globby_1.default)(`${files_dir}/**/*.prm`); // Get all .prm files
         files.forEach(file => documents.push(services.shared.workspace.LangiumDocuments.getOrCreateDocument(vscode_uri_1.URI.file(path_1.default.resolve(file)))));
         yield services.shared.workspace.DocumentBuilder.build(documents, { validationChecks: 'all' }); // Build the document. We need to pass all the .prm files to check for importation errors
         const validationErrors = ((_a = document.diagnostics) !== null && _a !== void 0 ? _a : []).filter(e => e.severity === 1);
         if (validationErrors.length > 0) {
-            console.error(chalk_1.default.red(`There are validation errors in ${fileName}:`));
+            console.error(`There are validation errors in ${fileName}:`);
             var errors = [];
             for (const validationError of validationErrors) {
                 errors.push(`[${fileName}: ${validationError.range.start.line + 1}] Error : ${validationError.message} [${document.textDocument.getText(validationError.range)}]`);
-                console.error(chalk_1.default.red(errors.at(-1)));
+                console.error(errors.at(-1));
             }
-            console.error(chalk_1.default.red("----------------------------------------------------------------------------"));
+            console.error("----------------------------------------------------------------------------");
             throw new Error(errors.join("\n"));
         }
         return document;
@@ -90,7 +92,10 @@ function extractAstNode(fileName, services, calls_buffer) {
                         if (!calls_buffer.find(element => libraries[i] == element.$container.library && import_names[i] == element.name)) {
                             // Update the elements that have been called
                             calls_buffer.push(new_calls[i]);
-                            const import_model = yield extractAstNode(libraries[i].split(".").join("/") + ".prm", services, calls_buffer);
+                            const fileName = libraries[i].split(".").join("/") + ".prm"; // Get absolute path of the import file
+                            let workspace_path = get_workspace(); //Required since we are in VSCODE LOCAL
+                            const abs_path = path_1.default.join(workspace_path, 'build_files', fileName).split('\\').join('/');
+                            const import_model = yield extractAstNode(abs_path, services, calls_buffer);
                             let imported_assets = [];
                             import_model.assets.forEach(asset => {
                                 //filter to only get the wanted functions
@@ -226,4 +231,15 @@ function get_all_asset_reuse(asset) {
     }
 }
 exports.get_all_asset_reuse = get_all_asset_reuse;
+/**
+ * Get Impromptu's main folder (the required wrokspace) as string
+ */
+function get_workspace() {
+    let workspace_path = process.env.WORKSPACE;
+    if (!workspace_path) {
+        workspace_path = process.cwd();
+    }
+    return workspace_path;
+}
+exports.get_workspace = get_workspace;
 //# sourceMappingURL=cli-util.js.map

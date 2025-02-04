@@ -6,5 +6,6 @@ import * from libraries.tests.import_testA
 import notRead from libraries.tests.import_testB
 
 prompt NewMain(): image
+prefix=no("hee")
 core=main(),notRead()
 language=English

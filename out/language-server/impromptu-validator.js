@@ -269,10 +269,7 @@ class ImpromptuValidator {
     checkImportedAsset(imported_asset, accept) {
         // I- The file it references (`imported_asset.library`) exists.
         const library = imported_asset.library.split(".").join("/"); // Convert the Qualified name into a relative path
-        let workspace_path = process.env.WORKSPACE;
-        if (!workspace_path) {
-            workspace_path = process.cwd();
-        }
+        let workspace_path = (0, cli_util_1.get_workspace)();
         let uri_array = workspace_path.split("/");
         let last = 'build_files';
         uri_array.push(last);
@@ -393,12 +390,8 @@ exports.ImpromptuValidator = ImpromptuValidator;
  * @returns
  */
 function findLanguage(language_name) {
-    let workspace_path = process.env.WORKSPACE;
-    if (!workspace_path) {
-        workspace_path = process.cwd();
-    }
     let found = false;
-    const json_file = fs_1.default.readFileSync(workspace_path + '/languages/lang.json');
+    const json_file = fs_1.default.readFileSync((0, cli_util_1.get_workspace)() + '/languages/lang.json');
     const json = JSON.parse(json_file.toString());
     json.forEach((element) => {
         if (element["language"] == language_name || element["code"] == language_name) {

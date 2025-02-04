@@ -168,7 +168,7 @@ export function genBaseSnippet_default(snippet: Ast.BaseSnippet, variables?:Map<
         return genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
     } 
     // TRAITS
-    // The traits with the atribute `content` need to know witch snippet function to ensure compatibilty to possible calls from the specific files
+    // The traits with the atribute `content` need to know which snippet function have to use to ensure compatibilty to possible calls from the specific files
     // Negative
     else if (Ast.isNegativeTrait(snippet)) {
         return genNegativeTrait_default(snippet, variables, snippet_function);
@@ -346,7 +346,7 @@ export function genLightingTrait_default(snippet: Ast.LightingTrait): string  {
 
 export function genMediumTrait_default(snippet: Ast.MediumTrait): string {
     const text  = snippet.value;
-    return "Style:"+text;
+    return "Style: "+text;
 }
 
 export function genEffectsTrait_default(snippet:Ast.EffectsTrait){

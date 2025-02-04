@@ -1,19 +1,7 @@
 
 language=English
 
-import question_topic from libraries.evaluation_questions
-
-
-import choose_one_answers from libraries.evaluation_questions
-
-
-import answer_options from libraries.evaluation_questions
-
-
-import InitialConditions from libraries.evaluation_questions
-
-
-import DetailedInstructions from libraries.evaluation_questions
+import * from libraries.evaluation_questions
 
 
 

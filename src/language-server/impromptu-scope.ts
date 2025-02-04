@@ -5,6 +5,7 @@ import { Asset, ImpromptuAstType, isAsset,isChain, Model} from './generated/ast.
 import { LangiumServices} from "langium";
 import { join } from 'path';
 import { URI } from 'vscode-uri';
+import { get_workspace } from '../cli/cli-util.js';
 
 
 const URI_SEPARATOR='/';
@@ -73,11 +74,7 @@ export class ScopeParamProvider extends DefaultScopeProvider {
         //get a base uri
         //const baseUri = document.uri;
 
-        let workspace_path = process.env.WORKSPACE
-        if (!workspace_path){
-            workspace_path= process.cwd()
-        }
-
+        let workspace_path = get_workspace()
         //get folder of current document
         const currentDir = join(workspace_path,'build_files')
         const uris = new Set<string>();
@@ -114,13 +111,8 @@ export class ScopeParamProvider extends DefaultScopeProvider {
         //get a base uri
         const baseUri = document.uri;
 
-        let workspace_path = process.env.WORKSPACE
-        if (!workspace_path){
-            workspace_path= process.cwd()
-        }
-
         //get folder of current document
-        const currentDir = join(baseUri.with({path:workspace_path}).path,'build_files')
+        const currentDir = join(baseUri.with({path:get_workspace()}).path,'build_files')
         const uris = new Set<string>();
         //for all file imports of the current file
         

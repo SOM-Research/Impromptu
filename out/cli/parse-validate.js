@@ -17,11 +17,12 @@ const chalk_1 = __importDefault(require("chalk"));
 const cli_util_1 = require("./cli-util");
 const impromptu_module_1 = require("../language-server/impromptu-module");
 const node_1 = require("langium/node");
+const path_1 = __importDefault(require("path"));
 const parseAndValidate = (fileName) => __awaiter(void 0, void 0, void 0, function* () {
     // retrieve the services for our language
     const services = (0, impromptu_module_1.createImpromptuServices)(node_1.NodeFileSystem).Impromptu;
     // extract a document for our program
-    const document = yield (0, cli_util_1.extractDocument)(fileName, services);
+    const document = yield (0, cli_util_1.extractDocument)(path_1.default.resolve('build_files/' + fileName), services);
     // extract the parse result details
     const parseResult = document.parseResult;
     // verify no lexer, parser, or general diagnostic errors show up

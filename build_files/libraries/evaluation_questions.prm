@@ -22,9 +22,10 @@ prompt complete_gaps_questions(@option):  text
         separator=". "
     language=English
 
+// Modification of complete_gaps_questions(@option) so that the question is to complete the gaps from a given text
 prompt only_one_text_option():  text
     core = 
-        "Use a common text for all questions"
+        "Use a common text for all questions, deleting main words/expression that the students have to guess"
         separator=" "
 
 // Provide that the mentioned question is an open question
@@ -48,7 +49,8 @@ prompt paraphrase():text
 // Provide that the mentioned question are multiple choice (A), B), C), D) - like questions)
 prompt multi_choice():  text
     core = 
-        "The questions should be multiple-choice type"
+
+        "The questions should be multiple-choice type. Generate this questions by first generating the set of questions and answers, and then adding the distractors. Omit this proccess in the response."
     separator=". "
     language=English
 
@@ -110,7 +112,7 @@ prompt goal_content(@source):  text
 prompt answer_options(@number,@answers, @distractors): text
     prefix= number_questions(@number)
     core= "You have to select the correct answers from the list:",@answers,
-    "and the distractors from the following list:",@distractors,"The distractors may not be in order"
+    "and the distractors from the following list:",@distractors,". The distractors may not be in order. When the test is generated, upgrade the distractors used."
     suffix= "Do not reveal what the distractors nor the correct answers are. Only use each correct answer once"
     separator=" "
     language= English
@@ -157,7 +159,7 @@ prompt hard_question():text
 //-------------------------------------Question level----------------------------------------------
 prompt level(@level): text
     core = 
-        "The questions should be selected to test people with",@level,"knowledge level. Try that the questions are as difficult as possible."
+        "The questions should be selected to test people with",@level,"knowledge level. Choose the questions so that they are challeging in that level."
         separator=" "
     language=English
 
@@ -177,7 +179,7 @@ prompt language_level(@level): text
 
 // Average age of the student (relevant to adult students, for example)
 prompt students_age(@age): text
-    core= "The target students are",@age,"years old"
+    core= "The target students are",@age,"years old. So adapat the question "
     separator=" "
 
 // Knowledge that has to be proven by passing the exam. For example:
@@ -190,8 +192,8 @@ prompt learning_outcome(@outcome): text
 // Give an example of a question that is wanted in the exam
 prompt example_question(@example):text
     core = 
-        "Take this question as an example:",@example
-        separator=" "
+        "Take this question as a model:",@example
+    separator=" "
     language=English
 
 // Time for solving the questions, in minutes
@@ -204,7 +206,7 @@ prompt duration_exam(@level,@times): text
 // Time for solving the question, in minutes
 prompt time_question(@times): text
     core = 
-        "The time limit to solve this question is",@times,"minutes"
+        "Adjust the complexity and langht of the question so that it can be solve in",@times,"minutes"
         separator=" "
     language=English
 
@@ -221,36 +223,38 @@ prompt exam_language(@lang):text
 
 // Prior concepts the students should know & use to pass the exam
 prompt prior_knowledge(@topic):text
-    core= "Assume the students have learned about", @topic
+    core= "The students have just learned about", @topic,"and the exam has to prove their understanding of it."
     separator=" "
 
 //--------------------------------------DetailedInstructions-----------------------------------------
 // Prefix of the prompt
 composer InitialConditions():
-    Personification(), ExamInstruction(), Context()
+    Personification(), ExamInstruction()
     language=English
 
 prompt ExamInstruction(): text
 core= "Write an exam. Before writing the question, give a brief explanation of the task"
 
 prompt Context(): text
-core = "Prepare the exam following Bloom's taxonomy, focusing on the cognitive and emotion domains"
+core = "The generated exam should follow Bloom's taxonomy"
 
 prompt Personification(): text
 core = "You are an exam-generator machine that creates original exam question following the instructions given in the prompt"
 
 // Suffix of the prompt
 composer DetailedInstructions():
-    "Questions should be clear", 
+    "Questions should be clear",
+    Context(),
     no("controversial topics"), 
-    "The questions should be as concise as possible."
+    "The questions should be as concise as possible",
+    "Return only the test itself, omitting any explanation or commentary of the task."
     separator=". "
     language=English
 
 //----------------------------------------Misc----------------------------------------------------
 // Format of the answer i.e JSON
 prompt answer_format(@format):text
-core = "The answer has to follow the format:",@format
+core = "The answer has to follow the format:",@format,""
     separator='
     '
 

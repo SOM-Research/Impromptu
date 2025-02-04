@@ -16,11 +16,8 @@ composer CompletePrompt():
 
 
 prompt EvaluationQuestionsModel(): text
-
-    prefix= InitialConditions()
-
+    prefix = InitialConditions()
     core= CompletePrompt()
-
     suffix= DetailedInstructions()
 
     separator= ". "

@@ -9,6 +9,7 @@ import { NodeFileSystem } from 'langium/node';
 import { readdirSync} from 'node:fs';
 import { addLLM, getAI_Alias, removeLLM } from './files_management';
 import * as readline from 'readline';
+import path from 'path';
 
 /**
  * Generate a prompt form the file transmitted 
@@ -23,7 +24,7 @@ export const generatePromptAction = async (fileName: string, opts: GenPromptOpti
 
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     try{
-        const model = await extractAstNode<Model>(fileName, services);
+        const model = await extractAstNode<Model>(path.resolve('build_files/'+fileName), services);
         
         var validPrompt= true;
         if(opts.prompt){
@@ -159,7 +160,7 @@ export const parseAndValidate = async (alias: string): Promise<void> => {
     // retrieve the services for our language
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
     // extract a document for our program
-    const document = await extractDocument(alias, services);
+    const document = await extractDocument(path.resolve('build_files/'+alias), services);
     // extract the parse result details
     const parseResult = document.parseResult;
     // verify no lexer, parser, or general diagnostic errors show up
