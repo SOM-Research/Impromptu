@@ -36,6 +36,8 @@
 
 **[Developing Workflow](#developing-workflow)**
 - [Commit Workflow](#commit-guidelines)
+- [Troubleshooting](#troubleshooting)
+- [Known Errors](#known-errors)
 
 **[License](#license)**
 
@@ -475,10 +477,21 @@ Vitest does not allow to spy on child functions. Therefore, in order to test the
 
 ## Troubleshooting
 
+
 ### VSCode Extension
 #### "AST node has no document"
-#### "AST node has no document"
 
+## Known Errors
+
+ ### Stable Diffusion
+ When working with Stable Siffusion, we face the singularity of that we can divide the prompt into the positive part and the negative one. 
+
+ This implies that the prompt we generate has to separate the common snippets to the **negative traits**. However, comes when there are assets inside a snippet (by an Asset Resuse, for example), becasuse with the current distribution we cannot access the other part (positive, or negative) of the prompt.
+
+ As a temporal solution, we work with the JSON that the child asset returns so that we can anlayse if something is positive or negative in the main asset. However, there are some situations that mess up this configuration, such as using weights in the snippet or the usage of some snippets in between.
+
+ > There are also some situations where should be illegal to use, or a "different" negative trait is needed for those cases (for example, inside a `between()` clause).
+ 
 
 # License
 

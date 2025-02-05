@@ -121,29 +121,48 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
         let pos_part:string[]=[]
 
 
-    
+        // Prefix
         pos_prefix.forEach(snippet => {try{
             pos_part.push(JSON.parse(snippet)["Positive"]);
-        }catch(e){pos_part.push(snippet)}} );
-        pos_core.forEach(snippet => {try{
-            pos_part.push(JSON.parse(snippet)["Positive"]);
             neg_part.push(JSON.parse(snippet)["Negative"]);
         }catch(e){pos_part.push(snippet)}} );
+
+        neg_prefix.forEach(snippet => {try{
+            neg_part.push(JSON.parse(snippet)["Positive"]);
+            pos_part.push(JSON.parse(snippet)["Negative"]);
+        }catch(e){neg_part.push(snippet)}} );
+
+        // Core
+        pos_core.forEach(snippet => {
+            if (snippet[0]===`{`){
+                try{
+                    pos_part.push(JSON.parse(snippet)["Positive"]);
+                    neg_part.push(JSON.parse(snippet)["Negative"]);     
+                }catch(e){pos_part.push(snippet)}}
+            else{
+                pos_part.push(snippet);
+            }
+         });
+
+        neg_core.forEach(snippet => {
+            if (snippet[0]===`{`){
+                try{
+                    pos_part.push(JSON.parse(snippet)["Negative"]);
+                    neg_part.push(JSON.parse(snippet)["Positive"]);
+                }catch(e){neg_part.push(snippet)}}
+            else{
+                neg_part.push(snippet);
+            }
+            } );
+
+        // Suffix
         pos_suffix.forEach(snippet => {try{
             pos_part.push(JSON.parse(snippet)["Positive"]);
+            neg_part.push(JSON.parse(snippet)["Negative"]);
         }catch(e){pos_part.push(snippet)}} );
-
-
-        
-        neg_prefix.forEach(snippet => {try{
-            neg_part.push(JSON.parse(snippet)["Negative"]);
-        }catch(e){neg_part.push(snippet)}} );
-        neg_core.forEach(snippet => {try{
-            neg_part.push(JSON.parse(snippet)["Negative"]);
-            neg_part.push(JSON.parse(snippet)["Positive"]);
-        }catch(e){neg_part.push(snippet)}} );
         neg_suffix.forEach(snippet => {try{
-            neg_part.push(JSON.parse(snippet)["Negative"]);
+            neg_part.push(JSON.parse(snippet)["Positive"]);
+            pos_part.push(JSON.parse(snippet)["Negative"]);
         }catch(e){neg_part.push(snippet)}} );
 
 
@@ -210,20 +229,42 @@ function extractPositiveModifiers(snippets: Ast.Snippet[]): Ast.Snippet[] {
  * @returns 
  */
 export function genSnippet_SD(snippet: Ast.Snippet, variables?:Map<string,string>): string {
-    const text = genBaseSnippet_SD(snippet.content, variables);
-    
-    if (snippet.weight != null) {
-        switch(snippet.weight.relevance) {
-            case 'min': { return "[[" + text + "]]"; }
-            case 'low':     { return "[" + text + "]";}
-            case 'medium':  { return text; }
-            case 'high':    { return "(" + text + ")"; }
-            case 'max': { return "((" + text + "))"; }
-            default:        { return ""; }
+    const response = genBaseSnippet_SD(snippet.content, variables);
+   
+    if (snippet.weight != null) { // if we have to add the weight, we need to extract the context from the text
+
+        let text
+        let type
+        if (response[0]===`{`){
+            try{
+                text=JSON.parse(response)["Positive"];
+                type= "Positive"
+                if (!text){
+                    text=JSON.parse(response)["Negative"];
+                    type= "Negative"
+                }
+                
+            text=`{\"${type}\":\"${implement_weight(text, snippet.weight.relevance)}\"}`
+            }catch(e){text=response}}
+        else{
+            text=response;
         }
+        return text
     } else {
-        return text;
+        return response;
     }
+}
+
+function implement_weight(text:string, weight: Ast.Relevance):string{
+    switch(weight) {
+        case 'min': { return "[[" + text + "]]"; }
+        case 'low':     { return "[" + text + "]";}
+        case 'medium':  { return text; }
+        case 'high':    { return "(" + text + ")"; }
+        case 'max': { return "((" + text + "))"; }
+        default:        { return ""; }
+    }
+    return text
 }
 
 export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<string,string>): string {
@@ -233,7 +274,8 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
     } else if (Ast.isParameterRef(snippet)) {
         return genParameterRef(snippet, variables)
     } else if (Ast.isAssetReuse(snippet)) {
-        return genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
+        let a= genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
+        return a
     } else if (Ast.isTrait(snippet)){ 
         if (Ast.isNegativeTrait(snippet)) {
             return genNegativeTrait(snippet)
