@@ -41,7 +41,7 @@ export function addLLM(llm:string,fileAlias:string,command:string){
     const file = `generate-prompt_${fileAlias}.ts`
     
     // add in the JSON
-    checkAI(llm) // First check if already exists
+    checkAI(llm, fileAlias, command) // First check if already exists
     add_in_JSON(llm,fileAlias,command)
 
     const generate_prompt = readFileSync(`${gen_folder}/generate-prompt.ts`);
@@ -63,16 +63,18 @@ export function addLLM(llm:string,fileAlias:string,command:string){
 }
 
 /**
- * Checks whether a LLM is already considered individually or not
+ * Checks whether a LLM is already considered individually or not (whether is it in the .json or not)
  * @param llm 
+ * @param fileAlias 
+ * @param command 
  */
-function checkAI(llm:string){
+function checkAI(llm:string,fileAlias:string,command:string){
     
     const data = fs.readFileSync(`${gen_folder}/llm_json.json`,'utf-8');
             
     const data_json = JSON.parse(data);
     const data_located = data_json.filter((element: { [x: string]: string; }) =>
-        element["name"]==llm
+       element["name"]==llm||element["alias"]==fileAlias ||element["name"]==command
     )
     if (data_located.length>0){
         console.error(chalk.red(`The LLM "${llm}" is already added.`));
@@ -158,7 +160,6 @@ function remove_from_JSON(llm:string){
 /**
  * Delete the custom behavior of a LLM
  * @param llm 
- * @param content 
  */
 export function removeLLM(llm:string){
     
@@ -203,6 +204,21 @@ export function getAI_Alias(llm:string):string|undefined{
     }
 }
 
+export function getAI_LLM(llm_command:string):string|undefined{
+    const data = fs.readFileSync(`${gen_folder}/llm_json.json`,'utf-8');
+    let llm='';
+    
+    JSON.parse(data).forEach((element: { [x: string]: string; }) => {
+        if (element["command"]==llm_command)
+            llm = element["name"]
+    })
+    if (llm)
+        return llm;
+    else{
+        return undefined
+    }
+}
+
 
 /**
  * Remove the ''import line'' related of a LLM from a content of a file
@@ -210,7 +226,7 @@ export function getAI_Alias(llm:string):string|undefined{
  * @param content 
  * @returns 
  */
-function removeImports(llm:string, content:string){
+export function removeImports(llm:string, content:string):string{
     // Remove from the AISystem
     const AIObject = content.match(AISystem_RegEx);
     if (AIObject){
@@ -240,7 +256,7 @@ function removeImports(llm:string, content:string){
  * @param content 
  * @returns 
  */
-function removeSwitch(llm:string,llm_alias:string,content:string){
+export function removeSwitch(llm:string,llm_alias:string,content:string){
     const switch_case_RegEx = new RegExp(String.raw`case(\s)*AISystem\.${llm}((\s|\S)*?)${llm_alias}(\s)*\(((\s|\S)*?)break;((\s|\S)*?)}`,'gm')
     // case AISystem.<llm> 
     // .

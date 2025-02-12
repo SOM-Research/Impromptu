@@ -16,7 +16,7 @@ function get_imported_ast(asset) {
   return mock_prompt
 }
 
-let mock_prompt_solution = 'Positive prompt:\n,@elemento, @elemento, @elemento,\n,\nNegative prompt:\n,fuego'
+let mock_prompt_solution = '{"Positive":"@elemento, @elemento, @elemento","Negative":"fuego"}'
 
 
 //--------------------------MOCK ELEMENTS--------------------------------------
@@ -427,7 +427,7 @@ test('check_imported_asset', async() => {
 test('check_imported_asset_in_asset_reuse', async() => {
   const spy = vi.spyOn( utils,'get_imported_asset');
   spy.mockReturnValue(mock_prompt);
-  expect(genAssetReuse(mock_assetReuse_imported_asset, AISystem.StableDiffusion)).toBe('Positive prompt:\n,fuego, fuego, fuego,\n,\nNegative prompt:\n,fuego'); // Do the same with the rest AISystems
+  expect(genAssetReuse(mock_assetReuse_imported_asset, AISystem.StableDiffusion)).toBe('{"Positive":"fuego, fuego, fuego","Negative":"fuego"}'); // Do the same with the rest AISystems
 })
 
 test('reference_in_text_literal', async() => {
@@ -465,11 +465,11 @@ test('reference_in_audience_trait', async() => {
   })
   
 
-// The subtituiton in SD is in the asset label
+// The subtituiton in SD is in the asset label TODO:REWORK IT
 test('reference_in_negation_trait', async() => {
   let map= new Map<string,string>;
 map.set( "@elemento","fuego")
-expect(genBaseSnippet_SD(mock_negation_trait, map)).toBe(""); // Check that the TextPlain  still doesn't
+expect(genBaseSnippet_SD(mock_negation_trait, map)).toBe("fuego"); // Check that the TextPlain  still doesn't
 })
 
 
@@ -477,22 +477,8 @@ expect(genBaseSnippet_SD(mock_negation_trait, map)).toBe(""); // Check that the 
 test('reference_in_prompt', async() => {
   let map= new Map<string,string>;
   map.set( "@elemento","fuego")
-  expect(genAsset_SD(mock_prompt,map)[0]).toBe("Positive prompt:\n"); // Stable Diffusion particularity
-  expect(genAsset_SD(mock_prompt,map)[1]).toContain("fuego"); // reference in Positive Part
-  expect(genAsset_SD(mock_prompt,map)[2]).toBe("\n"); // split between Positive & Negative part
-  expect(genAsset_SD(mock_prompt,map)[3]).toBe("\nNegative prompt:\n"); // Negative Traits
-  expect(genAsset_SD(mock_prompt,map)[4]).toContain("fuego"); // reference in Negative
-  // TODO: See how to check them individually
-/*
-  expect(genAsset_SD(mock_prompt,map)[0]).toBe("Positive prompt:\n"); // Stable Diffusion particularity
-  expect(genAsset_SD(mock_prompt,map)[1]).toBe("fuego"); // reference in prefix
-  expect(genAsset_SD(mock_prompt,map)[2]).toBe("fuego"); // reference in core
-  expect(genAsset_SD(mock_prompt,map)[3]).toBe(""); // reference in suffix ----> Maybe shouldn't
-  expect(genAsset_SD(mock_prompt,map)[4]).toBe("fuego"); // reference in suffix
-  expect(genAsset_SD(mock_prompt,map)[5]).toBe("\n"); // split between Positive & Negative part
-  expect(genAsset_SD(mock_prompt,map)[6]).toBe("Negative prompt:\n"); // Negative Traits
-  expect(genAsset_SD(mock_prompt,map)[7]).toBe("fuego"); // Nagative trait in core
-  */
+  expect(genAsset_SD(mock_prompt,map)[0]).toBe(`{"Positive":"fuego, fuego, fuego","Negative":"fuego"}`); // reference in Negative
+  
 })
 
 test('reference_in_composer', async() => {
@@ -535,6 +521,6 @@ test('asset_reuse_in_asset_reuse' , async() => {
 test('custom_separator', async() => {
   mock_prompt
   mock_prompt.separator = "..."
-  expect(genAsset_SD(mock_prompt)[1]).toContain("@elemento...@elemento") // The separator is used correctly
-  expect(genAsset_SD(mock_prompt)[1].endsWith("...")).toBe(false) // The separator is not implemented at the end
+  expect(genAsset_SD(mock_prompt)[0]).toContain("@elemento...@elemento") // The separator is used correctly
+  expect(genAsset_SD(mock_prompt)[0].endsWith("...")).toBe(false) // The separator is not implemented at the end
 })

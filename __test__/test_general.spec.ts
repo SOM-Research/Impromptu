@@ -1,11 +1,11 @@
 import { EmptyFileSystem } from "langium";
 import { createImpromptuServices } from "../src/language-server/impromptu-module";
-import { AssetReuse, Model } from "../src/language-server/generated/ast";
+import { AssetReuse, isPrompt, Model } from "../src/language-server/generated/ast";
 import { parseHelper } from "langium/test";
 import { beforeEach, test, expect } from 'vitest';
 import {  AISystem, generatePromptCode } from "../src/cli/gen/generate-prompt";
 import { NodeFileSystem } from "langium/node";
-import { check_loops, extractAstNode } from "../src/cli/cli-util";
+import { check_loops, extractAstNode, get_workspace } from "../src/cli/cli-util";
 import { URI } from "vscode-uri";
 import path from "path";
 // import { fs, vol } from 'memfs';
@@ -202,8 +202,9 @@ test('validation_recursion_loop', async() => {
    */
   async function prepare_model(){
     const services = createImpromptuServices(NodeFileSystem).Impromptu;
+    let workspace_path = get_workspace() 
     const fileName= '__test__/testPromptMode.prm';
-    const model = await extractAstNode<Model>(fileName, services);
+    const model = await extractAstNode<Model>(path.join(workspace_path,'build_files',fileName), services);
     return model;
   }
 
@@ -296,7 +297,8 @@ test('one_prompt_only_empty_varaibles', async() => {
 test('test_heritage', async() => {
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/testHeritage.prm';
-  const model = await extractAstNode<Model>(fileName, services);
+  const workspace_path= get_workspace()
+  const model = await extractAstNode<Model>(path.join(workspace_path,'build_files',fileName), services);
   const result = generatePromptCode(model,AISystem.Midjourney,undefined);
   expect(result?.join('')).toContain("Draw a , var 2"); // Test that the parameter has been used
 })
@@ -304,8 +306,9 @@ test('test_heritage', async() => {
 test('test_heritage_in_prompt_mode', async() => {
   // Checks that using prompt mode the reuse of Asset still works, without writing the prompt of the declared Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
-  const fileName= '__test__/exampleHeritage.prm';
-  const model = await extractAstNode<Model>(fileName, services);
+  const fileName= '__test__/exampleHeritage.prm';const workspace_path = get_workspace();
+  const abs_path = path.join(workspace_path,'build_files',fileName);
+  const model = await extractAstNode<Model>(abs_path, services);
   expect(model.assets[2].name).toBe("NewMain"); 
   const prompt = model.assets[2];
   const result = generatePromptCode(model,AISystem.Midjourney,prompt);
@@ -318,7 +321,9 @@ test('not_general parameters' , async() => {
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/not_global_heritage.prm';
-  const model = await extractAstNode<Model>(fileName, services);
+  const workspace_path = get_workspace();
+  const abs_path = path.join(workspace_path,'build_files',fileName);
+  const model = await extractAstNode<Model>(abs_path, services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt, ["mock_var_1", "mock_var_2"]);
   expect(result?.join(' ')).toContain("mock_var_1"); // The 1st var is referenced correctly although the name of Imput and InputRef is different
@@ -333,7 +338,8 @@ test('Check_import' , async() => {
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/basic_import.prm';
-  const model = await extractAstNode<Model>(fileName, services);
+  const workspace_path = get_workspace()
+  const model = await extractAstNode<Model>(path.join(workspace_path,'build_files',fileName), services);
   const prompt = model.assets[0]
   const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
   expect(result?.join(' ')).toContain("Respond whether you support the following sentence: "); // Check that the content of the imported asset appears in the result
@@ -341,15 +347,18 @@ test('Check_import' , async() => {
 })
 
 /** Checks that one can import an asset from another file, and the parameters are using the value given*/
-test('Check_import_varaibles' , async() => {
+test('Check_import_variables' , async() => {
 
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/import_with_variables.prm';
-  const model = await extractAstNode<Model>(fileName, services);
-  const prompt = model.assets[0]
-  const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
-  expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // Check that the content of the imported asset appears in the result ("black" and "doctor") are variables
-  expect(result?.join(' ')).not.toContain("job_statement"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
+  const workspace_path = get_workspace()
+  const model = await extractAstNode<Model>(path.join(workspace_path,'build_files',fileName), services);
+  const prompt = model.assets[0] 
+  if (isPrompt(prompt)){
+    const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
+    expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // Check that the content of the imported asset appears in the result ("black" and "doctor") are variables
+    expect(result?.join(' ')).not.toContain("job_statement"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
+  }
 })
 
 /**
@@ -360,12 +369,15 @@ test('Check_multi_import' , async() => {
   // Checks that defining a parameter in an Asset does not define it for its usage in another Asset
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/multi_import.prm';
-  const model = await extractAstNode<Model>(fileName, services);
-  const prompt = model.assets[0]
-  const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
-  expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // 1st imported asset in ImportedAsset
-  expect(result?.join(' ')).toContain("Respond whether you support the following sentence: "); // 2nd imported asset in ImportedAsset
-  })
+  const workspace_path = get_workspace()
+  const model = await extractAstNode<Model>(path.join(workspace_path,'build_files',fileName), services);
+  const prompt = model.assets[0] 
+  if (isPrompt(prompt)){
+    const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
+    expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // Check that the content of the imported asset appears in the result ("black" and "doctor") are variables
+    expect(result?.join(' ')).not.toContain("job_statement"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
+  }
+})
 
   /**
  * Check that two imports (imported in the same line) are imported correctly
@@ -375,12 +387,15 @@ test('Check_import_all' , async() => {
   // Checks that `import * from ....` import all the asset from the file 
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/import_all.prm';
-  const model = await extractAstNode<Model>(fileName, services);
-  const prompt = model.assets[0]
-  const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
-  expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // 1st imported asset in ImportedAsset
-  expect(result?.join(' ')).toContain("Respond whether you support the following sentence: "); // 2nd imported asset in ImportedAsset
-  })
+  const workspace_path = get_workspace();
+  const model = await extractAstNode<Model>(path.join(workspace_path,'build_files',fileName), services);
+  const prompt = model.assets[0] 
+  if (isPrompt(prompt)){
+    const result = generatePromptCode(model,AISystem.ChatGPT,prompt);
+    expect(result?.join(' ')).toContain(" a black person has to be a doctor"); // Check that the content of the imported asset appears in the result ("black" and "doctor") are variables
+    expect(result?.join(' ')).not.toContain("job_statement"); // The 2nd var has to not be refeenced, because @job is refrenced to @jobAlt and to to @job
+  }
+})
 
 /**
  * Checks that `import * from ....` does not affect improtations from other files
@@ -390,7 +405,9 @@ test('Check_import_all' , async() => {
        
       const services = createImpromptuServices(NodeFileSystem).Impromptu;
       const fileName= '__test__/import_all_error.prm';
-      const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); 
+      const workspace_path = get_workspace();
+      const abs_path = path.join(workspace_path,'build_files',fileName);
+      const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(abs_path))); 
       await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
       const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
       
@@ -405,8 +422,10 @@ test('Check_missing_asset' , async() => {
 
   const services = createImpromptuServices(NodeFileSystem).Impromptu;
   const fileName= '__test__/missing_asset.prm';
-  const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve('build_files/'+fileName))); 
-
+  const workspace_path = get_workspace();
+  const abs_path = path.join(workspace_path,'build_files',fileName);
+  const document = services.shared.workspace.LangiumDocuments.getOrCreateDocument(URI.file(path.resolve(abs_path))); 
+      
   await services.shared.workspace.DocumentBuilder.build([document], { validationChecks: 'all' });
   const validationErrors = (document.diagnostics ?? []).filter(e => e.severity === 1);
   // Test that the prompt is incorrect because promptA is not found

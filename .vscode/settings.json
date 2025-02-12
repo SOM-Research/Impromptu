@@ -1,10 +1,10 @@
 {
     "files.exclude": {
         "node_modules/": true,
-        "__test__": true,
+        "__test__": false,
         "out": true,
         "icons": true,
-        "pictures": false,
+        "pictures": true,
         "**/generate-prompt_base.ts":false
     }
 

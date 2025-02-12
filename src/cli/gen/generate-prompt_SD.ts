@@ -93,6 +93,8 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
         if (asset.separator !== undefined){
             separator = asset.separator;
         }
+
+        //Extract positie modifiers
         const pos_prefix = (asset.prefix != null ? extractPositiveModifiers(asset.prefix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         const pos_suffix = (asset.suffix != null ? extractPositiveModifiers(asset.suffix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         
@@ -111,6 +113,7 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
         
         let pos_core  = extractPositiveModifiers(asset.core.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[];
         
+        // Extract the negative modifiers
         const neg_prefix = (asset.prefix != null ? extractNegativeModifiers(asset.prefix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         const neg_suffix = (asset.suffix != null ? extractNegativeModifiers(asset.suffix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         
@@ -122,15 +125,28 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
 
 
         // Prefix
-        pos_prefix.forEach(snippet => {try{
-            pos_part.push(JSON.parse(snippet)["Positive"]);
-            neg_part.push(JSON.parse(snippet)["Negative"]);
-        }catch(e){pos_part.push(snippet)}} );
+        pos_prefix.forEach(snippet => {
+            
+            if (snippet[0]===`{`){
+                try{
+                    pos_part.push(JSON.parse(snippet)["Positive"]); // The positive part inside the positive part remains inside in the positive prompt
+                    neg_part.push(JSON.parse(snippet)["Negative"]); // The negative part inside the positive part goes to the negative prompt 
+                }catch(e){pos_part.push(snippet)}}
+            else{
+                pos_part.push(snippet);
+            }
+        });
 
-        neg_prefix.forEach(snippet => {try{
-            neg_part.push(JSON.parse(snippet)["Positive"]);
-            pos_part.push(JSON.parse(snippet)["Negative"]);
-        }catch(e){neg_part.push(snippet)}} );
+        neg_prefix.forEach(snippet => {
+            if (snippet[0]===`{`){
+                try{
+                    pos_part.push(JSON.parse(snippet)["Negative"]); // The negative part inside the negative part goes to the positive prompt
+                    neg_part.push(JSON.parse(snippet)["Positive"]); // The positive part inside the negative part remains in the negative prompt
+                }catch(e){neg_part.push(snippet)}}
+            else{
+                neg_part.push(snippet);
+            }
+        });
 
         // Core
         pos_core.forEach(snippet => {
@@ -142,7 +158,7 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
             else{
                 pos_part.push(snippet);
             }
-         });
+        });
 
         neg_core.forEach(snippet => {
             if (snippet[0]===`{`){
@@ -153,17 +169,30 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
             else{
                 neg_part.push(snippet);
             }
-            } );
+        });
 
         // Suffix
-        pos_suffix.forEach(snippet => {try{
-            pos_part.push(JSON.parse(snippet)["Positive"]);
-            neg_part.push(JSON.parse(snippet)["Negative"]);
-        }catch(e){pos_part.push(snippet)}} );
-        neg_suffix.forEach(snippet => {try{
-            neg_part.push(JSON.parse(snippet)["Positive"]);
-            pos_part.push(JSON.parse(snippet)["Negative"]);
-        }catch(e){neg_part.push(snippet)}} );
+        pos_suffix.forEach(snippet => {
+            if (snippet[0]===`{`){
+                try{
+                    pos_part.push(JSON.parse(snippet)["Positive"]);
+                    neg_part.push(JSON.parse(snippet)["Negative"]);     
+                }catch(e){pos_part.push(snippet)}}
+            else{
+                pos_part.push(snippet);
+            }
+        });
+
+        neg_suffix.forEach(snippet => {
+            if (snippet[0]===`{`){
+                try{
+                    pos_part.push(JSON.parse(snippet)["Negative"]);
+                    neg_part.push(JSON.parse(snippet)["Positive"]);
+                }catch(e){neg_part.push(snippet)}}
+            else{
+                neg_part.push(snippet);
+            }
+        });
 
 
 
@@ -274,8 +303,7 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
     } else if (Ast.isParameterRef(snippet)) {
         return genParameterRef(snippet, variables)
     } else if (Ast.isAssetReuse(snippet)) {
-        let a= genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
-        return a
+        return genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
     } else if (Ast.isTrait(snippet)){ 
         if (Ast.isNegativeTrait(snippet)) {
             return genNegativeTrait(snippet)
@@ -293,8 +321,6 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
             return df.genTraits_default(snippet,variables,genSnippet_SD)
         }
     }
-    
-    
     
    return "";
 }

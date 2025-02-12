@@ -142,27 +142,34 @@ exports.addAI = addAI;
  * Remove the file and the code in `generate-prompt.ts` that specify Impromptu the behavior for a certain LLM
  * @param llm LLM to delete
  */
-const removeAI = (llm) => __awaiter(void 0, void 0, void 0, function* () {
+const removeAI = (llm_command) => __awaiter(void 0, void 0, void 0, function* () {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
-    const llm_alias = (0, files_management_1.getAI_Alias)(llm);
-    // Confirmation that the LLM is wanted to be deleted
-    if (llm_alias != undefined) {
-        rl.question(`Are you sure you want to delete content related to the LLM "${llm}"? [y/n] `, (answer) => {
-            switch (answer.toLowerCase()) {
-                case 'y':
-                    (0, files_management_1.removeLLM)(llm);
-                    break;
-                case 'n':
-                    console.log('Deletion stopped');
-                    break;
-                default:
-                    console.log('Deletion stopped');
-            }
+    const llm = (0, files_management_1.getAI_LLM)(llm_command);
+    if (llm) {
+        const llm_alias = (0, files_management_1.getAI_Alias)(llm);
+        // Confirmation that the LLM is wanted to be deleted
+        if (llm_alias != undefined) {
+            rl.question(`Are you sure you want to delete content related to the LLM "${llm}"? [y/n] `, (answer) => {
+                switch (answer.toLowerCase()) {
+                    case 'y':
+                        (0, files_management_1.removeLLM)(llm);
+                        break;
+                    case 'n':
+                        console.log('Deletion stopped');
+                        break;
+                    default:
+                        console.log('Deletion stopped');
+                }
+                rl.close();
+            });
+        }
+        else {
+            console.log(chalk_1.default.blue(`It does not exist any AI system is saved by the name of "${llm}".`));
             rl.close();
-        });
+        }
     }
     else {
         console.log(chalk_1.default.blue(`It does not exist any AI system is saved by the name of "${llm}".`));

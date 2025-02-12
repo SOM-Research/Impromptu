@@ -180,7 +180,7 @@ Impromptu's modes are the different ways one can access the different Impromptu'
 
 ### Server's mode
 
-In the **server's mode**, a Node server is open so that you can access to the Impromptu's functionalities from the client by sending POST request. Those request are managed in `bin/server_main.js`[these section](#bin), were the server is open and solve the request by connecting with the specific function in `src/bin` that execututes the wanted command (adding a new LLM, generate a prompt, etc).
+In the **server's mode**, a Node server is open so that you can access to the Impromptu's functionalities from the client by sending POST request. Those request are managed in `bin/server_main.js` [these section](#bin), were the server is open and solve the request by connecting with the specific function in `src/bin` that execututes the wanted command (adding a new LLM, generate a prompt, etc).
 
 
 <img src="./pictures/ServerMode.drawio.png"></img>
@@ -194,7 +194,7 @@ In the **server's mode**, a Node server is open so that you can access to the Im
 Other option to interact with Impromptu is by sending command in the Command Line. In this case, the endpoint is `bin\cli`, and it connects with `src/cli/index.ts`, where are described all the command that Impromptu allow. See [CLI node and prompt customization](/README.md#cli-mode-and-prompt-customization).
 
 #### `main.ts`
-Starts the language server
+Starts the language server.
 
 #### `index.ts`
 Here are declared the different CLI commands that Impromptu accepts, and their functionalities. The different CLI commands are declared as `Command` objects, for example:
@@ -398,6 +398,8 @@ You can take a closer to the scheme in the [pictures/impromptu.drawio.png](pictu
 
 ## Data Flow
 
+Depending of how do you access to Imporptu, you have access to certain functionalities or another.
+
 <img src="/pictures/DataFlow.drawio.png">
 
 # Coding Guidelines
@@ -477,9 +479,32 @@ Vitest does not allow to spy on child functions. Therefore, in order to test the
 
 ## Troubleshooting
 
+##### *The puntation of the generated prompt is strange*
+The puntation between the different snippets is declared in the `separator` section of the Asset, including the spaces. Howver, it is not added in the last one. For example, in order to write ``Draw an elephant. Paint it on blue.``, one whould write
+
+```
+prompt main():text
+    core="Draw an elephant","Pain it in blue."
+    separator=". "
+```
+
+##### *How a prompt can have more then one separator?*
+It has not been implemented that functionality yet. However, a solution to that problem is dividing the prompt in several assets, each one with the different separator. Then, one can merge them by a parent asset.
+
+
+
+##### *How I can custom new created LLM file?*
+
+The `addLLM` command only creates a generic `.ts` document. That means that, if nothing else is done, there will be not difference in the generated prompt.
+
+The typescript file has to be changed to fit the wanted behaviour. Generally, **changing the different `genTraits()` function is enough to adapt the generated prompt to the wanted LLM. However, in some cases, more significant changes are needed. For example, Stable Diffusion acepts two prompts: The main prompt, and the negative prompt, where are located the concepts that are wanted to be avoided (the Negative Traits snippets). Therefore, the generation of the asset (`genAsset()`) has to be modified to separate the snippets depending on where they belong.
+Thes e types of particuliarities are the ones where the usage of the custom prompt generation is more revelant, but also where more work is required.
+
 
 ### VSCode Extension
-#### "AST node has no document"
+##### *"AST node has no document"*
+
+The `.prm` file used to generate the the code (or a file called while generating the prompt) has not been generated before calling it. It happens due to a problem with the import.
 
 ## Known Errors
 
@@ -488,10 +513,14 @@ Vitest does not allow to spy on child functions. Therefore, in order to test the
 
  This implies that the prompt we generate has to separate the common snippets to the **negative traits**. However, comes when there are assets inside a snippet (by an Asset Resuse, for example), becasuse with the current distribution we cannot access the other part (positive, or negative) of the prompt.
 
- As a temporal solution, we work with the JSON that the child asset returns so that we can anlayse if something is positive or negative in the main asset. However, there are some situations that mess up this configuration, such as using weights in the snippet or the usage of some snippets in between.
+ As a temporal solution, we work with the JSON that the child asset returns so that we can anlayse if something is positive or negative in the main asset. Further comprobations are needed to ensure the reliability of the patch.
 
  > There are also some situations where should be illegal to use, or a "different" negative trait is needed for those cases (for example, inside a `between()` clause).
  
+### Removing an LLM
+
+In `removeSwitch()`, which is used in `removeLLM()` for deleting the wanted parts from the code of `generate-prompt.ts`, there is a problem in a very sceptical case (it should not be even possible in a real case, because it would give a code error): if in a `switch` structure are written two "cases" from the same `AISystem`, but one of them is written wrongly, the detection of which cases have to be deleted acts wrongly.
+
 
 # License
 

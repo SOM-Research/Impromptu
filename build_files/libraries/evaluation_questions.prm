@@ -91,7 +91,7 @@ prompt multi_format(@formatA,@numberA,@formatB,@numberB):  text
 //-------------------------------------Question topic----------------------------------------------
 prompt question_topic(@topic):  text
     core = 
-        "Write a", @topic,"exam"
+        "Topic:", @topic
         separator=" "
     language=English
 
@@ -120,7 +120,7 @@ prompt answer_options(@number,@answers, @distractors): text
 //-------------------------------------Question number----------------------------------------------
 prompt number_questions(@number):  text
     core = 
-        "The exam will consist of", @number,"questions"
+        "Number of questions of the exam:", @number
         separator=" "
     language=English
 //----------------------------------------------------------------------------------------
@@ -192,7 +192,14 @@ prompt learning_outcome(@outcome): text
 // Give an example of a question that is wanted in the exam
 prompt example_question(@example):text
     core = 
-        "Take this question as a model:",@example
+        'Take this question as an example:"',@example,'".'
+    separator="
+    "
+    language=English
+
+prompt example_question_math(@example):text
+    core = 
+        example_question(@example),'Use completely different inputs from the used in the previous example. Use reverse engineering to generate the question. '
     separator=" "
     language=English
 

@@ -7,7 +7,7 @@ import { extractAstNode, extractDocument } from './cli-util';
 import { generatePrompt } from './gen/generate-prompt';
 import { NodeFileSystem } from 'langium/node';
 import { readdirSync} from 'node:fs';
-import { addLLM, getAI_Alias, removeLLM } from './files_management';
+import { addLLM, getAI_Alias, getAI_LLM, removeLLM } from './files_management';
 import * as readline from 'readline';
 import path from 'path';
 
@@ -116,28 +116,37 @@ export const addAI = async(llm: string, opts:GenAIOptions):Promise<void> =>{
  * Remove the file and the code in `generate-prompt.ts` that specify Impromptu the behavior for a certain LLM
  * @param llm LLM to delete
  */
-export const removeAI = async (llm: string): Promise<void> => {
+export const removeAI = async (llm_command: string): Promise<void> => {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
-    const llm_alias= getAI_Alias(llm)
+    
+    const llm = getAI_LLM(llm_command);
+    if (llm){
+        const llm_alias= getAI_Alias(llm);
+        // Confirmation that the LLM is wanted to be deleted
+        if(llm_alias!=undefined ){
 
-    // Confirmation that the LLM is wanted to be deleted
-    if(llm_alias!=undefined){
-        rl.question(`Are you sure you want to delete content related to the LLM "${llm}"? [y/n] `, (answer) => {
-            switch(answer.toLowerCase()) {
-            case 'y':
-                removeLLM(llm)
-                break;
-            case 'n':
-                console.log('Deletion stopped');
-                break;
-            default:
-                console.log('Deletion stopped');
-            }
+            rl.question(`Are you sure you want to delete content related to the LLM "${llm}"? [y/n] `, (answer) => {
+                switch(answer.toLowerCase()) {
+                case 'y':
+                    removeLLM(llm)
+                    break;
+                case 'n':
+                    console.log('Deletion stopped');
+                    break;
+                default:
+                    console.log('Deletion stopped');
+                }
+                rl.close();
+            });
+        }else{
+            console.log(chalk.blue(`It does not exist any AI system is saved by the name of "${llm}".`));
             rl.close();
-        });
+        }
+
+        
     }
     else{
         console.log(chalk.blue(`It does not exist any AI system is saved by the name of "${llm}".`));
