@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import * as Ast from '../../language-server/generated/ast';
 import { get_file_from, get_line_node } from '../cli-util';
-import { AISystem, extractMedium, genAssetReuse, genImportedAsset } from './generate-prompt';
+import { extractMedium, genAssetReuse, genImportedAsset } from './generate-prompt';
 
 // MODEL -------------------------------------------------------------------------------
 /**
@@ -113,7 +113,7 @@ export function genAsset_default(asset: Ast.Asset, variables?: Map<string,string
         console.log(chalk.yellow(`[${file}]-Warning in line ${line}: Chain assets are not yet implemented. It is ignored`));
         return [];
     } else if (Ast.isImportedAsset(asset)) {
-        return genImportedAsset(asset, AISystem.StableDiffusion, variables);
+        return genImportedAsset(asset, undefined, variables);
     }
     return [];
  }
@@ -162,10 +162,12 @@ export function genBaseSnippet_default(snippet: Ast.BaseSnippet, variables?:Map<
     }
     if (Ast.isTextLiteral(snippet)) {
         return ((snippet as unknown) as Ast.TextLiteral).content;
-    } else if (Ast.isParameterRef(snippet)) {
-        return genParameterRef_default(snippet, variables)
+    } else if (Ast.isInputRef(snippet)) {
+        return genInputRef(snippet, variables)
+    } else if (Ast.isConditional(snippet)) { 
+        return genConditional(snippet,variables);
     } else if (Ast.isAssetReuse(snippet)) {
-        return genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
+        return genAssetReuse(snippet, undefined, variables); 
     } 
     // TRAITS
     // The traits with the atribute `content` need to know which snippet function have to use to ensure compatibilty to possible calls from the specific files
@@ -234,6 +236,35 @@ export function genBaseSnippet_default(snippet: Ast.BaseSnippet, variables?:Map<
    return "";
 }
 
+/**
+ * Generates the text related to an Input (a paramter or a metadata), usally by getting the value given to it
+ * @param snippet InputRef
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genInputRef(snippet: Ast.InputRef,variables?: Map<string,string>){
+    if (Ast.isParameterRef(snippet)){
+        return genParameterRef_default(snippet,variables)
+    }
+    else if(Ast.isMultimodalRef(snippet)){
+        let line = get_line_node(snippet);
+        let file = get_file_from(snippet);
+        console.log(chalk.red(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`));
+        throw new Error(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`)
+    }
+    let line = get_line_node(snippet);
+    let file = get_file_from(snippet);
+    console.log(chalk.red(`[${file}]-Error in line `+ line+`: ERROR`));
+    throw new Error(`[${file}]-Error in line `+ line+`: ERROR`)    
+}
+
+/**
+ * Generates the text related to a parameter (usally by getting the value given to it)
+ * @param snippet Paramater Ref
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+
 export function genParameterRef_default(snippet: Ast.ParameterRef,variables?: Map<string,string>){
     if (!variables){
         return ((snippet as unknown) as Ast.ParameterRef).param.$refText ;}
@@ -241,6 +272,22 @@ export function genParameterRef_default(snippet: Ast.ParameterRef,variables?: Ma
         return variables.get(((snippet as unknown) as Ast.ParameterRef).param.$refText) as string;}
 }
 
+/**
+ * Generates the prompt text associated with a conditional snippet
+ * @param snippet Conditional Snippet
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genConditional(snippet: Ast.Conditional,variables?: Map<string,string>){
+    let value = genInputRef(snippet.param,variables)
+    if (value == snippet.condition){
+        return genSnippet_default(snippet.result,variables);
+    } else{
+        if (snippet.neg_result){
+            return genSnippet_default(snippet.neg_result, variables);
+        }else return ""
+    }
+}
 
 // TRAITS -------------------------------------------------------------------------------
 

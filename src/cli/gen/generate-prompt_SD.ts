@@ -93,7 +93,7 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
         if (asset.separator !== undefined){
             separator = asset.separator;
         }
-
+        
         //Extract positie modifiers
         const pos_prefix = (asset.prefix != null ? extractPositiveModifiers(asset.prefix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
         const pos_suffix = (asset.suffix != null ? extractPositiveModifiers(asset.suffix.snippets).flatMap(snippet => genSnippet_SD(snippet,variables)).filter(e => e !== undefined) as string[]: []);
@@ -230,6 +230,8 @@ export function genAsset_SD(asset: Ast.Asset, variables?: Map<string,string>): s
     }
     return [];
  }
+
+
 /**
  * For an array of snippets, extract the ones that (their content) are NegativeTrait
  * @param snippets 
@@ -266,11 +268,10 @@ export function genSnippet_SD(snippet: Ast.Snippet, variables?:Map<string,string
         let type
         if (response[0]===`{`){
             try{
-                text=JSON.parse(response)["Positive"];
-                type= "Positive"
-                if (!text){
-                    text=JSON.parse(response)["Negative"];
-                    type= "Negative"
+                const obj = JSON.parse(response)
+                for(const key in obj){
+                    text = obj[key]
+                    type = key
                 }
                 
             text=`{\"${type}\":\"${implement_weight(text, snippet.weight.relevance)}\"}`
@@ -300,10 +301,12 @@ export function genBaseSnippet_SD(snippet: Ast.BaseSnippet, variables?:Map<strin
     
     if (Ast.isTextLiteral(snippet)) {
         return ((snippet as unknown) as Ast.TextLiteral).content;
-    } else if (Ast.isParameterRef(snippet)) {
-        return genParameterRef(snippet, variables)
+    } else if (Ast.isInputRef(snippet)) {
+        return genInputRef(snippet, variables)
+    } else if (Ast.isConditional(snippet)) { 
+        return genConditional(snippet,variables);
     } else if (Ast.isAssetReuse(snippet)) {
-        return genAssetReuse(snippet,AISystem.StableDiffusion, variables); 
+        return genAssetReuse(snippet, undefined, variables); 
     } else if (Ast.isTrait(snippet)){ 
         if (Ast.isNegativeTrait(snippet)) {
             return genNegativeTrait(snippet)
@@ -351,12 +354,59 @@ function genMediumTrait_SD(snippet: Ast.MediumTrait): string {
     return text;
 }
 
+/**
+ * Generates the text related to an Input (a paramter or a metadata), usally by getting the value given to it
+ * @param snippet InputRef
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genInputRef(snippet: Ast.InputRef,variables?: Map<string,string>){
+    if (Ast.isParameterRef(snippet)){
+        return genParameterRef(snippet,variables)
+    }
+    else if(Ast.isMultimodalRef(snippet)){
+        let line = get_line_node(snippet);
+        let file = get_file_from(snippet);
+        console.log(chalk.red(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`));
+        throw new Error(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`)
+    }
+    let line = get_line_node(snippet);
+    let file = get_file_from(snippet);
+    console.log(chalk.red(`[${file}]-Error in line `+ line+`: ERROR`));
+    throw new Error(`[${file}]-Error in line `+ line+`: ERROR`)    
+}
+
+/**
+ * Generates the text related to a parameter (usally by getting the value given to it)
+ * @param snippet Paramater Ref
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
 function genParameterRef(snippet: Ast.ParameterRef,variables?: Map<string,string>){
     if (!variables){
         return ((snippet as unknown) as Ast.ParameterRef).param.$refText ;}
     else{
         return variables.get(((snippet as unknown) as Ast.ParameterRef).param.$refText) as string;}
 }
+
+/**
+ * Generates the prompt text associated with a conditional snippet
+ * @param snippet Conditional Snippet
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genConditional(snippet: Ast.Conditional,variables?: Map<string,string>){
+    let value = genInputRef(snippet.param,variables)
+    if (value == snippet.condition){
+        return genSnippet_SD(snippet.result,variables);
+    } else{
+        if (snippet.neg_result){
+            return genSnippet_SD(snippet.neg_result, variables);
+        }else return ""
+    }
+}
+
+
  function genNegativeTrait(snippet:Ast.NegativeTrait){
     return genSnippet_SD(snippet.content); // the Negative Traits in SD are in the Negative Prompt part, as an ordinary Trait
  }

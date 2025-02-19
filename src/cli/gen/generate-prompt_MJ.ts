@@ -154,8 +154,10 @@ export function genBaseSnippet_MJ(snippet: Ast.BaseSnippet, variables?:Map<strin
 
     if (Ast.isTextLiteral (snippet)) {
         return ((snippet as unknown) as Ast.TextLiteral).content;
-    } else if (Ast.isParameterRef(snippet)) {
-        return genParameterRef(snippet,variables);
+    } else if (Ast.isInputRef(snippet)) {
+            return genInputRef(snippet, variables)
+    } else if (Ast.isConditional(snippet)) { 
+        return genConditional(snippet,variables);
     } else if (Ast.isAssetReuse(snippet)) {
         return genAssetReuse(snippet, AISystem.Midjourney, variables)
     } else if (Ast.isTrait(snippet)){ 
@@ -225,9 +227,54 @@ function genMediumTrait_MJ(snippet: Ast.MediumTrait): string {
     return df.genMediumTrait_default(snippet)
 }
 
+/**
+ * Generates the text related to an Input (a paramter or a metadata), usally by getting the value given to it
+ * @param snippet InputRef
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genInputRef(snippet: Ast.InputRef,variables?: Map<string,string>){
+    if (Ast.isParameterRef(snippet)){
+        return genParameterRef(snippet,variables)
+    }
+    else if(Ast.isMultimodalRef(snippet)){
+        let line = get_line_node(snippet);
+        let file = get_file_from(snippet);
+        console.log(chalk.red(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`));
+        throw new Error(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`)
+    }
+    let line = get_line_node(snippet);
+    let file = get_file_from(snippet);
+    console.log(chalk.red(`[${file}]-Error in line `+ line+`: ERROR`));
+    throw new Error(`[${file}]-Error in line `+ line+`: ERROR`)    
+}
+
+/**
+ * Generates the text related to a parameter (usally by getting the value given to it)
+ * @param snippet Paramater Ref
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
 function genParameterRef(snippet: Ast.ParameterRef,variables?: Map<string,string>){
     if (!variables){
         return ((snippet as unknown) as Ast.ParameterRef).param.$refText ;}
     else{
         return variables.get(((snippet as unknown) as Ast.ParameterRef).param.$refText) as string;}
+}
+
+/**
+ * Generates the prompt text associated with a conditional snippet
+ * @param snippet Conditional Snippet
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genConditional(snippet: Ast.Conditional,variables?: Map<string,string>){
+    let value = genInputRef(snippet.param,variables)
+    if (value == snippet.condition){
+        return genSnippet_MJ(snippet.result,variables);
+    } else{
+        if (snippet.neg_result){
+            return genSnippet_MJ(snippet.neg_result, variables);
+        }else return ""
+    }
 }

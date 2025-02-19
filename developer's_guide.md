@@ -35,7 +35,6 @@
 - [Testing](#testing)
 
 **[Developing Workflow](#developing-workflow)**
-- [Commit Workflow](#commit-guidelines)
 - [Troubleshooting](#troubleshooting)
 - [Known Errors](#known-errors)
 
@@ -58,13 +57,14 @@ In addition of generating the prompts, there are other functionalities, such as 
 
 ## Prerequisites
 
-- Typescript
+- Typescript - *Writing the code tha generatates the prompt from the  `.prm` files*
 
-- Node.js
+- Node.js - *Framework from which Langium is based (Including CLI interaction)*
+    - `express` - *Server mode*
 
-- Have read Langium documentation
+- Have read Langium documentation - *files from `language-server` folder*
 
-- Have read VSCode extension documentation
+- Have read VSCode extension documentation - *VSCode extension mode*
 
 # Getting Started
 
@@ -73,14 +73,14 @@ See the file [StartUp.md](StartUp.md).
 
 # Project Structure
 
-The main folders that are important to the development of the application are:
+The project consists of several of several folders, each of them storing the different types of files. The main ones are:
 
-- `__test__`, where are **located the unitary tests**. It is hidden. For more information, see the [Testing](#testing) section.
+- `__test__`, where are **located the unitary tests**. It is hidden by default. For more information, see the [Testing](#testing) section.
 - `.vscode` Here are the json files that defines how the **vscode expansion** would behave, and the **debug options**.
-- `bin`. Here are located the two "gates" to the Impromptu server.
+- `bin`. Here are located the entrances to the Impromptu service.
 - `build_files`. Here are located the `.prm` files.
 - `src`. In this folder is located the core of the application, both its fuctionalities and Langium's files. Here are included:
-    - `/cli/gen`. Folder where are located the files about **generating th prompts from the `.prm` files**.
+    - `/cli/gen`. Folder where are located the files about **generating the prompts from the `.prm` files**.
     - `/language-server`. Folder where are located the files that **define the syntax and grammar of Impromptu**.
     - `/cli/file_management.ts`. File that manages the **modification of files in `/cli/gen`.**
     - `/extension.ts` and `/impromptu-code-generator.ts`. Files about running the **VSCode extension**.
@@ -89,50 +89,65 @@ The main folders that are important to the development of the application are:
 
 
 # Core Concepts
-In this section are explained the different functionalities of Impromptu, as well as the arquitecture of the Impromptu's files. When talking about the different functionalities and files, it will also be explain the main function and in which files are located.
+In this section will be explained the different functionalities of Impromptu, as well as the arquitecture of the Impromptu's folder that generates the `.prm` and its respective prompt (`/src` folder). When talking about the different functionalities and files, it will also be explain the main function and in which files are located.
 
 ## Functions
-The main function of Impromptu is to generate the prompt of a `.prm` file written by the user. However, there are another important functionalities that Impromptu has, which would give the user several facilities to help in that matter.
+The main function of Impromptu is to generate the prompt of a `.prm` file written by the user. However, there are another important functionalities that Impromptu has, which would help the user in that main goal.
 
 ### Prompt generation
-As it was said about, the main goal of Impromptu is to generate a prompt using a `.prm` file. Several parameter can be declared so that the prompt is adapted to a certain LLM, or indicating where the response file is created.
+As it was said before, the main goal of Impromptu is to generate a prompt using a `.prm` file. Several parameter can be declared so that the prompt is adapted to a certain LLM, or indicating where the response file is created.
 
 #### `generate-prompt.ts`
 In this file is located the code that gets the prompt based on the file `.prm` given. The prompt is generated . It returns a `.txt` file with the generated prompt. It is connected with the files that generate the prompt for each LLM (such as `generate-prompt_ChatGPT.ts`). In case no LLM was declared, the prompt will be generated using the default protocol (`generate-prompt_default.ts`)
-Those custom first files are based on `generate-prompt_default.ts`, but modify to adjust to the LLM. More custom generators can be created by the CLI command (`addLLM` link with it). The next section will be further explained.
+Those custom first files are based the default method, on `generate-prompt_default.ts`, but they are modified to adjust to the LLM. More custom generators can be created by the CLI command (`addLLM` link with it). The next section will be further explained.
 
 The stucture of the custom files are adpated to each LLM but every one of them is based on `generate-prompt_default.ts`.
 
 **Main functions:**
 
 - `generatePrompt_default(model: Ast.Model, prompt: Ast.Prompt | undefined, variables?: string[]): string[]`
-Launch function of generating a prompt. The input parameters are AST nodes (`model` and `prompt`), so itt needs that the AST of the `.prm` has been already built (done in `extractAstNode()` in `cli-util.ts`) wherever this function is used.
+Launch function of generating a prompt. The input parameters are AST nodes (`model` and `prompt`), so it needs that the AST of the `.prm` has already been built (done in `extractAstNode()` in `cli-util.ts`) wherever this function is used.
 
 - `genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefined,  previousMap?:Map<string,string>): string`
-Connects a reference of an asset with the original asset. Also, the variable mapping (transmitted in `previousMap`) is updated.
+Connects a reference of an asset with the original asset, and returns the generated prompt . Also, the variable mapping (transmitted in `previousMap`) is updated.
 
 - `genImportedAsset(asset:Ast.AssetImport, aiSystem:string|undefined, variables?: Map<string,string>):string[]`
-Link a reference of an imported asset to the imported asset, updating ath variable map in the process
-> The function `genImportedAsset()` is common for both the custom route and the default one. The reason is that its function is only to connect the functions outside the file, and generate thir prompt in the required LLM (that is the reason why one of their arguments is the **aiSystem**).
+Link a reference of an imported asset to the imported asset, updating the variable map in the process. It returns the generated prompt of the imported asset.
+**Inputs**
+    - `asset` Reference of the asset
+    - `aiSystem` LLM where the prompt will be used
+    - `variables` (Optional) Mapping of the parameters used in the reference with the inputs of the imported asset.
+**Returns**
+    - `prompt` Generated prompt of the imported asset
+
+> The function `genImportedAsset()` is common for every possible LLM. The reason is that the purpose of this function is to link the imported asset to its reference (the generation of the prompt, which it does depende on the LLM, is done in the `genAsset()` of the imported prompt), so it does not depend of the LLM chosen.
+
 
 
 
 #### `generate-prompt_default.ts`
 
 In this file are located the functions that generates the prompt, in case a certain LLM was not declared. If a LLM was declared instead, the prompt will be generated in `generate-prompt_<alias>.ts` (i.e `generate-prompt_SD.ts` for StableDiffusion). 
-Those files are based on `generate-prompt_default.ts`, but with certain modifications due to the prompt generated is adpated to the LLM where it will be used. 
-Analysing the functions and structures of the default case grant general knowledge about the specific cases as well.
+Those files are based on `generate-prompt_default.ts`, but they have certain modifications so that the prompt generated is adpated to the LLM where it will be used. Thus, by analysing only the functions and structures of the default case, we are able to obtain general knowledge about the specific cases as well.
 
 **Main functions**
 - **`generatePrompt_default()`**. 
-This function generates the prompt of all assets of a file . 
+This function generates the prompt of all assets (or the selected asset) of a file . 
 
 - **`genAsset_default()`**
 The prompt of each Asset is generated by **`genAsset_default()`** (if a prompt was sent as argument, will only returns that asset). Depending of the type of asset, it will generate the prompt in one way or another, using the different **snippets** of the asset.
-
+**Inputs:**
+    - `asset`: Asset from which we want to generate its prompt.
+    - `variables`: (Optional) Map of the variables from upper calls (if any) to its ralated inputs.
+    
+    **Outputs:**
+    - `prompt`: Generated prompt of the asset. It is a string.
 
 - **`genSnippet_default()`**
-The prompt related that snippets is generated by `genSnippet_default()`. It is important to remark that some types of BaseSnippets refrence elements located outside the assets (ParameterRef,  AssetReuse, Imports, etc). For those cases, the scoping is modified so that can be referenced correctly.
+The function that defines which prompt generates each snippet is `genSnippet_default()`. It is important to remark that some types of BaseSnippets reference elements located outside the assets (ParameterRef,  AssetReuse, Imports, etc). For those cases, the scoping is modified so that can be referenced correctly, in addition of mapping the variables of the functions do that the correct value of the inputs appers.
+
+
+In addition, there are functions that defines the behavior of each type of snippet, but are generally simple.
 
 
 #### `cli-utils.ts`
@@ -154,7 +169,7 @@ In this file there are multiple functions that offers multiple utilities for fun
 
 Impromptu has the option to create/delete a `.ts` file so that the prompt generation for a certain LLM is specific.  See [adding extra LLMs](README.md#adding-extra-llms). Those operations are accesible by CLI and server requests, and their code are located in `file_management.ts`.
 
-Those custom files are created from `generate-prompt_default.ts`. In fact, they are based on the hidden file `generate-prompt_base.ts`* that is a modification of `generate-prompt_default.ts`. In addition of generating/removing the new file, the `gen/generate-prompt.ts` file is modified so that it adapts to the consider the new configuration.-
+Those custom files are created from `generate-prompt_default.ts`. In fact, they are based on the hidden file `generate-prompt_base.ts`* that is a modification of `generate-prompt_default.ts`. In addition of generating/removing the new file, the `gen/generate-prompt.ts` file is modified so that it adapts to the consider the new configuration.
 
 
 This file is generated by creating a copy of the file `gen/generatic-prompt_base.ts`, which **is hidden by default**. 
@@ -173,7 +188,7 @@ This file is generated by creating a copy of the file `gen/generatic-prompt_base
 
 
 ## Modes
-Impromptu's modes are the different ways one can access the different Impromptu's functionalities. The mode choosen to use Impromptu will depend of how the user will want to use Impromptu. Depend of the mode chosen, the different functionalities talked before are accesible or not.
+Impromptu's modes are the different ways one can access the different Impromptu's functionalities. The mode choosen to use Impromptu will depend of how the user will want to use Impromptu. The different functionalities talked before are accesible or not are accesible depending on the mode chosen. 
 
 <img src='./pictures/UML_diagram.drawio.png'>
 
@@ -189,6 +204,7 @@ In the **server's mode**, a Node server is open so that you can access to the Im
 #### `server_main.js`
  Initialize the node server and define the different POST request the server accepts. That functions will call another functions in other files that the other modes will call as well. For example, the POST request of generating a prompt, will (after load the required Langium Documents) call `generatePromptCode()` in `src/cli/gen/generate_prompt.ts`.
 
+ The entrance to the server is done in `bin/server_main.js`. One can easily open the server by using `pm2` (see the [PM2 installation](README.md#pm2-installation) section).
 ### CLI's mode
 
 Other option to interact with Impromptu is by sending command in the Command Line. In this case, the endpoint is `bin\cli`, and it connects with `src/cli/index.ts`, where are described all the command that Impromptu allow. See [CLI node and prompt customization](/README.md#cli-mode-and-prompt-customization).
@@ -197,7 +213,14 @@ Other option to interact with Impromptu is by sending command in the Command Lin
 Starts the language server.
 
 #### `index.ts`
-Here are declared the different CLI commands that Impromptu accepts, and their functionalities. The different CLI commands are declared as `Command` objects, for example:
+Here are declared the different CLI commands that Impromptu accepts, and their functionalities. The different CLI commands are declared as `Command` objects. Each of them follw the same structure:
+- `command()` How the command is named
+- `argument()` Main argument
+- `option()` The saveral options the command has. The different with the argument is that it can be more than one option, and are preceed by a tag to identify them.
+- `description()`. Send the description that will appear in the `help` command.
+- `action()`. Function that is executed.
+
+for example:
 ```
  program
         .command('genprompt')
@@ -238,9 +261,9 @@ See [VSCode Extension](/README.md#vscode-extension)
 #### `extensions.ts`
 In this file are located functions that activates (`activate(context)`) and deactivates (`deactivate(context)`) the VSCode extension. 
 
-The activation of the extension requieres of several stapes
+The activation of the extension requieres of several steps
 - `startLanguageClient(context)` Start the debug server, and the client, inlcudind loading the elements in the UI
-`generateCodeService(context,aiSystem)`. Load the service that generates the `.py` file with generated prompt.
+- `generateCodeService(context,aiSystem)`. Load the service that generates the `.py` file with generated prompt.
 
 
 #### `impromptu-code-generator.ts`
@@ -249,33 +272,33 @@ In this file is located the generation of the `.py` file. The main function in t
 
 ## Impromptu's modules
 
-In a Langium workspace, in the folder `src/language-server` are located the documents regarding the syntax and grammar of the language. The `.langium` file defines the grammmar, while in the typescript file `impromptu-module.ts` is defined the syntax of the language. Several modification have been done from the default Langium syntax, about the **validation** and **scoping** of it
+In a Langium workspace, in the folder `src/language-server` are located the documents regarding the syntax and grammar of the language. The `.langium` file defines the grammmar, while in the typescript file `impromptu-module.ts` is defined the syntax of the language. Several modification have been done from the default Langium syntax, about the **validation** and **scoping** of it.
 
 
 ### Scoping (`src/language-server/impromptu-scope.ts`)
 
-The scope is key part of the Langium performance. It links the refrences in the AST tree with the nodes they reference. In Impormptu's case, there are some modification to the default scope that are necessary to the correct performances of the references in the `.prm` documents (more information [here](https://langium.org/docs/recipes/scoping/)).
+The scope is a key part of the Langium performance. It links the refrences in the AST tree with the nodes they reference. In Impormptu's case, there are some modification to the default scope that are necessary to the correct performances of the references in the `.prm` documents (more information [here](https://langium.org/docs/recipes/scoping/)).
 
 
 One of the properties of Impromptu is the fact that you can use functions describe in other `.prm` files. In order to to be able to do that, we need to change the default scoping provided by Langium so that the imports can be linked with the asset or different files. 
 
 The steps needed to archieve a correct scoping of items imported from another file, are:
 
-- **Link the reference of the import with the import itself**. One has to declare the map of the name and the object manually, since the default scope of the AssetReuse does not see Assets/Imports(they are adove in the AST tree).This is done similarly to the ParameterRef and Inputs.
+- **1. Link the reference of the import with the import itself**. One has to declare the map of the name and the object manually, since the default scope of the AssetReuse does not see Assets/Imports(they are adove in the AST tree).This is done similarly to the ParameterRef and Inputs.
 
-- **Reference the import with the original item in another file**. For do this correctly, and only look inside the imported file, one need to manage URIs, and add to the scope the item of those files. This is done using the `vscode\uri` package.
+- **2. Reference the import with the original item in another file**. For do this correctly, and only look inside the imported file, one need to manage URIs, and add to the scope the item of those files. This is done using the `vscode\uri` package.
 
 
-- Compute the exports so that the items can be referenciable outside of their own file properly. This is donde by forcing to **create the description of the assets during the scope computation phase**.
+- **3.** Compute the exports so that the items can be referenciable outside of their own file properly. This is donde by forcing to **create the description of the assets during the scope computation phase**.
 
 
 #### '*' import implementation
 
- Since in this case the asset are not refered in the ImportedAsset, **the scope has to be made directely between the AssetReuse and the Asset from the other file**, which imply that the elements we need are different from the previous case:
+ Since in this case the asset are not refered in the ImportedAsset, **the scope has to be made directely between the AssetReuse and the Asset from the other file**. That means that the elements we need in the scoping are different from the previous case:
 
 - Instead of the `AsseReuse` been linked to the `assetImport` which is linked to original Asset in the other file, is the `AsseReuse` which is connected with the original `Asset`. It is possible since the descriptions of the Asset are loaded in the scope computatrion phase
 - This means that this is part of the `AssetReuse` Scope, where there are the description to the Inputs (`ParameterRef`) and Referenciables(other `Assets` or `ImportedAssets`)
--  We do not need extra scope computations, since we make use of the  description created to the simple case.
+-  We do **not need extra scope computations**, since we make use of the  description created to the simple case.
 
 A similar implementation cab be found in the [file-based scoping example of the Langium Documentation](https://langium.org/docs/recipes/scoping/file-based/).
 
@@ -283,7 +306,8 @@ A similar implementation cab be found in the [file-based scoping example of the 
 
 Additionally, some modifications in Langium's Validators has had to be done as well. 
 
-- `checkNoRecursivity(model,accept)` Check that the script do not have infinite loops. This is the most elaborated validators, and has to be done by using recursive functions.
+- `checkNoRecursivity(model,accept)` Check that the script do not have infinite loops. This is the most elaborated validator, and has to be done by using recursive functions. This picture captures the scheme of this validation:
+
 <img src="./pictures/RecursivityValidator.drawio.png">
 
 - `checkAssetReuse()` Check that the number of inputs in an Asset and in its AssetReause match.
@@ -474,9 +498,6 @@ Vitest does not allow to spy on child functions. Therefore, in order to test the
 
 
 # Developing Workflow
-## Commit Guidelines
-
-
 ## Troubleshooting
 
 ##### *The puntation of the generated prompt is strange*
@@ -513,7 +534,7 @@ The `.prm` file used to generate the the code (or a file called while generating
 
  This implies that the prompt we generate has to separate the common snippets to the **negative traits**. However, comes when there are assets inside a snippet (by an Asset Resuse, for example), becasuse with the current distribution we cannot access the other part (positive, or negative) of the prompt.
 
- As a temporal solution, we work with the JSON that the child asset returns so that we can anlayse if something is positive or negative in the main asset. Further comprobations are needed to ensure the reliability of the patch.
+ As a temporal solution, we work with the JSON that the child asset returns so that we can anlayse if something is positive or negative in the main asset. Further comprobations are needed to ensure the reliability of the patch. For example, its usage inside comparison/ combination trait should be avoided.
 
  > There are also some situations where should be illegal to use, or a "different" negative trait is needed for those cases (for example, inside a `between()` clause).
  
@@ -523,5 +544,9 @@ In `removeSwitch()`, which is used in `removeLLM()` for deleting the wanted part
 
 
 # License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# Appendices
+The source code for the site is licensed under the MIT License, which you can find in the LICENSE.md file.
+
+All graphical assets are licensed under the
+[Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/).

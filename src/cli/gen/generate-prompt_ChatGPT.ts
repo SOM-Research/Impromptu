@@ -151,9 +151,11 @@ export function genSnippet_ChatGPT(snippet: Ast.Snippet, variables?: Map <string
 export function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet, variables?: Map<string,string>): string {
     if (Ast.isTextLiteral(snippet)) {
         return genTextLiteral(snippet);
-        }else if (Ast.isParameterRef(snippet)) {
-        return genParameterRef(snippet,variables);
-    }else if (Ast.isAssetReuse(snippet)) {
+    } else if (Ast.isInputRef(snippet)) {
+            return genInputRef(snippet, variables)
+    } else if (Ast.isConditional(snippet)) { 
+        return genConditional(snippet,variables);
+    } else if (Ast.isAssetReuse(snippet)) {
         return genAssetReuse(snippet, AISystem.ChatGPT, variables)
     } else if (Ast.isTrait(snippet)){
         if (Ast.isLanguageRegisterTrait(snippet)) {
@@ -161,8 +163,7 @@ export function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet, variables?: Map
         } else if (Ast.isLiteraryStyleTrait(snippet)) {
             return genLiteraryStyle(snippet);
         } else if (Ast.isPointOfViewTrait(snippet)) {
-            return genPoinOfView(snippet);
-        
+            return genPoinOfView(snippet);   
         }else if (Ast.isNegativeTrait(snippet)) {
             return genNegativeTait(snippet,variables);
         }else if (Ast.isComparisonTrait(snippet)) {
@@ -176,9 +177,11 @@ export function genBaseSnippet_ChatGPT(snippet: Ast.BaseSnippet, variables?: Map
         }
     } 
     else{
+        /*
         let file = get_file_from(snippet);
         let line = get_line_node(snippet);
-        console.log(chalk.yellow(`[${file}]- Warning in line ${line}: ${snippet.$type} snippets are not implemented in ChatGPT yet.Its prompt will be omitted.`));
+        console.log(chalk.yellow(`[${file}]- Warning in line ${line}: ${snippet.$type} snippets are not implemented in ChatGPT yet. Its prompt will be omitted.`));
+        */
     }return"";
 }
 
@@ -198,6 +201,34 @@ function genPoinOfView(snippet:Ast.PointOfViewTrait){
     return df.genPoinOfView_default(snippet);
 }
 
+/**
+ * Generates the text related to an Input (a paramter or a metadata), usally by getting the value given to it
+ * @param snippet InputRef
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genInputRef(snippet: Ast.InputRef,variables?: Map<string,string>){
+    if (Ast.isParameterRef(snippet)){
+        return genParameterRef(snippet,variables)
+    }
+    else if(Ast.isMultimodalRef(snippet)){
+        let line = get_line_node(snippet);
+        let file = get_file_from(snippet);
+        console.log(chalk.red(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`));
+        throw new Error(`[${file}]-Error in line `+ line+`: Multimodal is not yet implemented.`)
+    }
+    let line = get_line_node(snippet);
+    let file = get_file_from(snippet);
+    console.log(chalk.red(`[${file}]-Error in line `+ line+`: ERROR`));
+    throw new Error(`[${file}]-Error in line `+ line+`: ERROR`)    
+}
+
+/**
+ * Generates the text related to a parameter (usally by getting the value given to it)
+ * @param snippet Paramater Ref
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
 function genParameterRef(snippet: Ast.ParameterRef,variables?: Map<string,string>){
     if (!variables){
         return ((snippet as unknown) as Ast.ParameterRef).param.$refText ;}
@@ -209,10 +240,29 @@ function genNegativeTait(snippet:Ast.NegativeTrait, variables?: Map<string,strin
     return "Avoid " + genSnippet_ChatGPT(snippet.content, variables);
 }
 
+/**
+ * Generates the prompt text associated with a conditional snippet
+ * @param snippet Conditional Snippet
+ * @param variables Mappping of the assets' varaibles and their value
+ * @returns 
+ */
+export function genConditional(snippet: Ast.Conditional,variables?: Map<string,string>){
+    let value = genInputRef(snippet.param,variables)
+    if (value == snippet.condition){
+        return genSnippet_ChatGPT(snippet.result,variables);
+    } else{
+        if (snippet.neg_result){
+            return genSnippet_ChatGPT(snippet.neg_result, variables);
+        }else return ""
+    }
+}
+
 function genComparisonTrait(snippet:Ast.ComparisonTrait,variables?: Map<string,string>){
     return genSnippet_ChatGPT(snippet.content1, variables) + " is more " + genSnippet_ChatGPT(snippet.comparison, variables) + " than " +genSnippet_ChatGPT(snippet.content2, variables)
 }
 
 function genAudienceTrait(snippet:Ast.AudienceTrait,variables?: Map<string,string>){
-    return "The activity is intended for the following audience: " + genSnippet_ChatGPT(snippet.content, variables)
+    return "The generated answer should be suitable for " + genSnippet_ChatGPT(snippet.content, variables)
 }
+
+

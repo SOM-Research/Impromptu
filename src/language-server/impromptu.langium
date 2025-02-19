@@ -169,7 +169,7 @@ Snippet:
     content=BaseSnippet (weight=Weight)?;
 
 BaseSnippet:
-    TextLiteral | InputRef | AssetReuse | Trait;
+    TextLiteral | InputRef | AssetReuse | Trait | Conditional;
 
 TextLiteral:
     content=STRING;
@@ -179,6 +179,10 @@ InputRef:
 
 ParameterRef:
     param=[Parameter:ParamId];
+
+Conditional:
+    '(' param=InputRef '==' condition=STRING ')' '?' result=Snippet ( ':' neg_result=Snippet)?;
+// Falta meter la gramática
 
 MultimodalRef:
     param=[Multimodal:FileId];

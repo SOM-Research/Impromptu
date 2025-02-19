@@ -12,7 +12,7 @@
 - [Code generation](#code-generation-for-prompt-execution-and-output-validation)
 
 **[Impromptu as a server](#impromptu-as-server)**
-- [PM2 Installation](#pm2-instalation)
+- [PM2 Installation](#pm2-installation)
 - [Launching the server](#launching-the-server)
 
 **[Publications](#publications)**
@@ -243,7 +243,7 @@ In the same way, the client can send request equivalent to the other prompt comm
 
 This has the problem that the server has to be open from Impromptu workspace itself to work. Therefore, it is recommended to use a proccess manager such as **pm2** to configure the closing and opening of the server without considering the workspace. 
 
-### PM2 instalation
+### PM2 installation
 
 Use **npm** to install pm2:
 ``` 

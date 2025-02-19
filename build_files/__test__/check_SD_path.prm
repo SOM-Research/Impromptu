@@ -1,0 +1,7 @@
+
+prompt main():text
+    core=distractor_selection("1")
+    language=English
+prompt distractor_selection(@example):text
+    core="(hola, hola, You arrive to B)", (@example == "1")? "@example is 1"
+    language=English

@@ -151,8 +151,6 @@ function genAssetDescription(asset: Ast.Asset) {
 }
 
 
-
-
 /**
  * Generate the prompt of an imported Asset. Needed to link the parameters with its respective inputs
  * 
@@ -383,7 +381,6 @@ export function genAssetReuse(assetReuse: Ast.AssetReuse, aiSystem:string|undefi
                     result = genAsset_ChatGPT(snippetRef,map).toString()
                     break;
                 }case undefined: {
-                    console.error(chalk.yellow(`No target provided. Using 'chatgpt' by default`));
                     result = genAsset_default(snippetRef,map).toString()
                     break;
                 }

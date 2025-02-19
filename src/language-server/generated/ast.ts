@@ -24,7 +24,7 @@ export function isAsset(item: unknown): item is Asset {
     return reflection.isInstance(item, Asset);
 }
 
-export type BaseSnippet = AssetReuse | InputRef | TextLiteral | Trait;
+export type BaseSnippet = AssetReuse | Conditional | InputRef | TextLiteral | Trait;
 
 export const BaseSnippet = 'BaseSnippet';
 
@@ -220,7 +220,7 @@ export function isAssetImport(item: unknown): item is AssetImport {
 }
 
 export interface AssetReuse extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'AssetReuse';
     asset: Reference<Referenciable>
     pars?: ParamInvokation
@@ -233,7 +233,7 @@ export function isAssetReuse(item: unknown): item is AssetReuse {
 }
 
 export interface AudienceTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'AudienceTrait';
     content: Snippet
     validator?: '[reinforced]'
@@ -246,7 +246,7 @@ export function isAudienceTrait(item: unknown): item is AudienceTrait {
 }
 
 export interface ByAuthorTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'ByAuthorTrait';
     validator?: '[reinforced]'
     value: Snippet
@@ -259,7 +259,7 @@ export function isByAuthorTrait(item: unknown): item is ByAuthorTrait {
 }
 
 export interface CameraAngleTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'CameraAngleTrait';
     validator?: '[reinforced]'
     value: CameraAngle
@@ -272,7 +272,7 @@ export function isCameraAngleTrait(item: unknown): item is CameraAngleTrait {
 }
 
 export interface CameraSettingsTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'CameraSettingsTrait';
     validator?: '[reinforced]'
     value: CameraSettings
@@ -299,7 +299,7 @@ export function isChain(item: unknown): item is Chain {
 }
 
 export interface CombinationTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'CombinationTrait';
     contents: Array<Snippet>
     validator?: '[reinforced]'
@@ -312,7 +312,7 @@ export function isCombinationTrait(item: unknown): item is CombinationTrait {
 }
 
 export interface ComparisonTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'ComparisonTrait';
     comparison: Snippet
     content1: Snippet
@@ -343,6 +343,21 @@ export function isComposer(item: unknown): item is Composer {
     return reflection.isInstance(item, Composer);
 }
 
+export interface Conditional extends AstNode {
+    readonly $container: Conditional | Snippet;
+    readonly $type: 'Conditional';
+    condition: string
+    neg_result?: Snippet
+    param: InputRef
+    result: Snippet
+}
+
+export const Conditional = 'Conditional';
+
+export function isConditional(item: unknown): item is Conditional {
+    return reflection.isInstance(item, Conditional);
+}
+
 export interface Contents extends AstNode {
     readonly $container: Composer;
     readonly $type: 'Contents';
@@ -369,7 +384,7 @@ export function isCore(item: unknown): item is Core {
 }
 
 export interface EffectsTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'EffectsTrait';
     validator?: '[reinforced]'
     value: Effects
@@ -433,7 +448,7 @@ export function isImportedAsset(item: unknown): item is ImportedAsset {
 }
 
 export interface IncludesTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'IncludesTrait';
     contents: Array<Snippet>
     times?: number
@@ -460,7 +475,7 @@ export function isLanguage(item: unknown): item is Language {
 }
 
 export interface LanguageRegisterTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'LanguageRegisterTrait';
     validator?: '[reinforced]'
     value: LanguageRegister
@@ -473,7 +488,7 @@ export function isLanguageRegisterTrait(item: unknown): item is LanguageRegister
 }
 
 export interface LightingTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'LightingTrait';
     validator?: '[reinforced]'
     value: Lighting
@@ -486,7 +501,7 @@ export function isLightingTrait(item: unknown): item is LightingTrait {
 }
 
 export interface LiteraryStyleTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'LiteraryStyleTrait';
     validator?: '[reinforced]'
     value: LiteraryStyle
@@ -499,7 +514,7 @@ export function isLiteraryStyleTrait(item: unknown): item is LiteraryStyleTrait 
 }
 
 export interface MediumTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'MediumTrait';
     validator?: '[reinforced]'
     value: Medium
@@ -541,7 +556,7 @@ export function isMultimodal(item: unknown): item is Multimodal {
 }
 
 export interface MultimodalRef extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'MultimodalRef';
     param: Reference<Multimodal>
 }
@@ -553,7 +568,7 @@ export function isMultimodalRef(item: unknown): item is MultimodalRef {
 }
 
 export interface NegativeTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'NegativeTrait';
     content: Snippet
     validator?: '[reinforced]'
@@ -579,7 +594,7 @@ export function isParameter(item: unknown): item is Parameter {
 }
 
 export interface ParameterRef extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'ParameterRef';
     param: Reference<Parameter>
 }
@@ -615,7 +630,7 @@ export function isParamInvokation(item: unknown): item is ParamInvokation {
 }
 
 export interface PointOfViewTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'PointOfViewTrait';
     validator?: '[reinforced]'
     value: PointOfView
@@ -665,7 +680,7 @@ export function isPrompt(item: unknown): item is Prompt {
 }
 
 export interface ProximityTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'ProximityTrait';
     validator?: '[reinforced]'
     value: Proximity
@@ -678,7 +693,7 @@ export function isProximityTrait(item: unknown): item is ProximityTrait {
 }
 
 export interface SimilarToTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'SimilarToTrait';
     content: Snippet
     validator?: '[reinforced]'
@@ -691,7 +706,7 @@ export function isSimilarToTrait(item: unknown): item is SimilarToTrait {
 }
 
 export interface Snippet extends AstNode {
-    readonly $container: AudienceTrait | ByAuthorTrait | CombinationTrait | ComparisonTrait | Contents | Core | IncludesTrait | NegativeTrait | ParamInvokation | Prefix | SimilarToTrait | Suffix;
+    readonly $container: AudienceTrait | ByAuthorTrait | CombinationTrait | ComparisonTrait | Conditional | Contents | Core | IncludesTrait | NegativeTrait | ParamInvokation | Prefix | SimilarToTrait | Suffix;
     readonly $type: 'Snippet';
     content: BaseSnippet
     weight?: Weight
@@ -717,7 +732,7 @@ export function isSuffix(item: unknown): item is Suffix {
 }
 
 export interface TargetSizeTrait extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'TargetSizeTrait';
     amount: number
     dimension: Dimension
@@ -733,7 +748,7 @@ export function isTargetSizeTrait(item: unknown): item is TargetSizeTrait {
 }
 
 export interface TextLiteral extends AstNode {
-    readonly $container: Snippet;
+    readonly $container: Conditional | Snippet;
     readonly $type: 'TextLiteral';
     content: string
 }
@@ -782,6 +797,7 @@ export type ImpromptuAstType = {
     CombinationTrait: CombinationTrait
     ComparisonTrait: ComparisonTrait
     Composer: Composer
+    Conditional: Conditional
     Contents: Contents
     Core: Core
     EffectsTrait: EffectsTrait
@@ -827,7 +843,7 @@ export type ImpromptuAstType = {
 export class ImpromptuAstReflection extends AbstractAstReflection {
 
     getAllTypes(): string[] {
-        return ['Asset', 'AssetImport', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'ComparisonTrait', 'Composer', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'ImportedAsset', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'Referenciable', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
+        return ['Asset', 'AssetImport', 'AssetReuse', 'AudienceTrait', 'BaseSnippet', 'ByAuthorTrait', 'ByExpressionOutputTesting', 'CameraAngleTrait', 'CameraSettingsTrait', 'Chain', 'CombinationTrait', 'ComparisonTrait', 'Composer', 'Conditional', 'Contents', 'Core', 'EffectsTrait', 'Equivalency', 'ExecutableAsset', 'HyperParam', 'HyperParameters', 'ImageTrait', 'ImportedAsset', 'IncludesTrait', 'Input', 'InputRef', 'Language', 'LanguageRegisterTrait', 'LightingTrait', 'LiteraryStyleTrait', 'MediumIndependentTrait', 'MediumTrait', 'Model', 'Multimodal', 'MultimodalRef', 'NegativeTrait', 'ParamInvokation', 'Parameter', 'ParameterRef', 'Parameters', 'PointOfViewTrait', 'Prefix', 'Prompt', 'ProximityTrait', 'Referenciable', 'RelativeTrait', 'SimilarToTrait', 'Snippet', 'Suffix', 'TargetSizeTrait', 'TextLiteral', 'TextTrait', 'Trait', 'Weight'];
     }
 
     protected override computeIsSubtype(subtype: string, supertype: string): boolean {
@@ -837,6 +853,7 @@ export class ImpromptuAstReflection extends AbstractAstReflection {
                 return this.isSubtype(Referenciable, supertype);
             }
             case AssetReuse:
+            case Conditional:
             case InputRef:
             case TextLiteral:
             case Trait: {
